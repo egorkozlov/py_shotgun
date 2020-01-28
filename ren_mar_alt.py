@@ -19,7 +19,7 @@ from gridvec import VecOnGrid
 
 ##### main part
 
-def v_ren_new(setup,V,marriage,t,return_extra=False,return_vdiv_only=False,rescale=True):
+def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,rescale=True):
     # this returns value functions for couple that entered the period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     # 
@@ -28,11 +28,11 @@ def v_ren_new(setup,V,marriage,t,return_extra=False,return_vdiv_only=False,resca
     # a flat array.
      
     #Get Divorce or Separation Costs
-    if marriage:
-        dc = setup.div_costs
+    if haschild:
+        dc = setup.divorce_costs_k
         is_unil = dc.unilateral_divorce # whether to do unilateral divorce at all
     else:
-        dc = setup.sep_costs
+        dc = setup.divorce_costs_nk
         is_unil = dc.unilateral_divorce # whether to do unilateral divorce at all
     
     
@@ -48,6 +48,7 @@ def v_ren_new(setup,V,marriage,t,return_extra=False,return_vdiv_only=False,resca
     sc = setup.agrid_c
     
     # values of divorce
+    # different if have child
     vf_n, vm_n = v_div_byshare(
         setup, dc, t, sc, share_f, share_m,
         V['Male, single']['V'], V['Female, single']['V'],
@@ -62,37 +63,35 @@ def v_ren_new(setup,V,marriage,t,return_extra=False,return_vdiv_only=False,resca
     assert vf_n.ndim == vm_n.ndim == 2
     
     
-    
-    
     expnd = lambda x : setup.v_thetagrid_fine.apply(x,axis=2)
     
-    if marriage:
+    if haschild:
         # if couple is married already
         v_y = expnd(V['Couple and child']['V'])
         vf_y = expnd(V['Couple and child']['VF'])
         vm_y = expnd(V['Couple and child']['VM'])
     else:
-        # stay in cohabitation
-        v_y_coh = expnd(V['Couple, no children']['V'])
-        vf_y_coh = expnd(V['Couple, no children']['VF'])
-        vm_y_coh = expnd(V['Couple, no children']['VM'])
+        
+        v_y_nk = expnd(V['Couple, no children']['V'])
+        vf_y_nk = expnd(V['Couple, no children']['VF'])
+        vm_y_nk = expnd(V['Couple, no children']['VM'])
         # switch to marriage
-        v_y_mar = expnd(V['Couple and child']['V'])
-        vf_y_mar = expnd(V['Couple and child']['VF'])
-        vm_y_mar = expnd(V['Couple and child']['VM'])
+        v_y_k = expnd(V['Couple and child']['V'])
+        vf_y_k = expnd(V['Couple and child']['VF'])
+        vm_y_k = expnd(V['Couple and child']['VM'])
         # switching criterion
         #switch = (vf_y_mar>vf_y_coh) & (vm_y_mar>vm_y_coh)
-        switch = (v_y_mar > v_y_coh)
+        switch = (v_y_k > v_y_nk)
         
-        v_y = switch*v_y_mar + (~switch)*v_y_coh
-        vf_y = switch*vf_y_mar + (~switch)*vf_y_coh
-        vm_y = switch*vm_y_mar + (~switch)*vm_y_coh
+        v_y = switch*v_y_k + (~switch)*v_y_nk
+        vf_y = switch*vf_y_k + (~switch)*vf_y_nk
+        vm_y = switch*vm_y_k + (~switch)*vm_y_nk
         
         
     result  = v_ren_core_interp(setup,v_y, vf_y, vm_y, vf_n, vm_n, is_unil, rescale=rescale)
     
-    if not marriage:
-        result['Cohabitation preferred to Marriage'] = ~switch
+    if not haschild:
+        result['Give a birth'] = switch
         
         
     

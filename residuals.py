@@ -12,7 +12,7 @@ import numpy as np
 import pickle, dill
 import os
 
-xdef = np.array([0.05,0.01,0.02,0.7,0.25,0.0001,0.5,0.5])
+xdef = np.array([0.05,0.01,0.02,0.7,0.25,1.0001,0.5,0.5])
 
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
@@ -39,8 +39,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     
     # this is for the default model
-    dc = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=ulost,u_lost_f=ulost,eq_split=0.0)
-    sc = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00)
+    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=ulost,u_lost_f=ulost,eq_split=0.0)
+    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
     
     
     
@@ -75,8 +75,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                         pls=pls,u_shift_mar=mshift)
     
         
-        mdl = Model(iterator_name=iter_name,divorce_costs=dc,
-                    separation_costs=sc,**kwords)
+        mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
+                    divorce_costs_nk=dc_nk,**kwords)
         mdl_list = [mdl]
         
     else:       

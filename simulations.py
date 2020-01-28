@@ -9,7 +9,6 @@ import numpy as np
 
 from mc_tools import mc_simulate
 from gridvec import VecOnGrid
-import pickle
 
 class Agents:
     
@@ -35,7 +34,7 @@ class Agents:
         
             
         if T is None:
-            T = self.Mlist[0].setup.pars['T']
+            T = self.Mlist[0].setup.pars['Tsim']
             
         self.setup = self.Mlist[0].setup
         self.state_names = self.setup.state_names
@@ -209,7 +208,7 @@ class Agents:
                         lvl = self.Mlist[ipol].setup.ls_levels[ils]
         
                         
-                        if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
+                        if self.verbose: print('After t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
                         
                         
                         mat = self.Mlist[ipol].setup.exo_mats[sname][ils][t]
@@ -414,7 +413,7 @@ class Agents:
                         income_share_fem = income_fem / (income_fem + income_mal)
                         
                         # !!!
-                        costs = self.Mlist[ipol].setup.div_costs if sname == 'Couple and child' else self.Mlist[ipol].setup.sep_costs
+                        costs = self.Mlist[ipol].setup.divorce_costs_k if sname == 'Couple and child' else self.Mlist[ipol].setup.divorce_costs_nk
                                    
                         share_f, share_m = costs.shares_if_split(income_share_fem)
                         
@@ -444,15 +443,15 @@ class Agents:
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             self.ils_i[ind[i_ren],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_coh = decision['Cohabitation preferred to Marriage'][isc,iall,thts]
-                            i_coh1=i_coh[i_ren]
+                            i_birth = decision['Give a birth'][isc,iall,thts]
+                            i_birth1=i_birth[i_ren]
                             
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
-                            ils_if_mar = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_coh = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
+                            ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
+                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
                             
-                            self.ils_i[ind[i_ren],t+1] = i_coh1*ils_if_coh+(1-i_coh1)*ils_if_mar
-                            self.state[ind[i_ren],t+1] = i_coh1*self.state_codes["Couple"]+(1-i_coh1)*self.state_codes["Couple and child"]
+                            self.ils_i[ind[i_ren],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
+                            self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
                           
                                 
                             
@@ -461,24 +460,23 @@ class Agents:
                         self.state[ind[i_sq],t+1] = self.state_codes[sname]
                         # do not touch theta as already updated
                         
-                        #Distinguish between marriage and cohabitation
                         if sname == "Couple and child":
                             self.state[ind[i_sq],t+1] = self.state_codes[sname]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             self.ils_i[ind[i_sq],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_coh = decision['Cohabitation preferred to Marriage'][isc,iall,thts]
-                            i_coh1=i_coh[i_sq]
-                            self.state[ind[i_sq],t+1] = i_coh1*self.state_codes["Couple"]+(1-i_coh1)*self.state_codes["Couple and child"]
+                            i_birth = decision['Cohabitation preferred to Marriage'][isc,iall,thts]
+                            i_birth1=i_birth[i_sq]
+                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             
-                            ils_if_mar = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_coh = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
+                            ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
+                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
                            
-                            self.ils_i[ind[i_sq],t+1] = i_coh1*ils_if_coh+(1-i_coh1)*ils_if_mar
-                            self.state[ind[i_sq],t+1] = i_coh1*self.state_codes["Couple"]+(1-i_coh1)*self.state_codes["Couple and child"]
+                            self.ils_i[ind[i_sq],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
+                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
                 
                 else:
                     raise Exception('unsupported state?')

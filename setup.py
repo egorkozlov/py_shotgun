@@ -17,14 +17,13 @@ from scipy import sparse
 
 
 class ModelSetup(object):
-    def __init__(self,nogrid=False,divorce_costs='Default',separation_costs='Default',**kwargs): 
+    def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
-        T = 5
-        Tret = 4 # first period when the agent is retired
-        Tbef= 2
+        T = 10
+        Tret = 7 # first period when the agent is retired
         p['T'] = T
         p['Tret'] = Tret
-        p['Tbef'] = Tbef
+        p['Tsim'] = T
         p['sig_zf_0']  = 0.25
         p['sig_zf']    = 0.075
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
@@ -92,30 +91,30 @@ class ModelSetup(object):
         
         
         #Cost of Divorce
-        if divorce_costs == 'Default':
+        if divorce_costs_k == 'Default':
             # by default the costs are set in the bottom
-            self.div_costs = DivorceCosts()
+            self.divorce_costs_k = DivorceCosts()
         else:
-            if isinstance(divorce_costs,dict):
+            if isinstance(divorce_costs_k,dict):
                 # you can feed in arguments to DivorceCosts
-                self.div_costs = DivorceCosts(**divorce_costs)
+                self.divorce_costs_k = DivorceCosts(**divorce_costs_k)
             else:
                 # or just the output of DivorceCosts
-                assert isinstance(divorce_costs,DivorceCosts)
-                self.div_costs = divorce_costs
+                assert isinstance(divorce_costs_k,DivorceCosts)
+                self.divorce_costs_k = divorce_costs_k
                 
         #Cost of Separation
-        if separation_costs == 'Default':
+        if divorce_costs_nk == 'Default':
             # by default the costs are set in the bottom
-            self.sep_costs = DivorceCosts()
+            self.dov_costs_nok = DivorceCosts()
         else:
-            if isinstance(separation_costs,dict):
+            if isinstance(divorce_costs_nk,dict):
                 # you can feed in arguments to DivorceCosts
-                self.sep_costs = DivorceCosts(**divorce_costs)
+                self.divorce_costs_nk = DivorceCosts(**divorce_costs_nk)
             else:
                 # or just the output of DivorceCosts
-                assert isinstance(separation_costs,DivorceCosts)
-                self.sep_costs = separation_costs
+                assert isinstance(divorce_costs_nk,DivorceCosts)
+                self.divorce_costs_nk = divorce_costs_nk
             
         # exogrid should be deprecated
         if not nogrid:
@@ -634,6 +633,8 @@ class ModelSetup(object):
                 
         self.ucouple_precomputed_u = uout
         self.ucouple_precomputed_x = xout
+        
+        
                 
     
 
