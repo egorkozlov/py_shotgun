@@ -24,8 +24,8 @@ import psutil
 #if system() != 'Darwin':
 from setup import ModelSetup
 from solver_couples import v_iter_couple
-from solver_singles import v_iter_single
-from integrator_singles import ev_single
+from solver_singles import v_iter_single, v_iter_single_mom
+from integrator_singles import ev_single, ev_single_k
 from integrator_couples import ev_couple_m_c
 
 
@@ -113,13 +113,19 @@ class Model(object):
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
                 haschild = (desc== 'Couple and child')
-                if EV is None:
-                    
+                if EV is None:                    
                     V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift,haschild)
                 else:
                     V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)            
                 return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
-          
+            elif desc == 'Female and child':
+                if EV is None:
+                    V, c, x, s, fls, V_all_l = setup.vsk_last_grid(ushift)
+                else:
+                    V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
+                return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
+            else:
+                raise Exception('I do not know this type...')
             
         # and the integrator   
         
@@ -132,7 +138,10 @@ class Model(object):
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
             elif desc == 'Couple, no children':
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
-                
+            elif desc == 'Female and child':
+                EV, dec = ev_single_k(setup,V_next,setup.agrid_s,t)
+            else:
+                raise Exception('I do not know this type...')
             return EV, dec
             
         

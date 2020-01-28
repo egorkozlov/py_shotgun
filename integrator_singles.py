@@ -26,7 +26,27 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
         EV_nomeet =  np.dot(V['Male, single']['V'],M)
     
     return (1-pmeet)*EV_nomeet + pmeet*EV_meet, dec
+
+
+
+def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
+    pout = setup.pars['poutsm_t'][t]
+    na = sown.size
+    nz = setup.pars['n_zf_t'][t]
+    nl = setup.nls_sk    
+    EV = np.zeros((na,nz,nl),dtype=setup.dtype)
     
+    
+    
+    for il in range(nl):
+         M = setup.exogrid.zf_t_mat_by_l_sk[il][t]
+         EV_out = np.dot(V['Female, single']['V'],M.T)
+         EV_stay = np.dot(V['Female and child']['V'],M.T)
+         EV[...,il] = EV_out*pout + EV_stay*(1-pout)
+        
+    return EV, {}
+    
+
 
 def ev_single_meet(setup,V,sown,female,t,trim_lvl=0.001):
     # computes expected value of single person meeting a partner

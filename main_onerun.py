@@ -7,8 +7,8 @@ Created on Mon Jan 27
 """
 
 
-import warnings
-warnings.filterwarnings("error")
+#import warnings
+#warnings.filterwarnings("error")
  
 
 from platform import system
@@ -29,10 +29,6 @@ if __name__ == '__main__':
      
     
     out, mdl, agents, res = mdl_resid(return_format=['distance','models','agents','scaled residuals'],
-                                      #load_from=['mdl_save_bil.pkl','mdl_save_uni.pkl'],
-                                      #save_to=['mdl_save_bil.pkl','mdl_save_uni.pkl'],
                                       verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))
-     
-        

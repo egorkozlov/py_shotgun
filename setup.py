@@ -43,6 +43,9 @@ class ModelSetup(object):
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
         
+        p['poutsm'] = 0.4
+        
+        
         p['wret'] = 0.8
         p['uls'] = 0.2
         p['pls'] = 0.8
@@ -69,6 +72,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         p['pmeet_t'] = [p['pmeet']]*T
+        p['poutsm_t'] = [p['poutsm']]*T
         
         
         self.pars = p
@@ -78,17 +82,20 @@ class ModelSetup(object):
        
         
         # relevant for integration
-        self.state_names = ['Female, single','Male, single','Couple and child', 'Couple, no children']
+        self.state_names = ['Female, single','Male, single','Female and child','Couple, no children','Couple and child']
         
         # female labor supply
         self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
         self.ls_levels_k = np.array([0.2,1.0],dtype=self.dtype)
+        self.ls_levels_sk = np.array([0.2,1.0],dtype=self.dtype)
         
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
         self.ls_pdown_nk = np.array([0.0],dtype=self.dtype)
         self.ls_pdown_k = np.array([p['pls'],0.0],dtype=self.dtype)
+        self.ls_pdown_sk = np.array([p['pls'],0.0],dtype=self.dtype)
         self.nls_k = len(self.ls_levels_k)
         self.nls_nk = len(self.ls_levels_nk)
+        self.nls_sk = len(self.ls_levels_sk)
         
         
         
@@ -184,6 +191,9 @@ class ModelSetup(object):
                                     for m, md in zip(all_t_mat_sparse_T,all_t_mat_down_sparse_T)]
                                for p in self.ls_pdown_k ]
             
+            zf_t_mat_by_l_sk = [ [(1-p)*m + p*md if md is not None else None 
+                                for m , md in zip(exogrid['zf_t_mat'],zf_bad)]
+                                   for p in self.ls_pdown_sk ]
             
             
             exogrid['all_t_mat_by_l_nk'] = all_t_mat_by_l_nk
@@ -192,6 +202,7 @@ class ModelSetup(object):
             exogrid['all_t_mat_by_l_k'] = all_t_mat_by_l_k
             exogrid['all_t_mat_by_l_spt_k'] = all_t_mat_by_l_spt_k
             
+            exogrid['zf_t_mat_by_l_sk'] = zf_t_mat_by_l_sk
             
             exogrid['all_t'] = all_t
             
@@ -266,16 +277,19 @@ class ModelSetup(object):
 
         self.exo_grids = {'Female, single':exogrid['zf_t'],
                           'Male, single':exogrid['zm_t'],
+                          'Female and child':exogrid['zf_t'],
                           'Couple and child':exogrid['all_t'],
                           'Couple, no children':exogrid['all_t']}
         self.exo_mats = {'Female, single':exogrid['zf_t_mat'],
                           'Male, single':exogrid['zm_t_mat'],
+                          'Female and child':exogrid['zf_t_mat_by_l_sk'],
                           'Couple and child':exogrid['all_t_mat_by_l_k'],
                           'Couple, no children':exogrid['all_t_mat_by_l_nk']} # sparse version?
         
         
         self.utility_shifters = {'Female, single':0.0,
                                  'Male, single':0.0,
+                                 'Female and child':p['u_shift_mar'],
                                  'Couple and child':p['u_shift_mar'],
                                  'Couple, no children':p['u_shift_coh']}
         
@@ -288,6 +302,7 @@ class ModelSetup(object):
         
         self.part_mats = {'Female, single':zf_t_partmat,
                           'Male, single':  zm_t_partmat,
+                          'Female and cild':  None,
                           'Couple and child': None,
                           'Couple, no children': None} # last is added for consistency
         
@@ -297,19 +312,22 @@ class ModelSetup(object):
         
         
         # building m grid
-        #ezfmin = min([np.min(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
+        ezfmin = min([np.min(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
         ezmmin = min([np.min(np.exp(g+t)) for g,t in zip(exogrid['zm_t'],p['m_wage_trend'])])
         ezfmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
         ezmmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zm_t'],p['m_wage_trend'])])
         
         
-        
-        self.money_min = 0.95*ezmmin # cause FLS can be up to 0
-        #self.mgrid = ezmmin + self.sgrid_c # this can be changed later
-        mmin = ezmmin
+        mmin = 0.95*ezmmin
         mmax = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
-        self.mgrid = np.linspace(mmin,mmax,600)
+        self.mgrid_c = np.linspace(mmin,mmax,600)
+        
+        mmin_s = 0.95*min(self.ls_levels_sk)*ezfmin
+        mmax_s = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
+        self.mgrid_s = np.linspace(mmin_s,mmax_s,600)
+        
         self.u_precompute()
+        
         
         
     def mar_mats_assets(self,npoints=4,abar=0.1):
@@ -565,14 +583,17 @@ class ModelSetup(object):
         umult = self.u_mult(theta)         
         return umult*self.u(c) + ushift + psi
     
-    
+    def u_single_k(self,c,x,il,ushift):
+        umult = 1.0
+        l = self.ls_levels_sk[il]
+        return umult*self.u(c) + self.u_pub(x,l) + ushift
     
     def vm_last_grid(self,ushift,haschild):
         # this returns value of vm on the grid corresponding to vm
         s = self.agrid_c[:,None]
         zm = self.exogrid.all_t[-1][:,1][None,:]
         zf = self.exogrid.all_t[-1][:,0][None,:]
-        psi = 0*self.exogrid.all_t[-1][:,2][None,:,None]
+        psi = self.exogrid.all_t[-1][:,2][None,:,None]
         theta = self.thetagrid[None,None,:]
         
         nl = self.nls_k if haschild else self.nls_nk
@@ -605,7 +626,7 @@ class ModelSetup(object):
             for itheta in range(ntheta):
                 
                 vals = upc[:,itheta,il]
-                x_g[...,itheta,il] = np.interp(inc,self.mgrid,vals)
+                x_g[...,itheta,il] = np.interp(inc,self.mgrid_c,vals)
                 c_g[...,itheta,il] = inc - x_g[...,itheta,il]
             
             u_couple_g[...,il] = ucoup(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
@@ -640,7 +661,53 @@ class ModelSetup(object):
         trend = self.pars['f_wage_trend'][-1] if female else self.pars['m_wage_trend'][-1]        
         return self.vs_last(s_in,z_in+trend,ushift,return_cs)
         
+    
+    
+    def vsk_last_grid(self,ushift):
+        # this returns value of vm on the grid corresponding to vm
+        s = self.agrid_s[:,None]
+        zf = self.exogrid.zf_t[-1][None,:]
         
+        nl = self.nls_sk
+        
+        na, nexo = self.na, self.pars['n_zf_t'][-1]
+        
+        shp = (na,nexo,nl)
+        
+        u_g, income_g, c_g, x_g =np.zeros((4,) + shp,dtype=self.dtype)
+        
+        
+        ftrend = self.pars['f_wage_trend'][-1]
+        
+        
+   
+        lsl, upc, ufun = \
+            self.ls_levels_sk, self.ucouple_precomputed_x_sk, self.u_single_k
+        
+        
+        for il in range(len(lsl)):
+           
+            inc = self.pars['R_t'][-1]*s + np.exp(zf+ftrend)*lsl[il]
+            income_g[...,il]  = inc
+            
+            vals = upc[...,il]
+            x_g[...,il] = np.interp(inc,self.mgrid_s,vals)
+            c_g[...,il] = inc - x_g[...,il]
+            
+                
+            #(c,x,il,ushift)
+            u_g[...,il] = ufun(c_g[...,il],x_g[...,il],il,ushift)
+        assert np.all(c_g>0)
+        #Get optimal FLS
+        ls=np.argmax(u_g,axis=-1)
+        lsi=ls[...,None]
+        u_c, x, c = (np.take_along_axis(x,lsi,axis=-1).squeeze(axis=-1)
+                                for x in (u_g,x_g,c_g))
+        
+        V  = u_c 
+        
+        return V.astype(self.dtype), c.astype(self.dtype), x.astype(self.dtype), np.zeros_like(c).astype(self.dtype), ls.astype(np.int16), u_g.astype(self.dtype)
+    
     
     def u_precompute(self):
         from intratemporal import int_with_x
@@ -650,7 +717,7 @@ class ModelSetup(object):
         lam = self.pars['util_lam']
         kap = self.pars['util_kap']
         
-        nm = self.mgrid.size
+        nm = self.mgrid_c.size
         ntheta = self.ntheta
         nl = self.nls_k
         
@@ -661,7 +728,7 @@ class ModelSetup(object):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
                 ls = self.ls_levels_k[il]
-                x, c, u, q = int_with_x(self.mgrid,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+                x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
@@ -670,9 +737,11 @@ class ModelSetup(object):
         self.ucouple_precomputed_x_k = xout
         
         
+        
+        
         from intratemporal import int_no_x
         
-        nm = self.mgrid.size
+        nm = self.mgrid_c.size
         ntheta = self.ntheta
         nl = self.nls_nk
         
@@ -683,7 +752,7 @@ class ModelSetup(object):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
                 ls = self.ls_levels_nk[il]
-                x, c, u, q = int_no_x(self.mgrid,A=A,sig=sig)
+                x, c, u, q = int_no_x(self.mgrid_c,A=A,sig=sig)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
@@ -691,6 +760,24 @@ class ModelSetup(object):
         self.ucouple_precomputed_u_nk = uout
         self.ucouple_precomputed_x_nk = xout
         
+        
+        nm = self.mgrid_s.size
+        nl = self.nls_sk
+        
+        uout_s = np.empty((nm,nl),dtype=np.float32)
+        xout_s = np.empty((nm,nl),dtype=np.float32)
+        
+        
+        for il in range(nl):        
+            A = 1.0
+            ls = self.ls_levels_sk[il]
+            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+            uout_s[:,il] = u
+            xout_s[:,il] = x
+
+                
+        self.ucouple_precomputed_u_sk = uout_s
+        self.ucouple_precomputed_x_sk = xout_s
         
         
                 
