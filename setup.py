@@ -84,7 +84,7 @@ class ModelSetup(object):
        
         
         # relevant for integration
-        self.state_names = ['Female, single','Male, single','Couple, M', 'Couple, C']
+        self.state_names = ['Female, single','Male, single','Couple and child', 'Couple, no children']
         
         # female labor supply
         self.ls_levels = np.array([0.2,1.0],dtype=self.dtype)
@@ -256,18 +256,18 @@ class ModelSetup(object):
 
         self.exo_grids = {'Female, single':exogrid['zf_t'],
                           'Male, single':exogrid['zm_t'],
-                          'Couple, M':exogrid['all_t'],
-                          'Couple, C':exogrid['all_t']}
+                          'Couple and child':exogrid['all_t'],
+                          'Couple, no children':exogrid['all_t']}
         self.exo_mats = {'Female, single':exogrid['zf_t_mat'],
                           'Male, single':exogrid['zm_t_mat'],
-                          'Couple, M':exogrid['all_t_mat_by_l'],
-                          'Couple, C':exogrid['all_t_mat_by_l']} # sparse version?
+                          'Couple and child':exogrid['all_t_mat_by_l'],
+                          'Couple, no children':exogrid['all_t_mat_by_l']} # sparse version?
         
         
         self.utility_shifters = {'Female, single':0.0,
                                  'Male, single':0.0,
-                                 'Couple, M':p['u_shift_mar'],
-                                 'Couple, C':p['u_shift_coh']}
+                                 'Couple and child':p['u_shift_mar'],
+                                 'Couple, no children':p['u_shift_coh']}
         
         
         # this pre-computes transition matrices for meeting a partner
@@ -278,8 +278,8 @@ class ModelSetup(object):
         
         self.part_mats = {'Female, single':zf_t_partmat,
                           'Male, single':  zm_t_partmat,
-                          'Couple, M': None,
-                          'Couple, C': None} # last is added for consistency
+                          'Couple and child': None,
+                          'Couple, no children': None} # last is added for consistency
         
         self.mar_mats_assets()
         

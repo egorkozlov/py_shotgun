@@ -16,16 +16,13 @@ from timeit import default_timer
 #from numba import njit, vectorize
 #from memory_profiler import profile
 #from IPython import get_ipython
-from asizeof import asizeof
+#from asizeof import asizeof
 import os
 import psutil
 
 
 #if system() != 'Darwin':
 from setup import ModelSetup
-from graph import graphs
-from moments import moment
-from simulations import Agents
 from solver_couples import v_iter_couple
 from solver_singles import v_iter_single
 from integrator_singles import ev_single
@@ -114,7 +111,7 @@ class Model(object):
                     V, c, s = v_iter_single(setup,t,EV,female,ushift)             
                 return {desc: {'V':V,'c':c,'s':s}}   
              
-            elif desc== 'Couple, M' or desc == 'Couple, C':
+            elif desc== 'Couple and child' or desc == 'Couple, no children':
                 if EV is None:
                     V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift)
                 else:
@@ -129,9 +126,9 @@ class Model(object):
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
                 EV, dec = ev_single(setup,V_next,setup.agrid_s,female,t)
-            elif desc == 'Couple, M':
+            elif desc == 'Couple and child':
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
-            elif desc == 'Couple, C':
+            elif desc == 'Couple, no children':
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
                 
             return EV, dec
@@ -169,7 +166,7 @@ class Model(object):
         # on fine grid for theta that is used for integration and simulations.
         
         v = vout[desc]
-        if desc == 'Couple, M' or desc == 'Couple, C':
+        if desc == 'Couple and child' or desc == 'Couple, no children':
             
             #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
             sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2).astype(self.dtype)

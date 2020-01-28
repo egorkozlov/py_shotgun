@@ -68,18 +68,18 @@ def v_ren_new(setup,V,marriage,t,return_extra=False,return_vdiv_only=False,resca
     
     if marriage:
         # if couple is married already
-        v_y = expnd(V['Couple, M']['V'])
-        vf_y = expnd(V['Couple, M']['VF'])
-        vm_y = expnd(V['Couple, M']['VM'])
+        v_y = expnd(V['Couple and child']['V'])
+        vf_y = expnd(V['Couple and child']['VF'])
+        vm_y = expnd(V['Couple and child']['VM'])
     else:
         # stay in cohabitation
-        v_y_coh = expnd(V['Couple, C']['V'])
-        vf_y_coh = expnd(V['Couple, C']['VF'])
-        vm_y_coh = expnd(V['Couple, C']['VM'])
+        v_y_coh = expnd(V['Couple, no children']['V'])
+        vf_y_coh = expnd(V['Couple, no children']['VF'])
+        vm_y_coh = expnd(V['Couple, no children']['VM'])
         # switch to marriage
-        v_y_mar = expnd(V['Couple, M']['V'])
-        vf_y_mar = expnd(V['Couple, M']['VF'])
-        vm_y_mar = expnd(V['Couple, M']['VM'])
+        v_y_mar = expnd(V['Couple and child']['V'])
+        vf_y_mar = expnd(V['Couple and child']['VF'])
+        vm_y_mar = expnd(V['Couple and child']['VM'])
         # switching criterion
         #switch = (vf_y_mar>vf_y_coh) & (vm_y_mar>vm_y_coh)
         switch = (v_y_mar > v_y_coh)
@@ -124,9 +124,9 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,marriage,interpolate=True
     
     
     if marriage:
-        coup = 'Couple, M'
+        coup = 'Couple and child'
     else:
-        coup = 'Couple, C'
+        coup = 'Couple, no children'
     
     
     

@@ -94,7 +94,7 @@ def ev_single_meet(setup,V,sown,female,t,trim_lvl=0.001):
 
     mout = matches.copy()
     mout['Decision'] = dec
-    mout['M or C'] = morc
+    mout['Child immediately'] = morc
     mout['theta'] = tht
     
     return EV, mout
