@@ -10,12 +10,12 @@ import numpy as np
 from ren_mar_alt import v_ren_new
     
 
-def ev_couple_m_c(setup,Vpostren,t,marriage,use_sparse=True):
+def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     # computes expected value of couple entering the next period with an option
     # to renegotiate or to break up
     
     
-    out = v_ren_new(setup,Vpostren,marriage,t)
+    out = v_ren_new(setup,Vpostren,haschild,t)
     _Vren2 = out.pop('Values') 
     #_Vren2=out['Values']
     dec = out
@@ -30,13 +30,13 @@ def ev_couple_m_c(setup,Vpostren,t,marriage,use_sparse=True):
     
     # accounts for exogenous transitions
     
-    EV, EVf, EVm = ev_couple_exo(setup,Vren['M'],t,use_sparse,down=False)
+    EV, EVf, EVm = ev_couple_exo(setup,Vren['M'],t,haschild,use_sparse,down=False)
     
     
     return (EV, EVf, EVm), dec
 
 
-def ev_couple_exo(setup,Vren,t,use_sparse=True,down=False):
+def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
  
     # this does dot product along 3rd dimension
@@ -50,8 +50,16 @@ def ev_couple_exo(setup,Vren,t,use_sparse=True,down=False):
         else:
             return np.dot(a,b.T)
         
+        
+    if haschild:
+        mat_sp = setup.exogrid.all_t_mat_by_l_spt_k
+        mat_nsp = setup.exogrid.all_t_mat_by_l_k
+    else:
+        mat_sp = setup.exogrid.all_t_mat_by_l_spt_nk
+        mat_nsp = setup.exogrid.all_t_mat_by_l_nk
+        
     
-    nl = len(setup.exogrid.all_t_mat_by_l_spt)
+    nl = len(mat_sp)
     
     na, nexo, ntheta = setup.na, setup.pars['nexo_t'][t], setup.ntheta 
     
@@ -62,7 +70,7 @@ def ev_couple_exo(setup,Vren,t,use_sparse=True,down=False):
     
     for il in range(nl):
         
-        M = setup.exogrid.all_t_mat_by_l_spt[il][t] if use_sparse else setup.exogrid.all_t_mat_by_l[il][t]
+        M = mat_sp[il][t] if use_sparse else mat_nsp[il][t]
         
         
         

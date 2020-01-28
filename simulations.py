@@ -59,7 +59,7 @@ class Agents:
         
         # initialize FLS
         #self.ils=np.ones((N,T),np.float64)
-        self.ils_i=np.ones((N,T),np.int32)*(len(self.setup.ls_levels)-1)
+        self.ils_i=np.zeros((N,T),np.int32)#*(len(self.setup.ls_levels)-1)
         
         
         self.ils_i[:,-1] = 5
@@ -90,7 +90,7 @@ class Agents:
         
         
         self.timer('Simulations, creation',verbose=self.verbose)
-        self.ils_def = self.setup.nls - 1
+        self.ils_def = 0#self.setup.nls - 1
             
         #Create a file with the age of the change foreach person
         
@@ -196,16 +196,21 @@ class Agents:
                 iexo_now = self.iexo[ind,t].reshape(nst)
                 
                 
+                
+                
                 if sname == 'Couple, no children' or sname == 'Couple and child':
+                    
+                    nls = self.setup.nls_k if (sname == 'Couple and child') else self.setup.nls_nk
+                    lvls = self.setup.ls_levels_k if (sname == 'Couple and child') else self.setup.ls_levels_nk
                     
                     ls_val = self.ils_i[ind,t] 
                     
-                    for ils in range(self.setup.nls):
+                    for ils in range(nls):
                         this_ls = (ls_val==ils)                    
                         if not np.any(this_ls): continue
                     
                         cnt = np.sum(this_ls)
-                        lvl = self.Mlist[ipol].setup.ls_levels[ils]
+                        lvl = lvls[ils]
         
                         
                         if self.verbose: print('After t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
@@ -353,7 +358,7 @@ class Agents:
                         self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
                         
                         
-                elif sname == "Couple and child" or sname == "Couple":
+                elif sname == "Couple and child" or sname == "Couple, no children":
                     
                     decision = self.Mlist[ipol].decisions[t][sname]
     
@@ -448,10 +453,10 @@ class Agents:
                             
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
+                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
                             
                             self.ils_i[ind[i_ren],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
-                            self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
+                            self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                           
                                 
                             
@@ -466,17 +471,17 @@ class Agents:
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             self.ils_i[ind[i_sq],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_birth = decision['Cohabitation preferred to Marriage'][isc,iall,thts]
+                            i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_sq]
-                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
+                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple"]['fls'][ipick]
+                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
                            
                             self.ils_i[ind[i_sq],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
-                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple"]
+                            self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                 
                 else:
                     raise Exception('unsupported state?')

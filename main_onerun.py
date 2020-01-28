@@ -5,6 +5,10 @@ Created on Mon Jan 27
  
 @author: Egor Kozlov
 """
+
+
+import warnings
+warnings.filterwarnings("error")
  
 
 from platform import system

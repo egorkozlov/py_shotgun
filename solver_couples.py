@@ -26,7 +26,7 @@ else:
     nbatch_def = 17
     use_cp = False
 
-def v_iter_couple(setup,t,EV_tuple,ushift,nbatch=nbatch_def,verbose=False):
+def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=False):
     
     if verbose: start = default_timer()
     
@@ -38,7 +38,17 @@ def v_iter_couple(setup,t,EV_tuple,ushift,nbatch=nbatch_def,verbose=False):
     
     EV_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
     
-    ls = setup.ls_levels
+    
+    
+    if haschild:
+        ls = setup.ls_levels_k
+        uu, ux = setup.ucouple_precomputed_u_k,setup.ucouple_precomputed_x_k
+        upart, ucouple = setup.u_part_k, setup.u_couple_k
+    else:
+        ls = setup.ls_levels_nk
+        uu, ux = setup.ucouple_precomputed_u_nk,setup.ucouple_precomputed_x_nk
+        upart, ucouple = setup.u_part_nk, setup.u_couple_nk
+        
     nls = len(ls)
     
     
@@ -93,9 +103,11 @@ def v_iter_couple(setup,t,EV_tuple,ushift,nbatch=nbatch_def,verbose=False):
         EV_t = (ind,p,EV_by_l[:,istart:ifinish,:,:])
         
         
+        
+        
+        
         V_pure_i, c_opt_i, x_opt_i, s_opt_i, i_opt_i, il_opt_i, V_all_l_i = \
-           v_optimize_couple(money_t,sgrid,EV_t,setup.mgrid,
-                             setup.ucouple_precomputed_u,setup.ucouple_precomputed_x,
+           v_optimize_couple(money_t,sgrid,EV_t,setup.mgrid,uu,ux,
                                  ls,beta,ushift,dtype=dtype)
            
         V_ret_i = V_pure_i + psi[None,istart:ifinish,None]
@@ -124,8 +136,8 @@ def v_iter_couple(setup,t,EV_tuple,ushift,nbatch=nbatch_def,verbose=False):
     psi_r = psi[None,:,None].astype(dtype)
     
     # finally obtain value functions of partners
-    uf, um = setup.u_part(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
-    uc = setup.u_couple(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
+    uf, um = upart(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
+    uc = ucouple(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
     
     
     EVf_all, EVm_all, EV_all  = (get_EVM(ind,p,x) for x in (EV_fem_by_l, EV_mal_by_l,EV_by_l))

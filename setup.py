@@ -81,10 +81,14 @@ class ModelSetup(object):
         self.state_names = ['Female, single','Male, single','Couple and child', 'Couple, no children']
         
         # female labor supply
-        self.ls_levels = np.array([0.2,1.0],dtype=self.dtype)
+        self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
+        self.ls_levels_k = np.array([0.2,1.0],dtype=self.dtype)
+        
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
-        self.ls_pdown = np.array([p['pls'],0.0],dtype=self.dtype)
-        self.nls = len(self.ls_levels)
+        self.ls_pdown_nk = np.array([0.0],dtype=self.dtype)
+        self.ls_pdown_k = np.array([p['pls'],0.0],dtype=self.dtype)
+        self.nls_k = len(self.ls_levels_k)
+        self.nls_nk = len(self.ls_levels_nk)
         
         
         
@@ -164,18 +168,30 @@ class ModelSetup(object):
             
             
             
-            all_t_mat_by_l = [ [(1-p)*m + p*md if m is not None else None 
+            all_t_mat_by_l_nk = [ [(1-p)*m + p*md if m is not None else None 
                                 for m , md in zip(all_t_mat,all_t_mat_down)]
-                               for p in self.ls_pdown ]
+                               for p in self.ls_pdown_nk ]
             
-            all_t_mat_by_l_spt = [ [(1-p)*m + p*md if m is not None else None
+            all_t_mat_by_l_spt_nk = [ [(1-p)*m + p*md if m is not None else None
                                     for m, md in zip(all_t_mat_sparse_T,all_t_mat_down_sparse_T)]
-                               for p in self.ls_pdown ]
+                               for p in self.ls_pdown_nk ]
+            
+            all_t_mat_by_l_k = [ [(1-p)*m + p*md if m is not None else None 
+                                for m , md in zip(all_t_mat,all_t_mat_down)]
+                               for p in self.ls_pdown_k ]
+            
+            all_t_mat_by_l_spt_k = [ [(1-p)*m + p*md if m is not None else None
+                                    for m, md in zip(all_t_mat_sparse_T,all_t_mat_down_sparse_T)]
+                               for p in self.ls_pdown_k ]
             
             
             
-            exogrid['all_t_mat_by_l'] = all_t_mat_by_l
-            exogrid['all_t_mat_by_l_spt'] = all_t_mat_by_l_spt
+            exogrid['all_t_mat_by_l_nk'] = all_t_mat_by_l_nk
+            exogrid['all_t_mat_by_l_spt_nk'] = all_t_mat_by_l_spt_nk
+            
+            exogrid['all_t_mat_by_l_k'] = all_t_mat_by_l_k
+            exogrid['all_t_mat_by_l_spt_k'] = all_t_mat_by_l_spt_k
+            
             
             exogrid['all_t'] = all_t
             
@@ -254,8 +270,8 @@ class ModelSetup(object):
                           'Couple, no children':exogrid['all_t']}
         self.exo_mats = {'Female, single':exogrid['zf_t_mat'],
                           'Male, single':exogrid['zm_t_mat'],
-                          'Couple and child':exogrid['all_t_mat_by_l'],
-                          'Couple, no children':exogrid['all_t_mat_by_l']} # sparse version?
+                          'Couple and child':exogrid['all_t_mat_by_l_k'],
+                          'Couple, no children':exogrid['all_t_mat_by_l_nk']} # sparse version?
         
         
         self.utility_shifters = {'Female, single':0.0,
@@ -529,20 +545,29 @@ class ModelSetup(object):
         return alp*(x**lam + kap*(1-l)**lam)**((1-xi)/lam)/(1-xi)
     
     
-    def u_part(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
+    def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
-        l = self.ls_levels[il]
+        l = self.ls_levels_k[il]
         upub = self.u_pub(x,l) + ushift + psi
         return self.u(kf*c) + upub, self.u(km*c) + upub
     
-    def u_couple(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
+    def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
-        l = self.ls_levels[il]
+        l = self.ls_levels_k[il]
         return umult*self.u(c) + self.u_pub(x,l) + ushift + psi
     
+    def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
+        kf, km = self.c_mult(theta)   
+        upub = ushift + psi
+        return self.u(kf*c) + upub, self.u(km*c) + upub
+    
+    def u_couple_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
+        umult = self.u_mult(theta)         
+        return umult*self.u(c) + ushift + psi
     
     
-    def vm_last_grid(self,ushift):
+    
+    def vm_last_grid(self,ushift,haschild):
         # this returns value of vm on the grid corresponding to vm
         s = self.agrid_c[:,None]
         zm = self.exogrid.all_t[-1][:,1][None,:]
@@ -550,8 +575,9 @@ class ModelSetup(object):
         psi = 0*self.exogrid.all_t[-1][:,2][None,:,None]
         theta = self.thetagrid[None,None,:]
         
+        nl = self.nls_k if haschild else self.nls_nk
         
-        na, nexo, ntheta, nl = self.na, self.pars['nexo_t'][-1], self.ntheta, self.nls
+        na, nexo, ntheta = self.na, self.pars['nexo_t'][-1], self.ntheta
         
         shp = (na,nexo,ntheta,nl)
         
@@ -561,26 +587,35 @@ class ModelSetup(object):
         ftrend = self.pars['f_wage_trend'][-1]
         mtrend = self.pars['m_wage_trend'][-1]
         
-        for il in range(len(self.ls_levels)):
+        
+        if haschild:
+            lsl, upc, ucoup, upart = \
+                self.ls_levels_k, self.ucouple_precomputed_x_k, self.u_couple_k, self.u_part_k
+        else:
+            lsl, upc, ucoup, upart = \
+                self.ls_levels_nk, self.ucouple_precomputed_x_nk, self.u_couple_nk, self.u_part_nk
+        
+        
+        for il in range(len(lsl)):
            
-            inc = self.pars['R_t'][-1]*s + np.exp(zm+mtrend) +  np.exp(zf+ftrend)*self.ls_levels[il]
+            inc = self.pars['R_t'][-1]*s + np.exp(zm+mtrend) +  np.exp(zf+ftrend)*lsl[il]
             income_g[...,il]  = inc[...,None]
+            
             
             for itheta in range(ntheta):
                 
-                vals = self.ucouple_precomputed_x[:,itheta,il]
+                vals = upc[:,itheta,il]
                 x_g[...,itheta,il] = np.interp(inc,self.mgrid,vals)
                 c_g[...,itheta,il] = inc - x_g[...,itheta,il]
             
-            u_couple_g[...,il] = self.u_couple(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
-            u_f_g[...,il], u_m_g[...,il] = self.u_part(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
+            u_couple_g[...,il] = ucoup(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
+            u_f_g[...,il], u_m_g[...,il] = upart(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
              
         #Get optimal FLS
         ls=np.argmax(u_couple_g,axis=3)
         lsi=ls[...,None]
         u_c, u_f, u_m, x, c = (np.take_along_axis(x,lsi,axis=3).squeeze(axis=3)
                                 for x in (u_couple_g,u_f_g,u_m_g,x_g,c_g))
-        
         
         V  = u_c 
         VM = u_m 
@@ -608,7 +643,7 @@ class ModelSetup(object):
         
     
     def u_precompute(self):
-        from intratemporal import int_sol
+        from intratemporal import int_with_x
         sig = self.pars['crra_power']
         alp = self.pars['util_alp']
         xi = self.pars['util_xi']
@@ -617,7 +652,7 @@ class ModelSetup(object):
         
         nm = self.mgrid.size
         ntheta = self.ntheta
-        nl = self.nls
+        nl = self.nls_k
         
         uout = np.empty((nm,ntheta,nl),dtype=np.float32)
         xout = np.empty((nm,ntheta,nl),dtype=np.float32)
@@ -625,14 +660,37 @@ class ModelSetup(object):
         for il in range(nl):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
-                ls = self.ls_levels[il]
-                x, c, u = int_sol(self.mgrid,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+                ls = self.ls_levels_k[il]
+                x, c, u, q = int_with_x(self.mgrid,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
                 
-        self.ucouple_precomputed_u = uout
-        self.ucouple_precomputed_x = xout
+        self.ucouple_precomputed_u_k = uout
+        self.ucouple_precomputed_x_k = xout
+        
+        
+        from intratemporal import int_no_x
+        
+        nm = self.mgrid.size
+        ntheta = self.ntheta
+        nl = self.nls_nk
+        
+        uout = np.empty((nm,ntheta,nl),dtype=np.float32)
+        xout = np.empty((nm,ntheta,nl),dtype=np.float32)
+        
+        for il in range(nl):
+            for itheta in range(ntheta):
+                A = self.u_mult(self.thetagrid[itheta])
+                ls = self.ls_levels_nk[il]
+                x, c, u, q = int_no_x(self.mgrid,A=A,sig=sig)
+                uout[:,itheta,il] = u
+                xout[:,itheta,il] = x
+                
+                
+        self.ucouple_precomputed_u_nk = uout
+        self.ucouple_precomputed_x_nk = xout
+        
         
         
                 

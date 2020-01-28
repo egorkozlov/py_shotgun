@@ -112,10 +112,12 @@ class Model(object):
                 return {desc: {'V':V,'c':c,'s':s}}   
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
+                haschild = (desc== 'Couple and child')
                 if EV is None:
-                    V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift)
+                    
+                    V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift,haschild)
                 else:
-                    V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift)            
+                    V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)            
                 return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
           
             
