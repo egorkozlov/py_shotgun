@@ -19,10 +19,13 @@ from scipy import sparse
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
-        T = 10
-        Tret = 7 # first period when the agent is retired
+        T = 60
+        Tret = 45 # first period when the agent is retired
+        Tfert = 15 # first peroid when infertile
+        Tdiv = 30 # first period when cannot divorce / renegotiate
         p['T'] = T
         p['Tret'] = Tret
+        p['Tfert'] = Tfert
         p['Tsim'] = T
         p['sig_zf_0']  = 0.25
         p['sig_zf']    = 0.075
@@ -71,6 +74,9 @@ class ModelSetup(object):
         
         #Get the probability of meeting, adjusting for year-period
            
+        
+        p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
+        p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)
         p['pmeet_t'] = [p['pmeet']]*T
         p['poutsm_t'] = [p['poutsm']]*T
         

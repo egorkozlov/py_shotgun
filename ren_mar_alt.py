@@ -19,7 +19,7 @@ from gridvec import VecOnGrid
 
 ##### main part
 
-def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,rescale=True):
+def v_ren_new(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rescale=True):
     # this returns value functions for couple that entered the period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     # 
@@ -76,13 +76,24 @@ def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,resca
         v_y_nk = expnd(V['Couple, no children']['V'])
         vf_y_nk = expnd(V['Couple, no children']['VF'])
         vm_y_nk = expnd(V['Couple, no children']['VM'])
-        # switch to marriage
-        v_y_k = expnd(V['Couple and child']['V'])
-        vf_y_k = expnd(V['Couple and child']['VF'])
-        vm_y_k = expnd(V['Couple and child']['VM'])
+        # make a baby
+        
+        if canswitch:
+            v_y_k = expnd(V['Couple and child']['V'])
+            vf_y_k = expnd(V['Couple and child']['VF'])
+            vm_y_k = expnd(V['Couple and child']['VM'])
+        else:
+            v_y_k = v_y_nk
+            vf_y_k = vf_y_nk
+            vm_y_k = vm_y_nk
+            
         # switching criterion
         #switch = (vf_y_mar>vf_y_coh) & (vm_y_mar>vm_y_coh)
+        
+        
         switch = (v_y_k > v_y_nk)
+        
+        if not canswitch: assert not np.any(switch)
         
         v_y = switch*v_y_k + (~switch)*v_y_nk
         vf_y = switch*vf_y_k + (~switch)*vf_y_nk

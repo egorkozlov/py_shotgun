@@ -12,7 +12,7 @@ import numpy as np
 import pickle, dill
 import os
 
-xdef = np.array([0.05,0.01,0.02,0.7,0.25,0.7501,0.5,0.5])
+xdef = np.array([0.05,0.01,0.02,0.7,0.25,0.900,0.5,0.5])
 
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'

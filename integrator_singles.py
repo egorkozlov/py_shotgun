@@ -56,6 +56,7 @@ def ev_single_meet(setup,V,sown,female,t,trim_lvl=0.001):
     # characteristics so we have to do less bargaining
     
     nexo = setup.pars['nexo_t'][t]
+    cangiveabirth = setup.pars['is fertile'][t]
     ns = sown.size
     
     
@@ -84,18 +85,26 @@ def ev_single_meet(setup,V,sown,female,t,trim_lvl=0.001):
     
     for i in range(npart):
         
-        res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                 female=female,giveabirth=True)
-        
-        (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
         
         res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                  female=female,giveabirth=False)
         
         (vfoutc, vmoutc), nprc, decc, thtc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta']
         
+        
+        if cangiveabirth:
+            res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
+                                 female=female,giveabirth=True)
+        
+            (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
+        else:            
+            vfoutm,vmoutm, nprm, decm, thtm = vfoutc, vmoutc, nprc, decc, thtc
+            
+        
         # choice is made based on Nash Surplus value
-        i_mar = (nprm>=nprc) 
+        i_mar = (nprm>nprc) 
+        
+        if not cangiveabirth: assert not np.any(i_mar)
         
         if female:
             vout = i_mar*vfoutm + (1-i_mar)*vfoutc

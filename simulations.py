@@ -134,7 +134,7 @@ class Agents:
             self.anext(t) 
             self.iexonext(t)            
             self.statenext(t)
-            self.timer('Simulations, iteration',verbose=self.verbose)
+            self.timer('Simulations, iteration',verbose=False)
         
         
         #return self.gsavings, self.iexo, self.state,self.gtheta
@@ -225,7 +225,7 @@ class Agents:
                         lvl = lvls[ils]
         
                         
-                        if self.verbose: print('After t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
+                        #if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
                         
                         
                         mat = self.Mlist[ipol].setup.exo_mats[sname][ils][t]
@@ -253,10 +253,12 @@ class Agents:
                 is_pol = (self.policy_ind[:,t]==ipol)
                 is_state = (is_state_any_pol) & (is_pol) 
                 
-                if self.verbose: print('At t = {} count of {} is {}'.format(t,sname,np.sum(is_state)))
                 
                 if not np.any(is_state):
                     continue
+                
+                
+                if self.verbose: print('At t = {} count of {} is {}'.format(t+1,sname,np.sum(is_state)))
                 
                 ind = np.where(is_state)[0]
                 
@@ -327,7 +329,7 @@ class Agents:
                     nmar, ncoh, ndis, nnom = np.sum(i_agree_mar),np.sum(i_agree_coh),np.sum(i_disagree_and_meet),np.sum(i_nomeet)
                     ntot = sum((nmar, ncoh, ndis, nnom))
                     
-                    if self.verbose: print('{} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(nmar,ncoh,ndis,nnom,ntot))
+                    #if self.verbose: print('{} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(nmar,ncoh,ndis,nnom,ntot))
                     #assert np.all(ismar==(i_agree )
                     
                     if np.any(i_agree_mar):
@@ -422,7 +424,7 @@ class Agents:
                     i_sq = (i_stay) & (thts_orig == thts)
                         
                     
-                    if self.verbose: print('{} divorce, {} ren-f, {} ren-m, {} sq'.format(np.sum(i_div),np.sum(i_renf),np.sum(i_renm),np.sum(i_sq))                     )
+                    #if self.verbose: print('{} divorce, {} ren-f, {} ren-m, {} sq'.format(np.sum(i_div),np.sum(i_renf),np.sum(i_renm),np.sum(i_sq))                     )
                     
                     
                     

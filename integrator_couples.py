@@ -14,8 +14,9 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     # computes expected value of couple entering the next period with an option
     # to renegotiate or to break up
     
+    canswitch = setup.pars['is fertile'][t]
     
-    out = v_ren_new(setup,Vpostren,haschild,t)
+    out = v_ren_new(setup,Vpostren,haschild,canswitch,t)
     _Vren2 = out.pop('Values') 
     #_Vren2=out['Values']
     dec = out
