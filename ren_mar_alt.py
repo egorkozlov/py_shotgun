@@ -116,8 +116,62 @@ def v_ren_new(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     else:
         return result, extra
 
-
-
+def v_no_ren(setup,V,haschild,canswitch,t):
+    
+    # this works live v_ren_new but does not actually run renegotiation
+    # this version allows to make a baby however but this is just for testing
+    
+    expnd = lambda x : setup.v_thetagrid_fine.apply(x,axis=2)
+    
+    
+    
+    if haschild:
+        v_y = expnd(V['Couple and child']['V'])
+        vf_y = expnd(V['Couple and child']['VF'])
+        vm_y = expnd(V['Couple and child']['VM'])
+    else:
+        v_y_nk = expnd(V['Couple, no children']['V'])
+        vf_y_nk = expnd(V['Couple, no children']['VF'])
+        vm_y_nk = expnd(V['Couple, no children']['VM'])
+        # make a baby
+        
+        if canswitch:
+            v_y_k = expnd(V['Couple and child']['V'])
+            vf_y_k = expnd(V['Couple and child']['VF'])
+            vm_y_k = expnd(V['Couple and child']['VM'])
+        else:
+            v_y_k = v_y_nk
+            vf_y_k = vf_y_nk
+            vm_y_k = vm_y_nk
+            
+        # switching criterion        
+        switch = (v_y_k > v_y_nk)
+        
+        if not canswitch: assert not np.any(switch)
+        
+        v_y = switch*v_y_k + (~switch)*v_y_nk
+        vf_y = switch*vf_y_k + (~switch)*vf_y_nk
+        vm_y = switch*vm_y_k + (~switch)*vm_y_nk
+        
+     
+        
+    def r(x): return x.astype(np.float32)
+    
+    shape_notheta = v_y.shape[:-1]
+    yes = np.full(shape_notheta,True)
+    ntheta = setup.ntheta_fine
+    i_theta_out = np.broadcast_to(np.arange(ntheta,dtype=np.int16)[None,None,:],v_y.shape).copy()
+        
+    vf_n, vm_n = np.full((2,) + shape_notheta,-np.inf,dtype=np.float32)
+    
+    result =  {'Decision': yes, 'thetas': i_theta_out,
+            'Values': (r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
+    
+    if not haschild:
+        result['Give a birth'] = switch
+        
+        
+    return result
 
 def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=True,return_all=False):
     # this returns value functions for couple that entered the last period with
@@ -183,6 +237,21 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=Tr
 
     return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
 
+
+def v_no_mar(setup,t,V,icouple,ind_or_inds,*,female,giveabirth):
+    # emulates v_mar_igrid but with no marriage
+    
+    
+    ind, izf, izm, ipsi = setup.all_indices(t,ind_or_inds)
+    
+    vmout, vfout = V['Male, single']['V'][:,izm], V['Female, single']['V'][:,izf]
+    
+    
+    nbsout = np.zeros_like(vmout,dtype=np.float32)
+    ithetaout = -np.ones_like(vmout,dtype=np.int16)
+    agree = np.full_like(vmout,False,dtype=np.bool)
+    
+    return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
 
 
 def v_div_byshare(setup,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,cost_fem=0.0,cost_mal=0.0):

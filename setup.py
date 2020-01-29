@@ -22,7 +22,8 @@ class ModelSetup(object):
         T = 60
         Tret = 45 # first period when the agent is retired
         Tfert = 15 # first peroid when infertile
-        Tdiv = 30 # first period when cannot divorce / renegotiate
+        Tdiv = 35 # first period when cannot divorce / renegotiate
+        Tmeet = 25 # first period when stop meeting partners
         p['T'] = T
         p['Tret'] = Tret
         p['Tfert'] = Tfert
@@ -77,7 +78,7 @@ class ModelSetup(object):
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)
-        p['pmeet_t'] = [p['pmeet']]*T
+        p['pmeet_t'] = [p['pmeet']]*Tmeet + [0.0]*(T-Tmeet)
         p['poutsm_t'] = [p['poutsm']]*T
         
         

@@ -7,7 +7,7 @@ This is integrator for couples
 
 import numpy as np
 #from renegotiation import v_last_period_renegotiated, v_renegotiated_loop
-from ren_mar_alt import v_ren_new
+from ren_mar_alt import v_ren_new, v_no_ren
     
 
 def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
@@ -15,8 +15,14 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     # to renegotiate or to break up
     
     canswitch = setup.pars['is fertile'][t]
+    can_divorce = setup.pars['can divorce'][t] # !! no divorce = no fertility here
     
-    out = v_ren_new(setup,Vpostren,haschild,canswitch,t)
+    
+    if can_divorce:
+        out = v_ren_new(setup,Vpostren,haschild,canswitch,t)
+    else:
+        out = v_no_ren(setup,Vpostren,haschild,canswitch,t)
+        
     _Vren2 = out.pop('Values') 
     #_Vren2=out['Values']
     dec = out
