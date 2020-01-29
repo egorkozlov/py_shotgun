@@ -31,10 +31,11 @@ def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,resca
     if haschild:
         dc = setup.divorce_costs_k
         is_unil = dc.unilateral_divorce # whether to do unilateral divorce at all
+        V_fem = V['Female and child']['V']
     else:
         dc = setup.divorce_costs_nk
         is_unil = dc.unilateral_divorce # whether to do unilateral divorce at all
-    
+        V_fem = V['Female, single']['V']
     
     ind, izf, izm, ipsi = setup.all_indices(t+1)
     
@@ -51,7 +52,7 @@ def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,resca
     # different if have child
     vf_n, vm_n = v_div_byshare(
         setup, dc, t, sc, share_f, share_m,
-        V['Male, single']['V'], V['Female, single']['V'],
+        V['Male, single']['V'], V_fem,
         izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
     
     
@@ -107,22 +108,13 @@ def v_ren_new(setup,V,haschild,t,return_extra=False,return_vdiv_only=False,resca
 
 
 
-def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,marriage,interpolate=True,return_all=False):
+def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=True,return_all=False):
     # this returns value functions for couple that entered the last period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     
-    # if return_all==False returns Vout_f, Vout_m, that are value functions
-    # of male and female from entering this union
-    # if return_all==True returns (Vout_f, Vout_m, ismar, thetaout, technical)
-    # where ismar is marriage decision, thetaout is resulting theta and 
-    # tuple technical contains less usable stuff (check v_newmar_core for it)
-    #
-    # combine = True creates matrix (n_s-by-n_inds)
-    # combine = False assumed that n_s is the same shape as n_inds and creates
-    # a flat array.
     
     
-    if marriage:
+    if giveabirth:
         coup = 'Couple and child'
     else:
         coup = 'Couple, no children'

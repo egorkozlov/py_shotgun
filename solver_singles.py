@@ -64,6 +64,8 @@ def v_iter_single_mom(setup,t,EV,ushift):
     wm0 = np.zeros_like(zvals + ztrend)
     money_t = (R*agrid_s,np.exp(zvals + ztrend),wm0)
     
+    
+    # I add virtual theta axis
     EV_t = (ind,p,EV[...,None,:])
     
     uu, ux = setup.ucouple_precomputed_u_sk[:,None,:],setup.ucouple_precomputed_x_sk[:,None,:]
@@ -72,7 +74,7 @@ def v_iter_single_mom(setup,t,EV,ushift):
         v_optimize_couple(money_t,sgrid_s,EV_t,setup.mgrid_s,uu,ux,
                               ls,beta,ushift,dtype=dtype)
        
-     
+    # remove the virtual axis
     def r(x): return x.squeeze(axis=2).astype(dtype)
     
     return r(V), r(c), r(x), r(s), r(ils), r(V_all_l)

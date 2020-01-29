@@ -84,16 +84,14 @@ def ev_single_meet(setup,V,sown,female,t,trim_lvl=0.001):
     
     for i in range(npart):
         
-        # try marriage
         res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                 female=female,marriage=True)
+                                 female=female,giveabirth=True)
         
         (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
         
         res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                 female=female,marriage=False)
+                                 female=female,giveabirth=False)
         
-        # try cohabitation
         (vfoutc, vmoutc), nprc, decc, thtc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta']
         
         # choice is made based on Nash Surplus value

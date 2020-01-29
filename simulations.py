@@ -50,7 +50,8 @@ class Agents:
         self.shocks_single_a = np.random.random_sample((N,T))
         self.shocks_couple_a = np.random.random_sample((N,T))
         iexoinit = np.random.randint(0,self.setup.pars['n_zf_t'][0],size=N) # initial state
-        self.shocks_transition = np.random.random_sample((N,T))
+        self.shocks_outsm = np.random.random_sample((N,T))
+        self.shocks_transition = np.random.random_sample((N,T))        
         # no randomnes past this line please
         
         # initialize assets
@@ -78,16 +79,22 @@ class Agents:
         
         
         # initialize state
-        self.state = np.zeros((N,T),dtype=np.int32)       
-        self.state[:,0] = 0  # everyone starts as female
+        
         
         
         self.state_codes = dict()
         self.has_theta = list()
+        self.has_fls = list()
         for i, name in enumerate(self.setup.state_names):
             self.state_codes[name] = i
             self.has_theta.append((name=='Couple, no children' or name=='Couple and child'))
+            self.has_fls.append((name=='Couple, no children' or name=='Couple and child' or
+                                     name=='Female and child'))
         
+        
+        
+        self.state = np.zeros((N,T),dtype=np.int32)       
+        self.state[:,0] = self.state_codes['Female, single']  # everyone starts as female
         
         self.timer('Simulations, creation',verbose=self.verbose)
         self.ils_def = 0#self.setup.nls - 1
@@ -198,10 +205,15 @@ class Agents:
                 
                 
                 
-                if sname == 'Couple, no children' or sname == 'Couple and child':
+                if sname == 'Couple, no children' or sname == 'Couple and child' or sname == 'Female and child':
                     
-                    nls = self.setup.nls_k if (sname == 'Couple and child') else self.setup.nls_nk
-                    lvls = self.setup.ls_levels_k if (sname == 'Couple and child') else self.setup.ls_levels_nk
+                    nls = self.setup.nls_k if (sname == 'Couple and child')  \
+                        else self.setup.nls_nk if (sname == 'Couple, no children') \
+                            else self.setup.nls_sk 
+                            
+                    lvls = self.setup.ls_levels_k if (sname == 'Couple and child') \
+                        else self.setup.ls_levels_nk if (sname == 'Couple, no children')  \
+                            else self.setup.ls_levels_sk
                     
                     ls_val = self.ils_i[ind,t] 
                     
@@ -357,11 +369,21 @@ class Agents:
                         self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
                         
-                        
+                elif sname == "Female and child":
+                    
+                    pout = self.Mlist[ipol].setup.pars['poutsm_t'][t]
+                    i_out_sm = (self.shocks_outsm[ind,t]<pout)
+                    self.state[ind[ i_out_sm],t+1] = self.state_codes['Female, single']
+                    self.state[ind[~i_out_sm],t+1] = self.state_codes['Female and child']
+                    
+                    
+                
+                
                 elif sname == "Couple and child" or sname == "Couple, no children":
                     
                     decision = self.Mlist[ipol].decisions[t][sname]
     
+                    haschild = (sname == "Couple and child")
                     
                     # by default keep the same theta and weights
                     
@@ -428,7 +450,10 @@ class Agents:
                         self.iassets[ind[i_div],t+1] = VecOnGrid(agrid,sf).roll(shocks=shks)
                         self.itheta[ind[i_div],t+1] = -1
                         self.iexo[ind[i_div],t+1] = izf[i_div]
-                        self.state[ind[i_div],t+1] = self.state_codes['Female, single']
+                        if haschild:
+                            self.state[ind[i_div],t+1] = self.state_codes['Female and child']
+                        else:
+                            self.state[ind[i_div],t+1] = self.state_codes['Female, single']
                         
                         #FLS
                         self.ils_i[ind[i_div],t+1] = self.ils_def
@@ -459,7 +484,7 @@ class Agents:
                             self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                           
                                 
-                            
+                           
                         
                     if np.any(i_sq):
                         self.state[ind[i_sq],t+1] = self.state_codes[sname]
