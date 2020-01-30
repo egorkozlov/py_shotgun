@@ -16,14 +16,15 @@ from platform import system
 if system() != 'Darwin' and system() != 'Windows':  
     import os
     os.environ['QT_QPA_PLATFORM']='offscreen'
+    
  
  
 from residuals import mdl_resid
  
 print('Hi!')
  
- 
- 
+import os
+os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
      
