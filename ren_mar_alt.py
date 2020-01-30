@@ -173,7 +173,8 @@ def v_no_ren(setup,V,haschild,canswitch,t):
         
     return result
 
-def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=True,return_all=False):
+def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
+                unplanned_pregnancy=False,interpolate=True,return_all=False):
     # this returns value functions for couple that entered the last period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     
@@ -185,6 +186,13 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=Tr
         coup = 'Couple, no children'
     
     
+    if unplanned_pregnancy:
+        assert giveabirth
+        Vfem = V['Female and child']['V']
+    else:
+        Vfem = V['Female, single']['V']
+    
+    
     
     # import objects
     agrid_c = setup.agrid_c
@@ -192,13 +200,17 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,interpolate=Tr
     gamma = setup.pars['m_bargaining_weight']   
     
     
-    VMval_single, VFval_single = V['Male, single']['V'], V['Female, single']['V']
+    VMval_single, VFval_single = V['Male, single']['V'], Vfem
     VMval_postren, VFval_postren = V[coup]['VM'][icouple,...], V[coup]['VF'][icouple,...]
     
     
     
     # substantial part
     ind, izf, izm, ipsi = setup.all_indices(t,ind_or_inds)
+    
+    
+    if unplanned_pregnancy:
+        pass
     
     
     # using trim = True implicitly trims things on top

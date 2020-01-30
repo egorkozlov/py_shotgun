@@ -18,8 +18,18 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     
     skip_mar = (pmeet < 1e-5)
     
-    EV_meet, dec = ev_single_meet(setup,V,sown,female,t,
-                                  skip_mar=skip_mar,trim_lvl=trim_lvl)
+    EV_meet_np, dec_np, _ = ev_single_meet(setup,V,sown,female,t,
+                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
+                                      unplanned_preg=False)
+    
+    EV_meet_p, dec_p, ppreg = ev_single_meet(setup,V,sown,female,t,
+                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
+                                      unplanned_preg=True)
+    
+    EV_meet = EV_meet_np*(1-ppreg) + EV_meet_p*ppreg
+    
+    
+    
     
     if female:
         M = setup.exogrid.zf_t_mat[t].T
@@ -27,6 +37,9 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     else:
         M = setup.exogrid.zm_t_mat[t].T
         EV_nomeet =  np.dot(V['Male, single']['V'],M)
+    
+    
+    dec = {'Not pregnant':dec_np, 'Pregnant':dec_p}
     
     return (1-pmeet)*EV_nomeet + pmeet*EV_meet, dec
 
@@ -51,7 +64,8 @@ def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
     
 
 
-def ev_single_meet(setup,V,sown,female,t,skip_mar=False,trim_lvl=0.001):
+def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
+                   unplanned_preg=False,trim_lvl=0.001):
     # computes expected value of single person meeting a partner
     
     # this creates potential partners and integrates over them
@@ -67,11 +81,17 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,trim_lvl=0.001):
    
         
     V_next = np.ones((ns,nexo))*(-1e10)
+    
+    izf = setup.all_indices(t)[1]
+    p_preg_all = np.broadcast_to(setup.upp_precomputed[t][izf][None,:],(ns,nexo))
+    # this is a probability of unplanned pregnancy for each possible match
+    # including those that have zero probability
     inds = np.where( np.any(p_mat>0,axis=1 ) )[0]
     
     
     
     EV = 0.0
+    ppreg = 0.0
     
     i_assets_c, p_assets_c = setup.i_a_mat, setup.prob_a_mat
     
@@ -83,6 +103,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,trim_lvl=0.001):
     
     dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
     morc = np.zeros(matches['iexo'].shape,dtype=np.bool)
+    punp = np.zeros(matches['iexo'].shape,dtype=np.float32) # save probabilites of unplanned pregnancies
     tht = -1*np.ones(matches['iexo'].shape,dtype=np.int32)
     iconv = matches['iconv']
     
@@ -105,7 +126,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,trim_lvl=0.001):
                                      female=female,giveabirth=False)
             res_m = res_c
             
-            
+        
         (vfoutc, vmoutc), nprc, decc, thtc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta']
         (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
         
@@ -121,15 +142,24 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,trim_lvl=0.001):
             
         dec[:,:,iconv[:,i]] = (i_mar*decm + (1-i_mar)*decc)[:,None,:]
         tht[:,:,iconv[:,i]] = (i_mar*thtm + (1-i_mar)*thtc)[:,None,:]
-        morc[:,:,iconv[:,i]] = i_mar[:,None,:]
+        if not unplanned_preg:
+            morc[:,:,iconv[:,i]] = i_mar[:,None,:]
+        else:
+            morc[:,:,iconv[:,i]] = True
+        
+        
+        ppreg_res = p_preg_all[:,inds]
+        punp[:,:,iconv[:,i]] = ppreg_res[:,None,:]
             
         V_next[:,inds] = vout
         
         EV += (p_assets_c[:,i][:,None])*np.dot(V_next,p_mat)
+        ppreg += (p_assets_c[:,i][:,None])*np.dot(p_preg_all,p_mat)
 
     mout = matches.copy()
     mout['Decision'] = dec
     mout['Child immediately'] = morc
     mout['theta'] = tht
+    mout['Probability Unplanned'] = punp
     
-    return EV, mout
+    return EV, mout, ppreg
