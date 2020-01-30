@@ -18,15 +18,24 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     
     skip_mar = (pmeet < 1e-5)
     
+    
+    cangiveabirth = setup.pars['is fertile'][t]
+    
+    
     EV_meet_np, dec_np, _ = ev_single_meet(setup,V,sown,female,t,
                                   skip_mar=skip_mar,trim_lvl=trim_lvl,
                                       unplanned_preg=False)
     
-    EV_meet_p, dec_p, ppreg = ev_single_meet(setup,V,sown,female,t,
-                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
-                                      unplanned_preg=True)
     
-    EV_meet = EV_meet_np*(1-ppreg) + EV_meet_p*ppreg
+    if cangiveabirth:
+        EV_meet_p, dec_p, ppreg = ev_single_meet(setup,V,sown,female,t,
+                                      skip_mar=skip_mar,trim_lvl=trim_lvl,
+                                          unplanned_preg=True)
+        
+        EV_meet = EV_meet_np*(1-ppreg) + EV_meet_p*ppreg
+    else:
+        dec_p = dec_np
+        EV_meet = EV_meet_np
     
     
     
@@ -112,16 +121,26 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         
         
         if not skip_mar:
-            res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                     female=female,giveabirth=False)
-            
-            if cangiveabirth:
+            if not unplanned_preg:
+                # compare whether to give or not to give a birth
+                res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
+                                         female=female,giveabirth=False)
+                
+                if cangiveabirth:
+                    # maybe cannot give a birth at all
+                    res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
+                                         female=female,giveabirth=True)
+                else:            
+                    res_m = res_c
+            else:
+                # no choices
+                assert cangiveabirth
                 res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                     female=female,giveabirth=True)
-            else:            
-                res_m = res_c
+                                         female=female,giveabirth=True)
+                res_c = res_m
                 
         else:
+            # skip
             res_c = v_no_mar(setup,t,V,i_assets_c[:,i],inds,
                                      female=female,giveabirth=False)
             res_m = res_c
@@ -131,24 +150,25 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
         
         # choice is made based on Nash Surplus value
-        i_mar = (nprm>nprc) 
+        i_birth = (nprm>nprc) 
         
-        if not cangiveabirth: assert not np.any(i_mar)
+        if not cangiveabirth: assert not np.any(i_birth)
         
         if female:
-            vout = i_mar*vfoutm + (1-i_mar)*vfoutc
+            vout = i_birth*vfoutm + (1-i_birth)*vfoutc
         else:
-            vout = i_mar*vmoutm + (1-i_mar)*vmoutc
+            vout = i_birth*vmoutm + (1-i_birth)*vmoutc
             
-        dec[:,:,iconv[:,i]] = (i_mar*decm + (1-i_mar)*decc)[:,None,:]
-        tht[:,:,iconv[:,i]] = (i_mar*thtm + (1-i_mar)*thtc)[:,None,:]
+        dec[:,:,iconv[:,i]] = (i_birth*decm + (1-i_birth)*decc)[:,None,:]
+        tht[:,:,iconv[:,i]] = (i_birth*thtm + (1-i_birth)*thtc)[:,None,:]
+        
         if not unplanned_preg:
-            morc[:,:,iconv[:,i]] = i_mar[:,None,:]
+            morc[:,:,iconv[:,i]] = i_birth[:,None,:]
         else:
             morc[:,:,iconv[:,i]] = True
         
         
-        ppreg_res = p_preg_all[:,inds]
+        ppreg_res = cangiveabirth*p_preg_all[:,inds] # if not fertile force zeros
         punp[:,:,iconv[:,i]] = ppreg_res[:,None,:]
             
         V_next[:,inds] = vout

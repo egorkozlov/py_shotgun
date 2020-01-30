@@ -302,8 +302,9 @@ class Agents:
                     
                     # these things are the same for pregnant and not pregnant
                     
-                    p_preg = matches['Not pregnant']['Probability Unplanned'][ia,iznow,i_pmat]
+                    p_preg = matches['Pregnant']['Probability Unplanned'][ia,iznow,i_pmat]
                     # these are individual-specific pregnancy probabilities
+                    # for those who are not fertile this is forced to be zero
                         
                     # potential assets position of couple
                     
@@ -399,7 +400,7 @@ class Agents:
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = izf[i_disagree_or_nomeet]
                         #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_single],t+1] = self.state_codes['Female, single']
-                        self.state[ind[become_sm],t+1] = self.state_codes['Female, single']
+                        self.state[ind[become_sm],t+1] = self.state_codes['Female and child']
                         self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
                         
                 elif sname == "Female and child":
