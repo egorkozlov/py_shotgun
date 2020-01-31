@@ -67,6 +67,7 @@ class ModelSetup(object):
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
+        p['util_qbar'] = 0.2
         
         p['preg_a0'] = 0.4
         p['preg_at'] = 0.1
@@ -735,6 +736,7 @@ class ModelSetup(object):
         xi = self.pars['util_xi']
         lam = self.pars['util_lam']
         kap = self.pars['util_kap']
+        qbar = self.pars['util_qbar']
         
         nm = self.mgrid_c.size
         ntheta = self.ntheta
@@ -747,7 +749,8 @@ class ModelSetup(object):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
                 ls = self.ls_levels_k[il]
-                x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+                x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
+                                        qlb=qbar,lbr=ls)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
@@ -790,7 +793,8 @@ class ModelSetup(object):
         for il in range(nl):        
             A = 1.0
             ls = self.ls_levels_sk[il]
-            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
+                                    qlb=qbar,lbr=ls)
             uout_s[:,il] = u
             xout_s[:,il] = x
 
