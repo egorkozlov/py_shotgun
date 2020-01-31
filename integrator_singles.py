@@ -136,6 +136,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
                 # no choices
                 assert cangiveabirth
                 res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
+                                    unplanned_pregnancy=True,
                                          female=female,giveabirth=True)
                 res_c = res_m
                 
