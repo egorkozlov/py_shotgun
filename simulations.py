@@ -51,7 +51,8 @@ class Agents:
         self.shocks_couple_a = np.random.random_sample((N,T))
         iexoinit = np.random.randint(0,self.setup.pars['n_zf_t'][0],size=N) # initial state
         self.shocks_outsm = np.random.random_sample((N,T))
-        self.shocks_transition = np.random.random_sample((N,T))        
+        self.shocks_transition = np.random.random_sample((N,T)) 
+        self.shocks_single_preg = np.random.random_sample((N,T))
         # no randomnes past this line please
         
         # initialize assets
@@ -276,6 +277,8 @@ class Agents:
                     pmeet = self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
                     
                     
+                    # divide by 2 subgroups
+                    
                     matches = self.Mlist[ipol].decisions[t]['Female, single']
                     
                     
@@ -285,19 +288,39 @@ class Agents:
                     # TODO: fix the seed
                     iznow = self.iexo[ind,t]
                     
-                    pmat = matches['p'][ia,iznow,:]
+                    pmat = matches['Not pregnant']['p'][ia,iznow,:]
+                    
                     pmat_cum = pmat.cumsum(axis=1)
+                    
+                    
                     
                     
                     v = self.shocks_single_iexo[ind,t] #np.random.random_sample(ind.size) # draw uniform dist
                     
                     i_pmat = (v[:,None] > pmat_cum).sum(axis=1)  # index of the position in pmat
                     
-                    ic_out = matches['iexo'][ia,iznow,i_pmat]
-                    ia_out = matches['ia'][ia,iznow,i_pmat]
-                    it_out = matches['theta'][ia,iznow,i_pmat]
                     
+                    # these things are the same for pregnant and not pregnant
+                    
+                    p_preg = matches['Pregnant']['Probability Unplanned'][ia,iznow,i_pmat]
+                    # these are individual-specific pregnancy probabilities
+                    # for those who are not fertile this is forced to be zero
+                        
                     # potential assets position of couple
+                    
+                    vpreg = self.shocks_single_preg[ind,t]
+                    i_preg = (vpreg < p_preg)
+                    
+                    
+                    ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat]*(~i_preg) \
+                                + matches['Pregnant']['iexo'][ia,iznow,i_pmat]*(i_preg)
+                                
+                    ia_out = matches['Not pregnant']['ia'][ia,iznow,i_pmat]*(~i_preg) \
+                                + matches['Pregnant']['ia'][ia,iznow,i_pmat]*(i_preg)
+                                
+                    it_out = matches['Not pregnant']['theta'][ia,iznow,i_pmat]*(~i_preg) + \
+                                + matches['Pregnant']['theta'][ia,iznow,i_pmat]*(i_preg)
+                    
                     
                     iall, izf, izm, ipsi = self.Mlist[ipol].setup.all_indices(t,ic_out)
                     
@@ -310,12 +333,19 @@ class Agents:
                     
                     
                     
-                    i_pot_agree = matches['Decision'][ia,iznow,i_pmat]
-                    i_m_preferred = matches['Child immediately'][ia,iznow,i_pmat]
+                    i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat]*(~i_preg) \
+                                    + matches['Pregnant']['Decision'][ia,iznow,i_pmat]*(i_preg)
+                                    
+                    i_m_preferred = matches['Not pregnant']['Child immediately'][ia,iznow,i_pmat]*(~i_preg) \
+                                    + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat]*(i_preg)
                     
                     i_disagree = (~i_pot_agree)
                     i_disagree_or_nomeet = (i_disagree) | (i_nomeet)
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
+                    
+                    become_sm = (i_disagree_and_meet) & (i_preg)
+                    become_single = (i_disagree_or_nomeet) & ~(become_sm)   
+                    assert np.all(i_disagree_or_nomeet == ((become_sm) | (become_single)))
                     
                     i_agree = ~i_disagree_or_nomeet
     
@@ -368,7 +398,9 @@ class Agents:
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = izf[i_disagree_or_nomeet]
-                        self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
+                        #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
+                        self.state[ind[become_single],t+1] = self.state_codes['Female, single']
+                        self.state[ind[become_sm],t+1] = self.state_codes['Female and child']
                         self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
                         
                 elif sname == "Female and child":

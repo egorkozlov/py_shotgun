@@ -67,6 +67,12 @@ class ModelSetup(object):
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
+        p['util_qbar'] = 0.2
+        
+        p['preg_a0'] = 0.4
+        p['preg_at'] = 0.1
+        p['preg_az'] = -0.05
+        p['preg_azt'] = 0.00
         
         
         for key, value in kwargs.items():
@@ -334,6 +340,7 @@ class ModelSetup(object):
         self.mgrid_s = np.linspace(mmin_s,mmax_s,600)
         
         self.u_precompute()
+        self.unplanned_pregnancy_probability()
         
         
         
@@ -471,6 +478,7 @@ class ModelSetup(object):
                 nz = pmat_iexo.shape[0]
                 
                 inds = np.where( np.any(pmat_iexo>0,axis=0) )[0]
+                inds_fem = self.all_indices(t,inds)[1]
                 
                 npos_iexo = inds.size
                 npos_a = pmat_a.shape[1]
@@ -478,6 +486,7 @@ class ModelSetup(object):
                 pmatch = np.zeros((self.na,nz,npos),dtype=self.dtype)
                 iamatch = np.zeros((self.na,nz,npos),dtype=np.int32)
                 iexomatch = np.zeros((self.na,nz,npos),dtype=np.int32)
+                ifemmatch = np.zeros((self.na,nz,npos),dtype=np.int32)
                 
                 i_conv = np.zeros((npos_iexo,npos_a),dtype=np.int32)
                 
@@ -496,10 +505,14 @@ class ModelSetup(object):
                             imat_a[:,ia][:,None]
                         iexomatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
                             inds[None,:]
+                        ifemmatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
+                            inds_fem[None,:]
+                            
                             
                         
                 assert np.allclose(np.sum(pmatch,axis=2),1.0)
-                match_matrix.append({'p':pmatch,'ia':iamatch,'iexo':iexomatch,'iconv':i_conv})
+                match_matrix.append({'p':pmatch,'ia':iamatch,'iexo':iexomatch,'iconv':i_conv,
+                                         'ifem':ifemmatch})
                     
             self.matches[desc] = match_matrix
          
@@ -723,6 +736,7 @@ class ModelSetup(object):
         xi = self.pars['util_xi']
         lam = self.pars['util_lam']
         kap = self.pars['util_kap']
+        qbar = self.pars['util_qbar']
         
         nm = self.mgrid_c.size
         ntheta = self.ntheta
@@ -735,7 +749,8 @@ class ModelSetup(object):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
                 ls = self.ls_levels_k[il]
-                x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+                x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
+                                        qlb=qbar,lbr=ls)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
@@ -778,14 +793,27 @@ class ModelSetup(object):
         for il in range(nl):        
             A = 1.0
             ls = self.ls_levels_sk[il]
-            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,lbr=ls)
+            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
+                                    qlb=qbar,lbr=ls)
             uout_s[:,il] = u
             xout_s[:,il] = x
 
                 
         self.ucouple_precomputed_u_sk = uout_s
         self.ucouple_precomputed_x_sk = xout_s
-        
+    
+    def _unplanned_pregnancy_probability_fun(self,t,z):
+        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+            self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+        return np.clip(p,0.0,1.0)
+    
+    def unplanned_pregnancy_probability(self):
+        self.upp_precomputed = list()
+        for t in range(self.pars['T']):
+            zf = self.exogrid.zf_t[t]
+            pf = self._unplanned_pregnancy_probability_fun(t,zf)
+            self.upp_precomputed.append(pf)
+            
         
                 
     
