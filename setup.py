@@ -46,6 +46,7 @@ class ModelSetup(object):
         p['sig_partner_z'] = 0.4
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
+        p['pmeet_t'] = 0.0
         
         p['poutsm'] = 0.4
         
@@ -83,8 +84,8 @@ class ModelSetup(object):
            
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
-        p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)
-        p['pmeet_t'] = [p['pmeet']]*Tmeet + [0.0]*(T-Tmeet)
+        p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
+        p['pmeet_t'] = [p['pmeet'] + t*p['pmeet_t'] for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         p['poutsm_t'] = [p['poutsm']]*T
         
         

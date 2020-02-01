@@ -13,11 +13,9 @@ import pickle, dill
 import os
 
 
-lb = np.array([ 0.0, 1e-4, 0.5,  0.1, 0.0, 0.01, 0.05, 0.05])
-ub = np.array( [ 2.0, 0.5,  10.0, 1.0, 1.0, 4.0,  4.0, 0.75])
-xdef = np.array([0.5, 0.05, 2.0,  0.4, 0.8, 0.5,  0.6, 0.3])
-
-
+lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05])
+ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9])
+xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
@@ -35,10 +33,11 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     sigma_psi = x[1] 
     sigma_psi_init = x[1]*x[2]
     pmeet = x[3]
-    pls = x[4]
-    util_alp = x[5]
-    util_kap = x[6]
-    preg_a0 = x[7]
+    pmeet_t = x[4]
+    pls = x[5]
+    util_alp = x[6]
+    util_kap = x[7]
+    preg_a0 = x[8]
     
     
     
@@ -76,7 +75,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
         kwords = dict(sigma_psi=sigma_psi,
                         sigma_psi_init=sigma_psi_init,
                         pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
-                        pls=pls,u_shift_mar=mshift,preg_a0=preg_a0)
+                        pls=pls,u_shift_mar=mshift,preg_a0=preg_a0,
+                        pmeet_t=pmeet_t)
     
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
