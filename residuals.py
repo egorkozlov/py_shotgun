@@ -12,7 +12,11 @@ import numpy as np
 import pickle, dill
 import os
 
-xdef = np.array([0.05,0.01,0.02,0.7,0.25,0.900,0.5,0.5])
+
+lb = np.array([ 0.0, 1e-4, 0.5,  0.1, 0.0, 0.01, 0.05])
+ub = np.array( [ 2.0, 0.5,  10.0, 1.0, 1.0, 4.0,  4.0])
+xdef = np.array([0.5, 0.05, 2.0,  0.4, 0.8, 0.5,  0.6])
+
 
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
@@ -27,19 +31,18 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     from setup import DivorceCosts
     from simulations import Agents
  
-    ulost = x[0]
-    mshift=x[5]
+    mshift=x[0]
     sigma_psi = x[1] 
     sigma_psi_init = x[1]*x[2]
     pmeet = x[3]
-    pls = x[6]
-    util_alp = x[4]
-    util_kap = x[7]
+    pls = x[4]
+    util_alp = x[5]
+    util_kap = x[6]
     
     
     
     # this is for the default model
-    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=ulost,u_lost_f=ulost,eq_split=0.0)
+    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
     dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
     
     
@@ -93,9 +96,51 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
      
     agents = Agents( mdl_list, verbose=verbose)
     
-    sim = np.array([0.0,0.2,0.4])
-    dat = np.array([0.1,0.1,0.1])
-    W = np.eye(sim.size)
+    
+    n_mark = agents.state_codes['Couple and child']
+    n_marnk = agents.state_codes['Couple, no children']
+    n_single = agents.state_codes['Female, single']
+    n_singlek = agents.state_codes['Female and child']
+    
+    
+    is_mar = (agents.state == n_mark) | (agents.state == n_marnk)
+    
+    ever_mar = (np.cumsum(is_mar,axis=1) > 0)
+    div_now =  (ever_mar) & ((agents.state==n_single) | (agents.state==n_singlek))
+    ever_kid = ( np.cumsum( (agents.state == n_mark) | (agents.state == n_singlek),axis=1) > 0)
+    
+    
+    
+    nmar_25 = 1-ever_mar[:,4].mean()
+    nmar_30 = 1-ever_mar[:,9].mean()
+    nmar_35 = ever_mar[:,14].mean()
+    
+    div_25 = div_now[:,4].mean()
+    div_30 = div_now[:,9].mean()
+    div_35 = div_now[:,14].mean()
+    div_40 = div_now[:,19].mean()
+    
+    
+    nkid_25 = 1-ever_kid[:,4].mean()
+    nkid_30 = 1-ever_kid[:,9].mean()
+    nkid_35 = 1-ever_kid[:,14].mean()
+    
+    nkid_25_mar = 1-ever_kid[is_mar[:,4],4].mean() if np.any(is_mar[:,4]) else 0.0
+    nkid_30_mar = 1-ever_kid[is_mar[:,9],9].mean() if np.any(is_mar[:,9]) else 0.0
+    nkid_35_mar = 1-ever_kid[is_mar[:,14],14].mean() if np.any(is_mar[:,14]) else 0.0
+    
+    
+    
+    sim = np.array([nmar_25,nmar_30,nmar_35,
+                    div_25,div_30,div_35,div_40,
+                    nkid_25,nkid_30,nkid_35,
+                    nkid_25_mar,nkid_30_mar,nkid_35_mar])
+    dat = np.array([0.69,0.50,0.26,
+                    0.11,0.13,0.16,0.19,
+                    0.68,0.5,0.25,
+                    0.43,0.27,0.14])
+    
+    W = np.eye(sim.size)/(sim.size)
     
     
     
@@ -105,7 +150,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     if not rel_diff:    
         res_all=(dat-sim)
     else:
-        res_all = 100*(dat-sim)/(dat)
+        res_all = (dat-sim)/(dat)
     
     
     if verbose:
@@ -116,7 +161,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     resid_sc = resid_all*np.sqrt(np.diag(W)) # all residuals scaled
     
-    dist = np.dot(np.dot(resid_all,W),resid_all)
+    dist =  np.sqrt(np.dot(np.dot(resid_all,W),resid_all))
 
 
     print('Distance is {}'.format(dist))

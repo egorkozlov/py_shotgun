@@ -19,8 +19,8 @@ from scipy import sparse
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
-        T = 60
-        Tret = 45 # first period when the agent is retired
+        T = 29
+        Tret = 17 # first period when the agent is retired
         Tfert = 15 # first peroid when infertile
         Tdiv = 35 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
@@ -98,14 +98,22 @@ class ModelSetup(object):
         self.state_names = ['Female, single','Male, single','Female and child','Couple, no children','Couple and child']
         
         # female labor supply
+        
+        lmin = 0.2
+        lmax = 1.0
+        nl = 3
+        
+        ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
+        ps = p['pls']*(1-np.linspace(0.0,1.0,nl,dtype=self.dtype))
+        
         self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
-        self.ls_levels_k = np.array([0.2,1.0],dtype=self.dtype)
-        self.ls_levels_sk = np.array([0.2,1.0],dtype=self.dtype)
+        self.ls_levels_k = ls
+        self.ls_levels_sk = ls
         
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
         self.ls_pdown_nk = np.array([0.0],dtype=self.dtype)
-        self.ls_pdown_k = np.array([p['pls'],0.0],dtype=self.dtype)
-        self.ls_pdown_sk = np.array([p['pls'],0.0],dtype=self.dtype)
+        self.ls_pdown_k = ps
+        self.ls_pdown_sk = ps
         self.nls_k = len(self.ls_levels_k)
         self.nls_nk = len(self.ls_levels_nk)
         self.nls_sk = len(self.ls_levels_sk)

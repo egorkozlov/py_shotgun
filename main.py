@@ -28,7 +28,6 @@ if system() != 'Darwin' and system() != 'Windows':
 
 import numpy as np
 from numpy.random import random_sample as rs
-from data_moments import dat_moments
 from tiktak import tiktak
 print('Hi!')
 
@@ -38,16 +37,15 @@ if __name__ == '__main__':
     
     
     #Build  data moments and pickle them
-    dat_moments(period=1) # refresh
     
     
     
     #Initialize the file with parameters
 
 
-    x0 = np.array([0.01,0.01,0.02,0.7,0.25,0.0001,0.5,0.5])
-    lb= np.array([0.0,0.005, 0.5,0.4,0.01,0.0,0.0,0.01])
-    ub= np.array([1.0,0.5,  10.0,1.0,0.4,0.2,1.0,2.0])
+    lb = np.array([ 0.0, 1e-4, 0.5,  0.1, 0.0, 0.01, 0.05])
+    ub = np.array( [ 2.0, 0.5,  10.0, 1.0, 1.0, 4.0,  4.0])
+    x0 = np.array([0.5, 0.05, 2.0,  0.4, 0.8, 0.5,  0.6])
     
     
     
@@ -70,7 +68,7 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(200,200,12,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
+    param=tiktak(400,200,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
                  skip_local=True,skip_global=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
