@@ -69,9 +69,9 @@ class ModelSetup(object):
         p['util_kap'] = 0.5
         p['util_qbar'] = 0.2
         
-        p['preg_a0'] = 0.4
-        p['preg_at'] = 0.1
-        p['preg_az'] = -0.05
+        p['preg_a0'] = 0.25
+        p['preg_at'] = 0.0
+        p['preg_az'] = 0.00
         p['preg_azt'] = 0.00
         
         
