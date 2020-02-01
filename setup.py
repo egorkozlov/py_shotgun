@@ -19,8 +19,8 @@ from scipy import sparse
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
-        T = 29
-        Tret = 17 # first period when the agent is retired
+        T = 55
+        Tret = 40 # first period when the agent is retired
         Tfert = 15 # first peroid when infertile
         Tdiv = 35 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
