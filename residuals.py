@@ -16,8 +16,8 @@ import os
 lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05])
 ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9])
 #xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([0.84987294,0.04165579,3.76102189,0.46490206,-0.15402007,0.58787407,1.27964918,2.1106828,0.89785006])
-
+xdef = np.array([ 1.765625  ,  0.14460234,  6.66015625,  0.78203125, -0.03984375,
+        0.3203125 ,  1.43492187,  1.40976562,  0.10976563])
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
 def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
@@ -174,6 +174,6 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                 'scaled residuals':resid_sc,'models':mdl_list,'agents':agents}
     out = [out_dict[key] for key in return_format]
     
+    if len(out) == 1: out = out[0]
   
-            
     return out

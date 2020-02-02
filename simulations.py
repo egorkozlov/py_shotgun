@@ -292,6 +292,14 @@ class Agents:
                     
                     pmat_cum = pmat.cumsum(axis=1)
                     
+                    assert np.all(pmat_cum < 1 + 1e-5) 
+                    assert np.all(pmat_cum[:,-1] > 1 - 1e-5)
+                    assert np.all(pmat_cum >= 0.0)
+                    # there is a rare numerical issue when adding lots of floats
+                    # gives imprecise result > 1
+                    
+                    pmat_cum[:,-1] = 1+1e-5 
+                    
                     
                     
                     
