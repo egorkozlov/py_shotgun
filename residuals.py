@@ -15,7 +15,8 @@ import os
 
 lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05])
 ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9])
-xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
+#xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
+xdef = np.array([0.84987294,0.04165579,3.76102189,0.46490206,-0.15402007,0.58787407,1.27964918,2.1106828,0.89785006])
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience

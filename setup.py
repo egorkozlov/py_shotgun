@@ -85,7 +85,7 @@ class ModelSetup(object):
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
-        p['pmeet_t'] = [p['pmeet'] + t*p['pmeet_t'] for t in range(Tmeet)] + [0.0]*(T-Tmeet)
+        p['pmeet_t'] = [np.clip(p['pmeet'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         p['poutsm_t'] = [p['poutsm']]*T
         
         
