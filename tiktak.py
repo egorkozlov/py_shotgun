@@ -77,7 +77,7 @@ def tiktak(nthreads,N,N_st,xl,xu,f,tole=1e-3,nelder=True,refine=False,
     
     vals = [('minimize',(i,N_st,xl,xu)) for i in range(N_st)]
     
-    compute_for_values(vals,timeout=3600.0)
+    compute_for_values(vals,timeout=7200.0)
     
     param = filer('wisdom.pkl',None,write=False)
     

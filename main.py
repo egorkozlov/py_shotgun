@@ -51,12 +51,12 @@ if __name__ == '__main__':
     
     ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
     
-    print('Testing the workers...')
-    from p_client import compute_for_values
-    pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
-    pts = [('compute',x) for x in pts]    
-    outs = compute_for_values(pts,timeout=3600.0)
-    print('Everything worked, output is {}'.format(outs))
+    #print('Testing the workers...')
+    #from p_client import compute_for_values
+    #pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
+    #pts = [('compute',x) for x in pts]    
+    #outs = compute_for_values(pts,timeout=3600.0)
+    #print('Everything worked, output is {}'.format(outs))
     
     
     print('')
@@ -68,8 +68,8 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(400,400,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
-                 skip_local=True,skip_global=False)
+    param=tiktak(400,300,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
+                 skip_local=False,skip_global=True)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
