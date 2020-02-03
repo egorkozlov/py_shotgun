@@ -43,20 +43,21 @@ if __name__ == '__main__':
     #Initialize the file with parameters
 
 
-    lb = np.array([ 0.0,  1e-4,   0.5,  0.1,  -0.1, 0.0,  0.01, 0.05,  0.05])
-    ub = np.array( [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9])
-    x0 = np.array( [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
+    lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05, -0.2, 0.0])
+    ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9,    0.0, 1.0])
+    xdef = np.array([1.49701401,0.23225228,0.86106072,0.1669372,-0.01156311,0.10068043,0.86490734,0.23337081,0.89917949,0.0,1/3])
+
     
     
     
     ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
     
-    #print('Testing the workers...')
-    #from p_client import compute_for_values
-    #pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
-    #pts = [('compute',x) for x in pts]    
-    #outs = compute_for_values(pts,timeout=3600.0)
-    #print('Everything worked, output is {}'.format(outs))
+    print('Testing the workers...')
+    from p_client import compute_for_values
+    pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
+    pts = [('compute',x) for x in pts]    
+    outs = compute_for_values(pts,timeout=3600.0)
+    print('Everything worked, output is {}'.format(outs))
     
     
     print('')
@@ -68,7 +69,7 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(400,300,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
+    param=tiktak(400,600,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
                  skip_local=False,skip_global=True)
     
     print('f is {} and x is {}'.format(param[0],param[1]))

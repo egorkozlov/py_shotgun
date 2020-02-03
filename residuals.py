@@ -13,11 +13,10 @@ import pickle, dill
 import os
 
 
-lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05])
-ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9])
+lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05, -0.2, 0.0])
+ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9,    0.0, 1.0])
 #xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.765625  ,  0.14460234,  6.66015625,  0.78203125, -0.03984375,
-        0.3203125 ,  1.43492187,  1.40976562,  0.10976563])
+xdef = np.array([ 1.49701401,0.23225228,0.86106072,0.1669372,-0.01156311,0.10068043,0.86490734,0.23337081,0.89917949,0.0,1/3])
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
 def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
@@ -39,6 +38,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     util_alp = x[6]
     util_kap = x[7]
     preg_a0 = x[8]
+    preg_at = x[9]
+    poutsm = x[10]
     
     
     
@@ -77,7 +78,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                         sigma_psi_init=sigma_psi_init,
                         pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
                         pls=pls,u_shift_mar=mshift,preg_a0=preg_a0,
-                        pmeet_t=pmeet_t)
+                        pmeet_t=pmeet_t,preg_at=preg_at,poutsm=poutsm)
     
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
@@ -115,7 +116,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     nmar_25 = 1-ever_mar[:,4].mean()
     nmar_30 = 1-ever_mar[:,9].mean()
-    nmar_35 = ever_mar[:,14].mean()
+    nmar_35 = 1-ever_mar[:,14].mean()
     
     div_25 = div_now[:,4].mean()
     div_30 = div_now[:,9].mean()
@@ -132,15 +133,25 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     nkid_35_mar = 1-ever_kid[is_mar[:,14],14].mean() if np.any(is_mar[:,14]) else 0.0
     
     
+    #mkids_0_mar = (agents.state[:,1:] == n_mark)[ ~is_mar[:,0:-1] & is_mar[:,1:]].mean()
+    mkids_1_mar = (agents.state[:,2:] == n_mark)[ ~is_mar[:,0:-2] & is_mar[:,2:]].mean()
+    mkids_2_mar = (agents.state[:,3:] == n_mark)[ ~is_mar[:,0:-3] & is_mar[:,3:]].mean()
+    mkids_3_mar = (agents.state[:,4:] == n_mark)[ ~is_mar[:,0:-4] & is_mar[:,4:]].mean()
+    
     
     sim = np.array([nmar_25,nmar_30,nmar_35,
                     div_25,div_30,div_35,div_40,
                     nkid_25,nkid_30,nkid_35,
-                    nkid_25_mar,nkid_30_mar,nkid_35_mar])
+                    nkid_25_mar,nkid_30_mar,nkid_35_mar,
+                    mkids_1_mar,mkids_2_mar,mkids_3_mar])
     dat = np.array([0.69,0.50,0.26,
                     0.11,0.13,0.16,0.19,
                     0.68,0.5,0.25,
-                    0.43,0.27,0.14])
+                    0.43,0.27,0.14,
+                    0.45,0.55,0.64])
+    
+    
+    
     
     W = np.eye(sim.size)/(sim.size)
     
@@ -163,7 +174,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     resid_sc = resid_all*np.sqrt(np.diag(W)) # all residuals scaled
     
-    dist =  np.sqrt(np.dot(np.dot(resid_all,W),resid_all))
+    dist =  np.dot(np.dot(resid_all,W),resid_all)
 
 
     print('Distance is {}'.format(dist))

@@ -29,10 +29,10 @@ class ModelSetup(object):
         p['Tfert'] = Tfert
         p['Tsim'] = T
         p['sig_zf_0']  = 0.25
-        p['sig_zf']    = 0.075
+        p['sig_zf']    = np.sqrt(0.038)
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['sig_zm_0']  = 0.25
-        p['sig_zm']    = 0.05
+        p['sig_zm']    = np.sqrt(0.027)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
@@ -60,15 +60,28 @@ class ModelSetup(object):
         p['u_shift_coh'] = 0.0
         
         
-        p['f_wage_trend'] = [0.0 + 0.0*min(t,Tret) - 0.000*(min(t,Tret)**2) for t in range(T)]
-        p['m_wage_trend'] = [0.0 + 0.0*min(t,Tret) - 0.000*(min(t,Tret)**2) for t in range(T)]
+        p['f_wage_trend'] = np.array(
+                            [0.0 + 
+                             0.068386*(min(t,30) - 5)
+                             - 0.0040512*((min(t,30)-5)**2)
+                             + 0.0000784*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
+        p['m_wage_trend'] = np.array(
+                                    [0.1457256 + 0.0676344*(min(t,30)-5) - 
+                                         0.002752*((min(t,30)-5)**2) 
+                                         + 0.0000784*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
         
         
         p['util_lam'] = 0.4
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
-        p['util_qbar'] = 0.2
+        p['util_qbar'] = 0.0
         
         p['preg_a0'] = 0.25
         p['preg_at'] = 0.0
