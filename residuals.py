@@ -16,7 +16,10 @@ import os
 lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05, -0.2, 0.0])
 ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9,    0.0, 1.0])
 #xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.49701401,0.23225228,0.86106072,0.1669372,-0.01156311,0.10068043,0.86490734,0.23337081,0.89917949,0.0,1/3])
+xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084,
+        1.0,  1.68427564,  1.7914976 ,  0.60045406, -0.01858392,
+        0.30412627])
+    
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
 def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],

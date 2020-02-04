@@ -49,6 +49,7 @@ class ModelSetup(object):
         p['pmeet_t'] = 0.0
         
         p['poutsm'] = 0.4
+        p['z_drift'] = -0.1
         
         
         p['wret'] = 0.8
@@ -198,9 +199,15 @@ class ModelSetup(object):
             #Create a new bad version of transition matrix p(zf_t)
             
             
-            zf_bad = [cut_matrix(exogrid['zf_t_mat'][t]) if t < Tret -1 
-                          else (exogrid['zf_t_mat'][t] if t < T - 1 else None) 
-                              for t in range(self.pars['T'])]
+            
+            zf_bad = [tauchen_drift(exogrid['zf_t'][t], exogrid['zf_t'][t+1], 
+                                    1.0, p['sig_zf'], p['z_drift'])
+                        for t in range(self.pars['T']-1) ] + [None]
+            
+            
+            #zf_bad = [cut_matrix(exogrid['zf_t_mat'][t]) if t < Tret -1 
+            #              else (exogrid['zf_t_mat'][t] if t < T - 1 else None) 
+            #                  for t in range(self.pars['T'])]
             
             zf_t_mat_down = zf_bad
             
@@ -247,6 +254,8 @@ class ModelSetup(object):
             self.pars['nexo_t'] = [v.shape[0] for v in all_t]
             
             #assert False
+            
+            
             
         #Grid Couple
         self.na = 40
@@ -884,7 +893,31 @@ class DivorceCosts(object):
         
         return share_f, share_m
         
-        
+from rw_approximations import normcdf_tr
+
+def tauchen_drift(z_now,z_next,rho,sigma,mu):
+    z_now = np.atleast_1d(z_now)
+    z_next = np.atleast_1d(z_next)
+    if z_next.size == 1:
+        return np.ones((z_now.size,1),dtype=np.float32)
+    
+    d = np.diff(z_next)
+    assert np.ptp(d) < 1e-5, 'Step size should be fixed'
+    
+    h_half = d[0]/2
+    
+    Pi = np.zeros((z_now.size,z_next.size),dtype=np.float32)
+    
+    ez = rho*z_now + mu
+    
+    Pi[:,0] = normcdf_tr( ( z_next[0] + h_half - ez )/sigma)
+    Pi[:,-1] = 1 - normcdf_tr( (z_next[-1] - h_half - ez ) / sigma )
+    for j in range(1,z_next.size - 1):
+        Pi[:,j] = normcdf_tr( ( z_next[j] + h_half - ez )/sigma) - \
+                    normcdf_tr( ( z_next[j] - h_half - ez )/sigma)
+    return Pi
+
+
 
 def build_s_grid(agrid,n_between,da_min,da_max):
     sgrid = np.array([0.0],np.float64)
