@@ -71,7 +71,10 @@ class Agents:
         
         # initialize iexo
         self.iexo = np.zeros((N,T),np.int32)
-        # TODO: look if we can/need fix the shocks here...
+        
+        self.c = np.zeros((N,T),np.float32)
+        self.x = np.zeros((N,T),np.float32)
+        self.s = np.zeros((N,T),np.float32)
         
         
         
@@ -162,22 +165,31 @@ class Agents:
                 
                 ind = np.where(is_state)[0]
                 
+                pol = self.Mlist[ipol].decisions[t][sname]
+                    
+                
                 if not use_theta:
                     
                     # apply for singles
-                    anext = self.Vlist[ipol][t][sname]['s'][self.iassets[ind,t],self.iexo[ind,t]]
+                    
+                    
+                    
+                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t]]
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_s,anext).roll(shocks=self.shocks_single_a[ind,t])
-                
+                    self.s[ind,t] = anext
+                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t]]
+                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t]]
                 else:
                     
                     # interpolate in both assets and theta
                     # function apply_2dim is experimental but I checked it at this setup
                     
                     # apply for couples
-                    
-                    tk = lambda x : self.setup.v_thetagrid_fine.apply(x,axis=2)
-                    
-                    anext = tk(self.Vlist[ipol][t][sname]['s'])[self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                                        
+                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    self.s[ind,t] = anext
+                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
                     
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self.shocks_couple_a[ind,t])
                     
@@ -226,7 +238,7 @@ class Agents:
                         lvl = lvls[ils]
         
                         
-                        #if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
+                        if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
                         
                         
                         mat = self.Mlist[ipol].setup.exo_mats[sname][ils][t]
@@ -405,11 +417,16 @@ class Agents:
                         
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
+                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = izf[i_disagree_or_nomeet]
                         #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_single],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_sm],t+1] = self.state_codes['Female and child']
-                        self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
+                        self.ils_i[ind[become_single],t+1] = self.ils_def
+                        self.ils_i[ind[become_sm],t+1] = fls_policy[self.iassets[ind[become_sm],t+1],
+                                                                       izf[become_sm]]
+                        
                         
                 elif sname == "Female and child":
                     
@@ -418,6 +435,11 @@ class Agents:
                     self.state[ind[ i_out_sm],t+1] = self.state_codes['Female, single']
                     self.state[ind[~i_out_sm],t+1] = self.state_codes['Female and child']
                     
+                    fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                    
+                    self.ils_i[ind[ i_out_sm],t+1] = self.ils_def
+                    self.ils_i[ind[~i_out_sm],t+1] = fls_policy[self.iassets[ind[~i_out_sm],t+1],
+                                                                       self.iexo[ind[~i_out_sm],t+1]]
                     
                 
                 
@@ -492,13 +514,17 @@ class Agents:
                         self.iassets[ind[i_div],t+1] = VecOnGrid(agrid,sf).roll(shocks=shks)
                         self.itheta[ind[i_div],t+1] = -1
                         self.iexo[ind[i_div],t+1] = izf[i_div]
+                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
                         if haschild:
                             self.state[ind[i_div],t+1] = self.state_codes['Female and child']
+                            self.ils_i[ind[i_div],t+1] = fls_policy[self.iassets[ind[i_div],t+1],
+                                                                       izf[i_div]]
                         else:
                             self.state[ind[i_div],t+1] = self.state_codes['Female, single']
+                            self.ils_i[ind[i_div],t+1] = self.ils_def
                         
-                        #FLS
-                        self.ils_i[ind[i_div],t+1] = self.ils_def
+                        
+                        
                         
                     if np.any(i_ren):
                         

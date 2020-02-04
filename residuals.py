@@ -13,12 +13,10 @@ import pickle, dill
 import os
 
 
-lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05, -0.2, 0.0])
-ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9,    0.0, 1.0])
+lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.05, -0.2])
+ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.0])
 #xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084,
-        1.0,  1.68427564,  1.7914976 ,  0.60045406, -0.01858392,
-        0.30412627])
+xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, -0.01858392])
     
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
@@ -37,12 +35,10 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     sigma_psi_init = x[1]*x[2]
     pmeet = x[3]
     pmeet_t = x[4]
-    pls = x[5]
-    util_alp = x[6]
-    util_kap = x[7]
-    preg_a0 = x[8]
-    preg_at = x[9]
-    poutsm = x[10]
+    util_alp = x[5]
+    util_kap = x[6]
+    preg_a0 = x[7]
+    preg_at = x[8]
     
     
     
@@ -80,8 +76,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
         kwords = dict(sigma_psi=sigma_psi,
                         sigma_psi_init=sigma_psi_init,
                         pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
-                        pls=pls,u_shift_mar=mshift,preg_a0=preg_a0,
-                        pmeet_t=pmeet_t,preg_at=preg_at,poutsm=poutsm)
+                        u_shift_mar=mshift,preg_a0=preg_a0,
+                        pmeet_t=pmeet_t,preg_at=preg_at)
     
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
@@ -110,12 +106,14 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     
     is_mar = (agents.state == n_mark) | (agents.state == n_marnk)
+    is_mark = (agents.state == n_mark)
     
     ever_mar = (np.cumsum(is_mar,axis=1) > 0)
     div_now =  (ever_mar) & ((agents.state==n_single) | (agents.state==n_singlek))
     ever_kid = ( np.cumsum( (agents.state == n_mark) | (agents.state == n_singlek),axis=1) > 0)
     
-    
+    share_x = agents.x / np.maximum(1e-3, agents.x  + agents.c)
+    mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
     
     nmar_25 = 1-ever_mar[:,4].mean()
     nmar_30 = 1-ever_mar[:,9].mean()
@@ -146,12 +144,12 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                     div_25,div_30,div_35,div_40,
                     nkid_25,nkid_30,nkid_35,
                     nkid_25_mar,nkid_30_mar,nkid_35_mar,
-                    mkids_1_mar,mkids_2_mar,mkids_3_mar])
+                    mkids_1_mar,mkids_2_mar,mkids_3_mar,mean_x])
     dat = np.array([0.69,0.50,0.26,
                     0.11,0.13,0.16,0.19,
                     0.68,0.5,0.25,
                     0.43,0.27,0.14,
-                    0.45,0.55,0.64])
+                    0.45,0.55,0.64,0.4])
     
     
     
@@ -186,7 +184,21 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     out_dict = {'distance':dist,'all residuals':resid_all,
                 'scaled residuals':resid_sc,'models':mdl_list,'agents':agents}
+    
+    
     out = [out_dict[key] for key in return_format]
+    
+    del(out_dict)
+    
+    
+    if 'models' not in return_format:
+        for m in mdl_list:
+            del(m)
+        del mdl_list
+        
+    if 'agents' not in return_format:
+        del(agents)
+        
     
     if len(out) == 1: out = out[0]
   

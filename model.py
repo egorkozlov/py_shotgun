@@ -185,14 +185,22 @@ class Model(object):
             
             Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2).astype(self.dtype)
             
+            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2).astype(self.dtype)
+            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2).astype(self.dtype)
+            
             if Vint.ndim < 4: Vint = Vint[:,:,:,None]
             
             fls = Vint.argmax(axis=3).astype(np.int8)
             
-            dec.update({'s':sint,'fls':fls})
-            del sint,fls
+            
+            
+            dec.update({'s':sint,'fls':fls,'x':xint,'c':cint})
+            #del sint, fls
+        elif desc == 'Female and child':
+            dec.update({'s':v['s'],'fls':v['fls'],'x':v['x'],'c':v['c']})
         else:
-            dec.update({'s':v['s']})
+            xx = np.broadcast_to(0.0,v['s'].shape) # this saves memory a bit
+            dec.update({'s':v['s'],'x':xx,'c':v['c']})
             del v
         
     

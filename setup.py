@@ -48,13 +48,13 @@ class ModelSetup(object):
         p['pmeet'] = 0.5
         p['pmeet_t'] = 0.0
         
-        p['poutsm'] = 0.4
+        p['poutsm'] = 1/3
         p['z_drift'] = -0.1
         
         
         p['wret'] = 0.8
         p['uls'] = 0.2
-        p['pls'] = 0.8
+        p['pls'] = 1.0
         
         
         p['u_shift_mar'] = 0.0
@@ -116,7 +116,7 @@ class ModelSetup(object):
         
         lmin = 0.2
         lmax = 1.0
-        nl = 3
+        nl = 4
         
         ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
         ps = p['pls']*(1-np.linspace(0.0,1.0,nl,dtype=self.dtype))

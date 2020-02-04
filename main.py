@@ -42,12 +42,10 @@ if __name__ == '__main__':
     
     #Initialize the file with parameters
 
+    lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.05, -0.2])
+    ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.0])
+    xdef = np.array( [ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, -0.01858392])
 
-    lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2, 0.0,  0.01, 0.05,  0.05, -0.2, 0.0])
-    ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0, 1.0,   3.0,  3.0,  0.9,    0.0, 1.0])
-    #xdef = np.array([1.49701401,0.23225228,0.86106072,0.1669372,-0.01156311,0.10068043,0.86490734,0.23337081,0.89917949,0.0,1/3])
-    xdef = np.array([1.23324997,0.31855457,2.07568454,0.26196516,-0.00875849,0.20482658,1.43709675,1.99198956,0.60084713,-0.05876468,0.29476709])
-    
     
     
     ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
@@ -69,7 +67,7 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(400,600,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
+    param=tiktak(400,400,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
                  skip_local=True,skip_global=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
