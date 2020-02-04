@@ -15,7 +15,7 @@ from time import sleep
 import pickle
 
 def tiktak(nthreads,N,N_st,xl,xu,f,tole=1e-3,nelder=True,refine=False,
-           skip_global=False,skip_local=False):
+           skip_global=False,skip_local=False,resume_local=False):
     
     #Initial cheks
     assert len(xl)==len(xu)
@@ -70,12 +70,17 @@ def tiktak(nthreads,N,N_st,xl,xu,f,tole=1e-3,nelder=True,refine=False,
     #Create a file with sobol sequence points
     filer('sobol.pkl',x_init,True)    
     
-    #List containing parameters and save them in file
-    param=list([ (fx_init[0], x_init[:,0])])
-    filer('wisdom.pkl',param,True)
-         
     
-    vals = [('minimize',(i,N_st,xl,xu)) for i in range(N_st)]
+    if not resume_local:
+        #List containing parameters and save them in file
+        param=list([ (fx_init[0], x_init[:,0])])
+        filer('wisdom.pkl',param,True)
+        i_start = 0
+    else:
+        param = filer('wisdom.pkl',None,False)
+        i_start = len(param)
+    
+    vals = [('minimize',(i,N_st,xl,xu)) for i in range(i_start,N_st)]
     
     compute_for_values(vals,timeout=7200.0)
     
