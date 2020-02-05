@@ -84,7 +84,17 @@ class Agents:
         self.x = np.zeros((N,T),np.float32)
         self.s = np.zeros((N,T),np.float32)
         
-        
+        self.unplanned_preg = np.zeros((N,T),dtype=np.bool)
+        self.planned_preg = np.zeros((N,T),dtype=np.bool)
+        self.disagreed = np.zeros((N,T),dtype=np.bool)
+        self.met_a_partner = np.zeros((N,T),dtype=np.bool)
+        self.agreed = np.zeros((N,T),dtype=np.bool)   
+        self.agreed_k = np.zeros((N,T),dtype=np.bool) 
+        self.agreed_unplanned = np.zeros((N,T),dtype=np.bool) 
+        self.renegotiated = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced_nk = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced_k = np.zeros((N,T),dtype=np.bool)
         
         self.iexo[:,0] = iexoinit
         
@@ -339,6 +349,7 @@ class Agents:
                     i_preg = (vpreg < p_preg)
                     
                     
+                    
                     ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat]*(~i_preg) \
                                 + matches['Pregnant']['iexo'][ia,iznow,i_pmat]*(i_preg)
                                 
@@ -358,7 +369,8 @@ class Agents:
                     vmeet = self.shocks_single_meet[ind,t]
                     i_nomeet =  np.array( vmeet > pmeet )
                     
-                    
+                    self.met_a_partner[ind,t] = ~i_nomeet
+                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet)
                     
                     i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat]*(~i_preg) \
                                     + matches['Pregnant']['Decision'][ia,iznow,i_pmat]*(i_preg)
@@ -367,8 +379,12 @@ class Agents:
                                     + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat]*(i_preg)
                     
                     i_disagree = (~i_pot_agree)
+                    
+                    
                     i_disagree_or_nomeet = (i_disagree) | (i_nomeet)
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
+                    
+                    self.disagreed[ind,t] = i_disagree_and_meet
                     
                     become_sm = (i_disagree_and_meet) & (i_preg)
                     become_single = (i_disagree_or_nomeet) & ~(become_sm)   
@@ -379,6 +395,9 @@ class Agents:
                     
                     i_agree_mar = (i_agree) & (i_m_preferred)
                     i_agree_coh = (i_agree) & (~i_m_preferred)
+                    
+                    self.agreed = (i_agree_mar) | (i_agree_coh)
+                    self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
                     
                     assert np.all(~i_nomeet[i_agree])
                     
@@ -395,6 +414,9 @@ class Agents:
                         self.iexo[ind[i_agree_mar],t+1] = iall[i_agree_mar]
                         self.state[ind[i_agree_mar],t+1] = self.state_codes['Couple and child']
                         self.iassets[ind[i_agree_mar],t+1] = ia_out[i_agree_mar]
+                        
+                        self.agreed_k[ind,t] = i_agree_mar
+                        self.agreed_unplanned[ind,t] = (i_agree_mar) & (i_preg)
                         
                         # FLS decision
                         #self.ils_i[ind[i_ren],t+1] = 
@@ -495,7 +517,7 @@ class Agents:
                     
                     #if self.verbose: print('{} divorce, {} ren-f, {} ren-m, {} sq'.format(np.sum(i_div),np.sum(i_renf),np.sum(i_renm),np.sum(i_sq))                     )
                     
-                    
+                    self.renegotiated[ind,t] = i_ren
                     
                     zf_grid = self.setup.exo_grids['Female, single'][t]
                     zm_grid = self.setup.exo_grids['Male, single'][t]
@@ -504,6 +526,7 @@ class Agents:
                      
                     
                     if np.any(i_div):
+                        
                         
                         income_fem = np.exp(zf_grid[izf[i_div]])
                         income_mal = np.exp(zm_grid[izm[i_div]])
@@ -517,11 +540,18 @@ class Agents:
                         
                         sf = share_f*sc[i_div]
                         
+                        self.just_divorced[ind,t] = i_div
+                        if haschild:
+                            self.just_divorced_k[ind,t] = i_div
+                        else:
+                            self.just_divorced_nk[ind,t] = i_div
+                        
                         shks = self.shocks_couple_a[ind[i_div],t]
                         self.iassets[ind[i_div],t+1] = VecOnGrid(agrid,sf).roll(shocks=shks)
                         self.itheta[ind[i_div],t+1] = -1
                         self.iexo[ind[i_div],t+1] = izf[i_div]
                         fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        
                         if haschild:
                             self.state[ind[i_div],t+1] = self.state_codes['Female and child']
                             self.ils_i[ind[i_div],t+1] = fls_policy[self.iassets[ind[i_div],t+1],
@@ -551,6 +581,8 @@ class Agents:
                             i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_ren]
                             
+                            self.planned_preg[ind[i_ren],t] = i_birth1
+                            
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
                             ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
@@ -573,6 +605,7 @@ class Agents:
                         else:
                             i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_sq]
+                            self.planned_preg[ind[i_sq],t] = i_birth1
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
