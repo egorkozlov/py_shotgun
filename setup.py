@@ -28,11 +28,11 @@ class ModelSetup(object):
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
-        p['sig_zf_0']  = 0.25
-        p['sig_zf']    = np.sqrt(0.038)
+        p['sig_zf_0']  = 0.513 #0.25
+        p['sig_zf']    = 0.084#np.sqrt(0.038)
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
-        p['sig_zm_0']  = 0.25
-        p['sig_zm']    = np.sqrt(0.027)
+        p['sig_zm_0']  = 0.525 #0.25
+        p['sig_zm']    = 0.097 #np.sqrt(0.027)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
@@ -61,6 +61,8 @@ class ModelSetup(object):
         p['u_shift_coh'] = 0.0
         
         
+        
+        '''
         p['f_wage_trend'] = np.array(
                             [0.0 + 
                              0.068386*(min(t,30) - 5)
@@ -73,6 +75,39 @@ class ModelSetup(object):
                                     [0.1457256 + 0.0676344*(min(t,30)-5) - 
                                          0.002752*((min(t,30)-5)**2) 
                                          + 0.0000784*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        '''
+        '''
+        se_05_m = 0.5596
+        se_20_m = 0.6735
+        
+        sigma_m = np.sqrt( (se_20_m**2 - se_05_m**2)/15 )
+        sigma_m0 = np.sqrt(se_05_m**2 - 4*sigma_m**2)
+        
+        se_05_f = 0.5397
+        se_20_f = 0.6305
+        
+        sigma_f = np.sqrt( (se_20_f**2 - se_05_f**2)/15 )
+        sigma_f0 = np.sqrt(se_05_f**2 - 4*sigma_f**2)
+        
+        '''
+        
+        
+        
+        
+        p['f_wage_trend'] = np.array(
+                            [0.0 + 
+                             0.0844278*(min(t,30) - 5)
+                             -0.0044622*((min(t,30)-5)**2)
+                             + 0.0000788*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
+        p['m_wage_trend'] = np.array(
+                                    [0.0776162 + 0.0810113*(min(t,30)-5)  
+                                         - 0.0027093*((min(t,30)-5)**2) 
+                                         + 0.0000298*((min(t,30)-5)**3)
                                          for t in range(T)]
                                     )
         
