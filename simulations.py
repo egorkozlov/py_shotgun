@@ -7,7 +7,7 @@ This contains things relevant for simulations
 import numpy as np
 
 
-from mc_tools import mc_simulate
+from mc_tools import mc_simulate, int_prob
 from gridvec import VecOnGrid
 
 class Agents:
@@ -49,7 +49,15 @@ class Agents:
         self.shocks_couple_iexo = np.random.random_sample((N,T))
         self.shocks_single_a = np.random.random_sample((N,T))
         self.shocks_couple_a = np.random.random_sample((N,T))
-        iexoinit = np.random.randint(0,self.setup.pars['n_zf_t'][0],size=N) # initial state
+        
+        
+        fem_prob = int_prob(self.setup.exogrid.zf_t[0], sig = self.setup.pars['sig_zf_0'])
+        shocks_init = np.random.random_sample((N,))        
+        i_fem = np.sum((shocks_init[:,None] > np.cumsum(fem_prob)[None,:]), axis=1)
+        iexoinit = i_fem # initial state
+        
+        
+        
         self.shocks_outsm = np.random.random_sample((N,T))
         self.shocks_transition = np.random.random_sample((N,T)) 
         self.shocks_single_preg = np.random.random_sample((N,T))
@@ -71,9 +79,25 @@ class Agents:
         
         # initialize iexo
         self.iexo = np.zeros((N,T),np.int32)
-        # TODO: look if we can/need fix the shocks here...
         
+        self.c = np.zeros((N,T),np.float32)
+        self.x = np.zeros((N,T),np.float32)
+        self.s = np.zeros((N,T),np.float32)
         
+        self.unplanned_preg = np.zeros((N,T),dtype=np.bool)
+        self.planned_preg = np.zeros((N,T),dtype=np.bool)
+        self.disagreed = np.zeros((N,T),dtype=np.bool)
+        self.met_a_partner = np.zeros((N,T),dtype=np.bool)
+        self.agreed = np.zeros((N,T),dtype=np.bool)   
+        self.agreed_k = np.zeros((N,T),dtype=np.bool) 
+        self.agreed_unplanned = np.zeros((N,T),dtype=np.bool) 
+        self.renegotiated = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced_nk = np.zeros((N,T),dtype=np.bool)
+        self.just_divorced_k = np.zeros((N,T),dtype=np.bool)
+        self.k_m = np.zeros((N,T),dtype=np.bool)
+        self.k_m_true = np.zeros((N,T),dtype=np.bool)
+        self.m_k = np.zeros((N,T),dtype=np.bool)
         
         self.iexo[:,0] = iexoinit
         
@@ -122,7 +146,6 @@ class Agents:
             self.policy_ind[:] = 0
             
         if not nosim: self.simulate()
-        print(11)
             
         
     def simulate(self):
@@ -162,22 +185,31 @@ class Agents:
                 
                 ind = np.where(is_state)[0]
                 
+                pol = self.Mlist[ipol].decisions[t][sname]
+                    
+                
                 if not use_theta:
                     
                     # apply for singles
-                    anext = self.Vlist[ipol][t][sname]['s'][self.iassets[ind,t],self.iexo[ind,t]]
+                    
+                    
+                    
+                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t]]
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_s,anext).roll(shocks=self.shocks_single_a[ind,t])
-                
+                    self.s[ind,t] = anext
+                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t]]
+                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t]]
                 else:
                     
                     # interpolate in both assets and theta
                     # function apply_2dim is experimental but I checked it at this setup
                     
                     # apply for couples
-                    
-                    tk = lambda x : self.setup.v_thetagrid_fine.apply(x,axis=2)
-                    
-                    anext = tk(self.Vlist[ipol][t][sname]['s'])[self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                                        
+                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    self.s[ind,t] = anext
+                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
                     
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self.shocks_couple_a[ind,t])
                     
@@ -226,7 +258,7 @@ class Agents:
                         lvl = lvls[ils]
         
                         
-                        #if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
+                        if self.verbose: print('At t = {} for {} {} have LS of {}'.format(t,sname,cnt,lvl))
                         
                         
                         mat = self.Mlist[ipol].setup.exo_mats[sname][ils][t]
@@ -292,6 +324,14 @@ class Agents:
                     
                     pmat_cum = pmat.cumsum(axis=1)
                     
+                    assert np.all(pmat_cum < 1 + 1e-5) 
+                    assert np.all(pmat_cum[:,-1] > 1 - 1e-5)
+                    assert np.all(pmat_cum >= 0.0)
+                    # there is a rare numerical issue when adding lots of floats
+                    # gives imprecise result > 1
+                    
+                    pmat_cum[:,-1] = 1+1e-5 
+                    
                     
                     
                     
@@ -310,6 +350,7 @@ class Agents:
                     
                     vpreg = self.shocks_single_preg[ind,t]
                     i_preg = (vpreg < p_preg)
+                    
                     
                     
                     ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat]*(~i_preg) \
@@ -331,7 +372,8 @@ class Agents:
                     vmeet = self.shocks_single_meet[ind,t]
                     i_nomeet =  np.array( vmeet > pmeet )
                     
-                    
+                    self.met_a_partner[ind,t] = ~i_nomeet
+                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet)
                     
                     i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat]*(~i_preg) \
                                     + matches['Pregnant']['Decision'][ia,iznow,i_pmat]*(i_preg)
@@ -340,8 +382,12 @@ class Agents:
                                     + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat]*(i_preg)
                     
                     i_disagree = (~i_pot_agree)
+                    
+                    
                     i_disagree_or_nomeet = (i_disagree) | (i_nomeet)
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
+                    
+                    self.disagreed[ind,t] = i_disagree_and_meet
                     
                     become_sm = (i_disagree_and_meet) & (i_preg)
                     become_single = (i_disagree_or_nomeet) & ~(become_sm)   
@@ -352,6 +398,9 @@ class Agents:
                     
                     i_agree_mar = (i_agree) & (i_m_preferred)
                     i_agree_coh = (i_agree) & (~i_m_preferred)
+                    
+                    self.agreed[ind,t] = (i_agree_mar) | (i_agree_coh)
+                    self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
                     
                     assert np.all(~i_nomeet[i_agree])
                     
@@ -368,6 +417,13 @@ class Agents:
                         self.iexo[ind[i_agree_mar],t+1] = iall[i_agree_mar]
                         self.state[ind[i_agree_mar],t+1] = self.state_codes['Couple and child']
                         self.iassets[ind[i_agree_mar],t+1] = ia_out[i_agree_mar]
+                        
+                        self.agreed_k[ind[i_agree_mar],t] = True
+                        self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]
+                        
+                        self.k_m[ind[i_agree_mar],t:] = True
+                        self.k_m_true[ind[i_agree_mar],t:] = i_preg[i_agree_mar][:,None]
+                        
                         
                         # FLS decision
                         #self.ils_i[ind[i_ren],t+1] = 
@@ -397,11 +453,16 @@ class Agents:
                         
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
+                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = izf[i_disagree_or_nomeet]
                         #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_single],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_sm],t+1] = self.state_codes['Female and child']
-                        self.ils_i[ind[i_disagree_or_nomeet],t+1] = self.ils_def
+                        self.ils_i[ind[become_single],t+1] = self.ils_def
+                        self.ils_i[ind[become_sm],t+1] = fls_policy[self.iassets[ind[become_sm],t+1],
+                                                                       izf[become_sm]]
+                        
                         
                 elif sname == "Female and child":
                     
@@ -410,6 +471,11 @@ class Agents:
                     self.state[ind[ i_out_sm],t+1] = self.state_codes['Female, single']
                     self.state[ind[~i_out_sm],t+1] = self.state_codes['Female and child']
                     
+                    fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                    
+                    self.ils_i[ind[ i_out_sm],t+1] = self.ils_def
+                    self.ils_i[ind[~i_out_sm],t+1] = fls_policy[self.iassets[ind[~i_out_sm],t+1],
+                                                                       self.iexo[ind[~i_out_sm],t+1]]
                     
                 
                 
@@ -458,7 +524,7 @@ class Agents:
                     
                     #if self.verbose: print('{} divorce, {} ren-f, {} ren-m, {} sq'.format(np.sum(i_div),np.sum(i_renf),np.sum(i_renm),np.sum(i_sq))                     )
                     
-                    
+                    self.renegotiated[ind,t] = i_ren
                     
                     zf_grid = self.setup.exo_grids['Female, single'][t]
                     zm_grid = self.setup.exo_grids['Male, single'][t]
@@ -467,6 +533,7 @@ class Agents:
                      
                     
                     if np.any(i_div):
+                        
                         
                         income_fem = np.exp(zf_grid[izf[i_div]])
                         income_mal = np.exp(zm_grid[izm[i_div]])
@@ -480,17 +547,28 @@ class Agents:
                         
                         sf = share_f*sc[i_div]
                         
+                        self.just_divorced[ind,t] = i_div
+                        if haschild:
+                            self.just_divorced_k[ind,t] = i_div
+                        else:
+                            self.just_divorced_nk[ind,t] = i_div
+                        
                         shks = self.shocks_couple_a[ind[i_div],t]
                         self.iassets[ind[i_div],t+1] = VecOnGrid(agrid,sf).roll(shocks=shks)
                         self.itheta[ind[i_div],t+1] = -1
                         self.iexo[ind[i_div],t+1] = izf[i_div]
+                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        
                         if haschild:
                             self.state[ind[i_div],t+1] = self.state_codes['Female and child']
+                            self.ils_i[ind[i_div],t+1] = fls_policy[self.iassets[ind[i_div],t+1],
+                                                                       izf[i_div]]
                         else:
                             self.state[ind[i_div],t+1] = self.state_codes['Female, single']
+                            self.ils_i[ind[i_div],t+1] = self.ils_def
                         
-                        #FLS
-                        self.ils_i[ind[i_div],t+1] = self.ils_def
+                        
+                        
                         
                     if np.any(i_ren):
                         
@@ -509,6 +587,11 @@ class Agents:
                         else:
                             i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_ren]
+                            
+                            self.planned_preg[ind[i_ren],t] = i_birth1
+                            
+                            self.m_k[ind[i_ren][i_birth1],t:] = True
+                            
                             
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
@@ -532,6 +615,8 @@ class Agents:
                         else:
                             i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_sq]
+                            self.m_k[ind[i_sq][i_birth1],t:] = True                            
+                            self.planned_preg[ind[i_sq],t] = i_birth1
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])

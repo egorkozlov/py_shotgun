@@ -39,6 +39,7 @@ from p_function import fun
 
 
 # this tests if the worker can run at least something
+'''
 try:
     print('I am trying to test myself...')
     out = fun(('test',0))
@@ -48,7 +49,7 @@ except KeyboardInterrupt:
 except BaseException as a:
     print('I cannot compute the function in the default point, sorry...')
     raise a
-   
+'''   
 
 try:
     mkdir('Job')

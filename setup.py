@@ -19,8 +19,8 @@ from scipy import sparse
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
-        T = 60
-        Tret = 45 # first period when the agent is retired
+        T = 55
+        Tret = 40 # first period when the agent is retired
         Tfert = 15 # first peroid when infertile
         Tdiv = 35 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
@@ -28,11 +28,11 @@ class ModelSetup(object):
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
-        p['sig_zf_0']  = 0.25
-        p['sig_zf']    = 0.075
+        p['sig_zf_0']  = 0.513 #0.25
+        p['sig_zf']    = 0.084#np.sqrt(0.038)
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
-        p['sig_zm_0']  = 0.25
-        p['sig_zm']    = 0.05
+        p['sig_zm_0']  = 0.525 #0.25
+        p['sig_zm']    = 0.097 #np.sqrt(0.027)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
@@ -41,37 +41,87 @@ class ModelSetup(object):
         p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
-        p['couple_rts'] = 0.4    
+        p['couple_rts'] = 0.23    
         p['sig_partner_a'] = 0.1
         p['sig_partner_z'] = 0.4
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
+        p['pmeet_t'] = 0.0
         
-        p['poutsm'] = 0.4
+        p['poutsm'] = 1/3
+        p['z_drift'] = -0.1
         
         
         p['wret'] = 0.8
         p['uls'] = 0.2
-        p['pls'] = 0.8
+        p['pls'] = 1.0
         
         
         p['u_shift_mar'] = 0.0
         p['u_shift_coh'] = 0.0
         
         
-        p['f_wage_trend'] = [0.0 + 0.0*min(t,Tret) - 0.000*(min(t,Tret)**2) for t in range(T)]
-        p['m_wage_trend'] = [0.0 + 0.0*min(t,Tret) - 0.000*(min(t,Tret)**2) for t in range(T)]
+        
+        '''
+        p['f_wage_trend'] = np.array(
+                            [0.0 + 
+                             0.068386*(min(t,30) - 5)
+                             - 0.0040512*((min(t,30)-5)**2)
+                             + 0.0000784*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
+        p['m_wage_trend'] = np.array(
+                                    [0.1457256 + 0.0676344*(min(t,30)-5) - 
+                                         0.002752*((min(t,30)-5)**2) 
+                                         + 0.0000784*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        '''
+        '''
+        se_05_m = 0.5596
+        se_20_m = 0.6735
+        
+        sigma_m = np.sqrt( (se_20_m**2 - se_05_m**2)/15 )
+        sigma_m0 = np.sqrt(se_05_m**2 - 4*sigma_m**2)
+        
+        se_05_f = 0.5397
+        se_20_f = 0.6305
+        
+        sigma_f = np.sqrt( (se_20_f**2 - se_05_f**2)/15 )
+        sigma_f0 = np.sqrt(se_05_f**2 - 4*sigma_f**2)
+        
+        '''
+        
+        
+        
+        
+        p['f_wage_trend'] = np.array(
+                            [0.0 + 
+                             0.0844278*(min(t,30) - 5)
+                             -0.0044622*((min(t,30)-5)**2)
+                             + 0.0000788*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
+        p['m_wage_trend'] = np.array(
+                                    [0.0776162 + 0.0810113*(min(t,30)-5)  
+                                         - 0.0027093*((min(t,30)-5)**2) 
+                                         + 0.0000298*((min(t,30)-5)**3)
+                                         for t in range(T)]
+                                    )
+        
         
         
         p['util_lam'] = 0.4
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
-        p['util_qbar'] = 0.2
+        p['util_qbar'] = 0.0
         
-        p['preg_a0'] = 0.4
-        p['preg_at'] = 0.1
-        p['preg_az'] = -0.05
+        p['preg_a0'] = 0.25
+        p['preg_at'] = 0.0
+        p['preg_az'] = 0.00
         p['preg_azt'] = 0.00
         
         
@@ -83,8 +133,8 @@ class ModelSetup(object):
            
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
-        p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)
-        p['pmeet_t'] = [p['pmeet']]*Tmeet + [0.0]*(T-Tmeet)
+        p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
+        p['pmeet_t'] = [np.clip(p['pmeet'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         p['poutsm_t'] = [p['poutsm']]*T
         
         
@@ -98,14 +148,22 @@ class ModelSetup(object):
         self.state_names = ['Female, single','Male, single','Female and child','Couple, no children','Couple and child']
         
         # female labor supply
+        
+        lmin = 0.2
+        lmax = 1.0
+        nl = 4
+        
+        ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
+        ps = p['pls']*(1-np.linspace(0.0,1.0,nl,dtype=self.dtype))
+        
         self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
-        self.ls_levels_k = np.array([0.2,1.0],dtype=self.dtype)
-        self.ls_levels_sk = np.array([0.2,1.0],dtype=self.dtype)
+        self.ls_levels_k = ls
+        self.ls_levels_sk = ls
         
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
         self.ls_pdown_nk = np.array([0.0],dtype=self.dtype)
-        self.ls_pdown_k = np.array([p['pls'],0.0],dtype=self.dtype)
-        self.ls_pdown_sk = np.array([p['pls'],0.0],dtype=self.dtype)
+        self.ls_pdown_k = ps
+        self.ls_pdown_sk = ps
         self.nls_k = len(self.ls_levels_k)
         self.nls_nk = len(self.ls_levels_nk)
         self.nls_sk = len(self.ls_levels_sk)
@@ -176,9 +234,15 @@ class ModelSetup(object):
             #Create a new bad version of transition matrix p(zf_t)
             
             
-            zf_bad = [cut_matrix(exogrid['zf_t_mat'][t]) if t < Tret -1 
-                          else (exogrid['zf_t_mat'][t] if t < T - 1 else None) 
-                              for t in range(self.pars['T'])]
+            
+            zf_bad = [tauchen_drift(exogrid['zf_t'][t], exogrid['zf_t'][t+1], 
+                                    1.0, p['sig_zf'], p['z_drift'])
+                        for t in range(self.pars['T']-1) ] + [None]
+            
+            
+            #zf_bad = [cut_matrix(exogrid['zf_t_mat'][t]) if t < Tret -1 
+            #              else (exogrid['zf_t_mat'][t] if t < T - 1 else None) 
+            #                  for t in range(self.pars['T'])]
             
             zf_t_mat_down = zf_bad
             
@@ -225,6 +289,8 @@ class ModelSetup(object):
             self.pars['nexo_t'] = [v.shape[0] for v in all_t]
             
             #assert False
+            
+            
             
         #Grid Couple
         self.na = 40
@@ -862,7 +928,31 @@ class DivorceCosts(object):
         
         return share_f, share_m
         
-        
+from rw_approximations import normcdf_tr
+
+def tauchen_drift(z_now,z_next,rho,sigma,mu):
+    z_now = np.atleast_1d(z_now)
+    z_next = np.atleast_1d(z_next)
+    if z_next.size == 1:
+        return np.ones((z_now.size,1),dtype=np.float32)
+    
+    d = np.diff(z_next)
+    assert np.ptp(d) < 1e-5, 'Step size should be fixed'
+    
+    h_half = d[0]/2
+    
+    Pi = np.zeros((z_now.size,z_next.size),dtype=np.float32)
+    
+    ez = rho*z_now + mu
+    
+    Pi[:,0] = normcdf_tr( ( z_next[0] + h_half - ez )/sigma)
+    Pi[:,-1] = 1 - normcdf_tr( (z_next[-1] - h_half - ez ) / sigma )
+    for j in range(1,z_next.size - 1):
+        Pi[:,j] = normcdf_tr( ( z_next[j] + h_half - ez )/sigma) - \
+                    normcdf_tr( ( z_next[j] - h_half - ez )/sigma)
+    return Pi
+
+
 
 def build_s_grid(agrid,n_between,da_min,da_max):
     sgrid = np.array([0.0],np.float64)

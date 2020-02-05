@@ -64,7 +64,7 @@ def fun(x):
         
         def q(pt):
             try:
-                ans = mdl_resid(pt,return_format=['scaled residuals'])[0]
+                ans = mdl_resid(pt,return_format=['scaled residuals'])
             except:
                 print('During optimization function evaluation failed at {}'.format(pt))
                 ans = np.array([1e6])
@@ -73,11 +73,11 @@ def fun(x):
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-4, maxfun=100, bounds=(lb,ub))
+        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-4, maxfun=100, bounds=(lb,ub), scaling_within_bounds=True)
         
         print(res)
         
-        fbest = mdl_resid(res.x)[0] # in prnciple, this can be inconsistent with
+        fbest = mdl_resid(res.x) # in prnciple, this can be inconsistent with
         # squared sum of residuals
         
         

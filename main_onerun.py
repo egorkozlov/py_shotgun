@@ -30,6 +30,7 @@ if __name__ == '__main__':
      
     
     out, mdl, agents, res = mdl_resid(return_format=['distance','models','agents','scaled residuals'],
-                                      save_to='mdl.pkl',verbose=True,draw=True)
+                                      load_from='mdl.pkl',
+                                      verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))

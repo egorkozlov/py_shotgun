@@ -28,7 +28,6 @@ if system() != 'Darwin' and system() != 'Windows':
 
 import numpy as np
 from numpy.random import random_sample as rs
-from data_moments import dat_moments
 from tiktak import tiktak
 print('Hi!')
 
@@ -38,27 +37,25 @@ if __name__ == '__main__':
     
     
     #Build  data moments and pickle them
-    dat_moments(period=1) # refresh
     
     
     
     #Initialize the file with parameters
 
+    lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.05, -0.2])
+    ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.0])
+    xdef = np.array( [ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, -0.01858392])
 
-    x0 = np.array([0.01,0.01,0.02,0.7,0.25,0.0001,0.5,0.5])
-    lb= np.array([0.0,0.005, 0.5,0.4,0.01,0.0,0.0,0.01])
-    ub= np.array([1.0,0.5,  10.0,1.0,0.4,0.2,1.0,2.0])
-    
     
     
     ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
     
-    print('Testing the workers...')
-    from p_client import compute_for_values
-    pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
-    pts = [('compute',x) for x in pts]    
-    outs = compute_for_values(pts,timeout=3600.0)
-    print('Everything worked, output is {}'.format(outs))
+    #print('Testing the workers...')
+    #from p_client import compute_for_values
+    #pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
+    #pts = [('compute',x) for x in pts]    
+    #outs = compute_for_values(pts,timeout=3600.0)
+    #print('Everything worked, output is {}'.format(outs))
     
     
     print('')
@@ -70,7 +67,7 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(200,200,12,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
+    param=tiktak(400,400,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
                  skip_local=True,skip_global=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
