@@ -95,6 +95,9 @@ class Agents:
         self.just_divorced = np.zeros((N,T),dtype=np.bool)
         self.just_divorced_nk = np.zeros((N,T),dtype=np.bool)
         self.just_divorced_k = np.zeros((N,T),dtype=np.bool)
+        self.k_m = np.zeros((N,T),dtype=np.bool)
+        self.k_m_true = np.zeros((N,T),dtype=np.bool)
+        self.m_k = np.zeros((N,T),dtype=np.bool)
         
         self.iexo[:,0] = iexoinit
         
@@ -396,7 +399,7 @@ class Agents:
                     i_agree_mar = (i_agree) & (i_m_preferred)
                     i_agree_coh = (i_agree) & (~i_m_preferred)
                     
-                    self.agreed = (i_agree_mar) | (i_agree_coh)
+                    self.agreed[ind,t] = (i_agree_mar) | (i_agree_coh)
                     self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
                     
                     assert np.all(~i_nomeet[i_agree])
@@ -415,8 +418,12 @@ class Agents:
                         self.state[ind[i_agree_mar],t+1] = self.state_codes['Couple and child']
                         self.iassets[ind[i_agree_mar],t+1] = ia_out[i_agree_mar]
                         
-                        self.agreed_k[ind,t] = i_agree_mar
-                        self.agreed_unplanned[ind,t] = (i_agree_mar) & (i_preg)
+                        self.agreed_k[ind[i_agree_mar],t] = True
+                        self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]
+                        
+                        self.k_m[ind[i_agree_mar],t:] = True
+                        self.k_m_true[ind[i_agree_mar],t:] = i_preg[i_agree_mar][:,None]
+                        
                         
                         # FLS decision
                         #self.ils_i[ind[i_ren],t+1] = 
@@ -583,6 +590,9 @@ class Agents:
                             
                             self.planned_preg[ind[i_ren],t] = i_birth1
                             
+                            self.m_k[ind[i_ren][i_birth1],t:] = True
+                            
+                            
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
                             ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
@@ -605,6 +615,7 @@ class Agents:
                         else:
                             i_birth = decision['Give a birth'][isc,iall,thts]
                             i_birth1=i_birth[i_sq]
+                            self.m_k[ind[i_sq][i_birth1],t:] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                             
