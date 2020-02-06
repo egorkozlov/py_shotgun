@@ -151,6 +151,12 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     km_30 = agents.k_m[in_sample[:,9],9].mean()
     km_35 = agents.k_m[in_sample[:,14],14].mean()
     
+    just_km_25 = agents.agreed_k[:,4].mean()
+    just_km_30 = agents.agreed_k[:,9].mean()
+    just_km_35 = agents.agreed_k[:,14].mean()
+    
+    share_planned = agents.planned_preg[(agents.planned_preg) | (agents.unplanned_preg)].mean()
+    
     
     
     sim = np.array([nmar_25,nmar_30,nmar_35,nmar_40,
@@ -159,14 +165,16 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                     nkid_25_mar,nkid_30_mar,nkid_35_mar,
                     no_kids_1_mar,no_kids_2_mar,no_kids_3_mar,
                     mean_x,
-                    km_25,km_30,km_35])
+                    km_25,km_30,km_35,
+                    just_km_25,just_km_30,just_km_35])
     dat = np.array([0.75,0.38,0.21,0.15,
                     0.057,0.084,0.11,0.15,
                     0.90,0.60,0.34,
                     0.71,0.39,0.17,
                     0.81,0.66,0.51,
                     0.4,
-                    0.21,0.12,0.10])
+                    0.21,0.12,0.10,
+                    0.0058,0.0081,0.0046])
     
     
     
