@@ -119,15 +119,23 @@ class ModelSetup(object):
         p['util_kap'] = 0.5
         p['util_qbar'] = 0.0
         
-        p['preg_a0'] = 0.25
-        p['preg_at'] = 0.0
-        p['preg_az'] = 0.00
-        p['preg_azt'] = 0.00
+        
+        p['preg_20'] = 0.2
+        p['preg_28'] = 0.1
         
         
         for key, value in kwargs.items():
             assert (key in p), 'wrong name?'
             p[key] = value
+        
+        
+        
+        dp = (p['preg_28'] - p['preg_20'])/8
+         
+        p['preg_a0'] = p['preg_20']
+        p['preg_at'] = dp
+        p['preg_az'] = 0.00
+        p['preg_azt'] = 0.00
         
         #Get the probability of meeting, adjusting for year-period
            
