@@ -9,6 +9,7 @@ from time import sleep
 from main import mdl_resid
 import numpy as np
 from tiktak import filer
+import gc
 
 
 #def mdl_resid(x=(0,)):
@@ -69,6 +70,7 @@ def fun(x):
                 print('During optimization function evaluation failed at {}'.format(pt))
                 ans = np.array([1e6])
             finally:
+                gc.collect()
                 return ans
             
             
