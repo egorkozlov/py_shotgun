@@ -50,6 +50,7 @@ class ModelSetup(object):
         
         p['poutsm'] = 1/3
         p['z_drift'] = -0.1
+        p['no kids at meeting'] = True
         
         
         p['wret'] = 0.8

@@ -84,6 +84,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     nexo = setup.pars['nexo_t'][t]
     cangiveabirth = setup.pars['is fertile'][t]
     ns = sown.size
+    no_kids_at_meet = setup.pars['no kids at meeting']
     
     
     p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T
@@ -126,7 +127,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
                 res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                          female=female,giveabirth=False)
                 
-                if cangiveabirth:
+                if cangiveabirth and (not no_kids_at_meet):
                     # maybe cannot give a birth at all
                     res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                          female=female,giveabirth=True)
