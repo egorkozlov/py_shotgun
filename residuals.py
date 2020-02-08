@@ -14,10 +14,12 @@ import os
 
 
 lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.01, 0.01,0.0])
-ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.9,4.0])
+ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.9,0.9])
 #xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, 0.01858392, 0.01])
-    
+xdef = np.array([1.49977468e+00,  3.60677187e-01,  4.33637034e+00,  2.04230657e-01,
+        -4.30637592e-05,  1.31229355e+00,  1.83077097e+00,  4.86128886e-02,
+         1.25049425e-01,  1.24602571e-01])
+
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
 def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
@@ -37,9 +39,9 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     pmeet_t = x[4]
     util_alp = x[5]
     util_kap = x[6]
-    preg_20 = x[7]
-    preg_28 = x[8]
-    util_qbar = x[9]
+    preg_25 = x[7]
+    preg_30 = x[8]
+    preg_35 = x[9]
     
     
     
@@ -77,9 +79,9 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
         kwords = dict(sigma_psi=sigma_psi,
                         sigma_psi_init=sigma_psi_init,
                         pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
-                        u_shift_mar=mshift,preg_20=preg_20,
-                        pmeet_t=pmeet_t,preg_28=preg_28,
-                        util_qbar=util_qbar)
+                        u_shift_mar=mshift,preg_25=preg_25,
+                        pmeet_t=pmeet_t,preg_30=preg_30,
+                        preg_35=preg_35)
     
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
@@ -149,6 +151,11 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     
     in_sample = (agents.k_m) | (agents.m_k)
     
+    divorced_km = div_now[:,:20][agents.k_m[:,:20]].mean()
+    divorced_mk = div_now[:,:20][agents.m_k[:,:20]].mean()
+    
+    print('Averages: divorced k_m = {}, divorced m_k = {}'.format(divorced_km,divorced_mk))
+    
     km_25 = agents.k_m[in_sample[:,4],4].mean()
     km_30 = agents.k_m[in_sample[:,9],9].mean()
     km_35 = agents.k_m[in_sample[:,14],14].mean()
@@ -157,9 +164,14 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     just_km_30 = agents.agreed_k[:,9].mean()
     just_km_35 = agents.agreed_k[:,14].mean()
     
+    just_m_25 = agents.agreed[:,4].mean()
+    just_m_30 = agents.agreed[:,9].mean()
+    just_m_35 = agents.agreed[:,14].mean()
+    
     share_planned = agents.planned_preg[(agents.planned_preg) | (agents.unplanned_preg)].mean()
+    share_rejected = agents.disagreed.sum() / (agents.disagreed | agents.agreed).sum()
     
-    
+    print('Rejected: {}, planned preg: {}'.format(share_rejected,share_planned))
     
     sim = np.array([nmar_25,nmar_30,nmar_35,nmar_40,
                     div_25,div_30,div_35,div_40,
@@ -168,7 +180,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                     no_kids_1_mar,no_kids_2_mar,no_kids_3_mar,
                     mean_x,
                     km_25,km_30,km_35,
-                    just_km_25,just_km_30,just_km_35])
+                    just_km_25,just_km_30,just_km_35,
+                    just_m_25,just_m_30,just_m_35])
     dat = np.array([0.75,0.38,0.21,0.15,
                     0.057,0.084,0.11,0.15,
                     0.90,0.60,0.34,
@@ -176,7 +189,8 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                     0.81,0.66,0.51,
                     0.4,
                     0.21,0.12,0.10,
-                    0.0058,0.0081,0.0046])
+                    0.0058,0.0081,0.0046,
+                    0.068,0.054,0.019])
     
     
     
