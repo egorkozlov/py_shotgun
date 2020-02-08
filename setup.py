@@ -60,6 +60,7 @@ class ModelSetup(object):
         
         p['u_shift_mar'] = 0.0
         p['u_shift_coh'] = 0.0
+        p['sm_shift'] = 0.0
         
         
         
@@ -122,7 +123,7 @@ class ModelSetup(object):
         
         
         p['preg_20'] = 0.2
-        p['preg_28'] = 0.1
+        p['preg_28'] = p['preg_20']
         
         
         for key, value in kwargs.items():
@@ -378,7 +379,7 @@ class ModelSetup(object):
         
         self.utility_shifters = {'Female, single':0.0,
                                  'Male, single':0.0,
-                                 'Female and child':p['u_shift_mar'],
+                                 'Female and child':p['u_shift_mar'] + p['sm_shift'],
                                  'Couple and child':p['u_shift_mar'],
                                  'Couple, no children':p['u_shift_coh']}
         
