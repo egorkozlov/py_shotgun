@@ -28,13 +28,18 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
     from simulations import Agents
     from calibration_params import calibration_params
 
-    lb, ub, xdef, keys, translator = calibration_params()
 
-    if x is None:
-        x = xdef
+    if type(x) is dict:
+        kwords = x
+    else:
+        lb, ub, xdef, keys, translator = calibration_params()
+    
+        if x is None:
+            x = xdef
+        kwords = translator(x)
+            
         
-        
-    if verbose: print(translator(x))
+    if verbose: print(kwords)
     
     # this is for the default model
     dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
@@ -66,9 +71,6 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
     
                 
     if load_from is None:
-        
-        kwords = translator(x)
-    
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
                     divorce_costs_nk=dc_nk,**kwords)
