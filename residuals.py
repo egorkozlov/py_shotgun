@@ -9,38 +9,32 @@ Created on Sat Dec 14 10:58:43 2019
 
 # this defines model residuals
 import numpy as np
-import pickle, dill
+import dill
 import os
 
 
-lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.01,  -2.0])
-ub = np.array(   [ 3.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,     2.0])
-#xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, 0.01])
-    
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
-def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
+def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
               rel_diff=True):
+    
+    
     
     
     
     from model import Model
     from setup import DivorceCosts
     from simulations import Agents
- 
-    mshift=x[0]
-    sigma_psi = x[1] 
-    sigma_psi_init = x[1]*x[2]
-    pmeet = x[3]
-    pmeet_t = x[4]
-    util_alp = x[5]
-    util_kap = x[6]
-    preg_20 = x[7]
-    sm_shift = x[8]
-    
-    
+    from calibration_params import calibration_params
+
+    lb, ub, xdef, keys, translator = calibration_params()
+
+    if x is None:
+        x = xdef
+        
+        
+    if verbose: print(translator(x))
     
     # this is for the default model
     dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
@@ -73,11 +67,7 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                 
     if load_from is None:
         
-        kwords = dict(sigma_psi=sigma_psi,
-                        sigma_psi_init=sigma_psi_init,
-                        pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
-                        u_shift_mar=mshift,preg_20=preg_20,
-                        pmeet_t=pmeet_t,sm_shift=sm_shift)
+        kwords = translator(x)
     
         
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,

@@ -21,7 +21,7 @@ class ModelSetup(object):
         p = dict()       
         T = 55
         Tret = 40 # first period when the agent is retired
-        Tfert = 15 # first peroid when infertile
+        Tfert = 18 # first peroid when infertile
         Tdiv = 35 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
         p['T'] = T
@@ -29,12 +29,12 @@ class ModelSetup(object):
         p['Tfert'] = Tfert
         p['Tsim'] = T
         p['sig_zf_0']  = 0.513 #0.25
-        p['sig_zf']    = 0.084#np.sqrt(0.038)
+        p['sig_zf']    = np.sqrt(0.038)#0.084
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['sig_zm_0']  = 0.525 #0.25
-        p['sig_zm']    = 0.097 #np.sqrt(0.027)
+        p['sig_zm']    = np.sqrt(0.027)#0.097
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
-        p['sigma_psi_init'] = 0.28
+        p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.04]*T
         p['n_psi_t']     = [12]*T
@@ -42,8 +42,8 @@ class ModelSetup(object):
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
-        p['sig_partner_a'] = 0.1
-        p['sig_partner_z'] = 0.4
+        p['sig_partner_a'] = 0.6
+        p['sig_partner_z'] = 0.6
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
         p['pmeet_t'] = 0.0
@@ -123,7 +123,7 @@ class ModelSetup(object):
         
         
         p['preg_20'] = 0.2
-        p['preg_28'] = p['preg_20']
+        p['preg_30'] = 0.2
         
         
         for key, value in kwargs.items():
@@ -131,8 +131,12 @@ class ModelSetup(object):
             p[key] = value
         
         
+        # derivetive parameters
+        p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
         
-        dp = (p['preg_28'] - p['preg_20'])/8
+        
+        
+        dp = (p['preg_30'] - p['preg_20'])/10
          
         p['preg_a0'] = p['preg_20']
         p['preg_at'] = dp

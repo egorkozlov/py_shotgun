@@ -32,31 +32,23 @@ from tiktak import tiktak
 print('Hi!')
 
 from residuals import mdl_resid
+from calibration_params import calibration_params
 
 if __name__ == '__main__':
     
+    fix_values = False
+    if fix_values:
+        xfix = {'u_shift_mar': 1.691189,
+                'sigma_psi': 0.4584274,
+                'sigma_psi_mult': 3.79805726,
+                'util_alp': 0.98122074,
+                'util_kap': 0.92348031}
+    else:
+        xfix = None
+        
+    lb, ub, xdef, keys, translator = calibration_params(xfix=xfix)
     
-    #Build  data moments and pickle them
-    
-    
-    
-    #Initialize the file with parameters
-
-    lb = np.array(   [ 0.0,         0.01,        0.5,         0.1,        -0.1,        0.5,         0.5,         0.01,       -2.00])
-    ub = np.array(   [ 3.0,         0.5,         8.0,         1.0,        0.0,         3.0,         3.0,         0.5,         2.00])
-    xdef = np.array( [ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.30045406,  0.01])
-
-    
-    
-    ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
-    
-    #print('Testing the workers...')
-    #from p_client import compute_for_values
-    #pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
-    #pts = [('compute',x) for x in pts]    
-    #outs = compute_for_values(pts,timeout=3600.0)
-    #print('Everything worked, output is {}'.format(outs))
-    
+    print('calibration adjusts {}'.format(keys))
     
     print('')
     print('')
