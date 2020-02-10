@@ -107,7 +107,8 @@ class ModelSetup(object):
                                     )
         
         p['m_wage_trend'] = np.array(
-                                    [0.0776162 + 0.0810113*(min(t,30)-5)  
+                                    [0.0776162 +
+                                     0.0810113*(min(t,30)-5)  
                                          - 0.0027093*((min(t,30)-5)**2) 
                                          + 0.0000298*((min(t,30)-5)**3)
                                          for t in range(T)]
@@ -116,7 +117,7 @@ class ModelSetup(object):
         
         # no college
         p['f_wage_trend'] = np.array(
-                            [0.0 + 
+                            [-0.4153825 + 
                              0.031699*(min(t,30) - 5)
                              -0.0017101*((min(t,30)-5)**2)
                              +0.0000377*((min(t,30)-5)**3)
@@ -124,7 +125,8 @@ class ModelSetup(object):
                                     )
         
         p['m_wage_trend'] = np.array(
-                                    [0.1227397 + 0.041411*(min(t,30)-5)  
+                                    [-0.2933313 + 
+                                         0.041411*(min(t,30)-5)  
                                          -0.0016752*((min(t,30)-5)**2) 
                                          + 0.0000294*((min(t,30)-5)**3)
                                          for t in range(T)]
