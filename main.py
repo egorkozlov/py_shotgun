@@ -36,7 +36,7 @@ from calibration_params import calibration_params
 
 if __name__ == '__main__':
     
-    fix_values = True
+    fix_values = False
     if fix_values:
         xfix = {'u_shift_mar': 0.725863356303563,
                 'util_alp': 0.6534190912803465,
@@ -57,7 +57,7 @@ if __name__ == '__main__':
    
 
     #Tik Tak Optimization
-    param=tiktak(N=500,N_st=20,xfix=xfix,skip_local=True,skip_global=False)
+    param=tiktak(N=400,N_st=20,xfix=xfix,skip_local=False,skip_global=True,resume_local=True)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
