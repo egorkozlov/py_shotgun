@@ -29,11 +29,18 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
      
-    x = [ 1.691189  ,  0.4584274 ,  3.79805726,  0.31549985, -0.01826916,
-         0.98122074,  0.92348031,  0.01      ,  0.41852047]
+    x = {'u_shift_mar': 0.78012885,
+         'sigma_psi': 0.22466639,
+         'sigma_psi_mult': 1.34982032,
+         'pmeet': 0.17557838,
+         'pmeet_t': -0.00900235,
+         'util_alp': 0.47896648,
+         'util_kap': 1.72740958,
+         'preg_20': 0.2184985,
+         'preg_30': 0.33067173}
     
     out, mdl, agents, res = mdl_resid(x=x,return_format=['distance','models','agents','scaled residuals'],
-                                      save_to='mdl.pkl',
+                                      load_from='mdl.pkl',
                                       verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))

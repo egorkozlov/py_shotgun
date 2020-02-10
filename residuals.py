@@ -148,6 +148,14 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
     just_km_35 = agents.agreed_k[:,14].mean()
     
     share_planned = agents.planned_preg[(agents.planned_preg) | (agents.unplanned_preg)].mean()
+    share_rejected = agents.disagreed.sum() / (agents.disagreed | agents.agreed).sum()
+    
+    if verbose: print('Rejected: {}, planned preg: {}'.format(share_rejected,share_planned))
+    
+    
+    divorced_km = div_now[:,:20][agents.k_m[:,:20]].mean()
+    divorced_mk = div_now[:,:20][agents.m_k[:,:20]].mean()    
+    if verbose: print('Anything: divorced k_m = {}, divorced m_k = {}'.format(divorced_km,divorced_mk))
     
     
     
