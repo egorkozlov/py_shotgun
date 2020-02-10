@@ -159,6 +159,8 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
                     mean_x,
                     km_25,km_30,km_35,
                     just_km_25,just_km_30,just_km_35])
+    
+    '''
     dat = np.array([0.75,0.38,0.21,0.15,
                     0.057,0.084,0.11,0.15,
                     0.90,0.60,0.34,
@@ -167,8 +169,16 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
                     0.4,
                     0.21,0.12,0.10,
                     0.0058,0.0081,0.0046])
+    '''
     
-    
+    dat = np.array([0.75,0.38,0.21,0.15,
+                    0.057,0.084,0.11,0.15,
+                    0.90,0.60,0.34,
+                    0.71,0.39,0.17,
+                    0.81,0.66,0.51,
+                    0.4,
+                    0.21,0.12,0.10,
+                    0.0058,0.0081,0.0046])
     
     
     W = np.eye(sim.size)/(sim.size)
