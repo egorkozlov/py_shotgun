@@ -630,4 +630,15 @@ class Agents:
                 else:
                     raise Exception('unsupported state?')
         
-        assert not np.any(np.isnan(self.state[:,t+1]))            
+        assert not np.any(np.isnan(self.state[:,t+1]))       
+        
+        
+        
+    def compute_moments(self):
+        import moments
+        return moments.compute_moments(self)
+            
+            
+            
+        
+        

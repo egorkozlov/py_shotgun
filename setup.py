@@ -51,7 +51,7 @@ class ModelSetup(object):
         p['poutsm'] = 1/3
         p['z_drift'] = -0.1
         p['no kids at meeting'] = True
-        
+        p['high education'] = True # what trend to pick
         
         p['wret'] = 0.8
         p['uls'] = 0.2
@@ -97,39 +97,8 @@ class ModelSetup(object):
         
         
         # college
-        '''
-        p['f_wage_trend'] = np.array(
-                            [0.0 + 
-                             0.0844278*(min(t,30) - 5)
-                             -0.0044622*((min(t,30)-5)**2)
-                             + 0.0000788*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
-        p['m_wage_trend'] = np.array(
-                                    [0.0776162 + 0.0810113*(min(t,30)-5)  
-                                         - 0.0027093*((min(t,30)-5)**2) 
-                                         + 0.0000298*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        '''
-        
-        # no college
-        p['f_wage_trend'] = np.array(
-                            [0.0 + 
-                             0.031699*(min(t,30) - 5)
-                             -0.0017101*((min(t,30)-5)**2)
-                             +0.0000377*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
-        p['m_wage_trend'] = np.array(
-                                    [0.1227397 + 0.041411*(min(t,30)-5)  
-                                         -0.0016752*((min(t,30)-5)**2) 
-                                         + 0.0000294*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
+            
+            
         
         
         p['util_lam'] = 0.4
@@ -148,7 +117,45 @@ class ModelSetup(object):
             p[key] = value
         
         
-        # derivetive parameters
+        
+        
+        if p['high education']:
+            p['f_wage_trend'] = np.array(
+                                [0.0 + 
+                                 0.0844278*(min(t,30) - 5)
+                                 -0.0044622*((min(t,30)-5)**2)
+                                 + 0.0000788*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+            
+            p['m_wage_trend'] = np.array(
+                                        [0.0776162 + 0.0810113*(min(t,30)-5)  
+                                             - 0.0027093*((min(t,30)-5)**2) 
+                                             + 0.0000298*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+        
+        else:
+        # no college
+        
+            p['f_wage_trend'] = np.array(
+                                [-0.4153825 + 
+                                 0.031699*(min(t,30) - 5)
+                                 -0.0017101*((min(t,30)-5)**2)
+                                 +0.0000377*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+            
+            p['m_wage_trend'] = np.array(
+                                        [-0.2933313 + 0.041411*(min(t,30)-5)  
+                                             -0.0016752*((min(t,30)-5)**2) 
+                                             + 0.0000294*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+        
+        
+        
+        # derivative parameters
         p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
         
         

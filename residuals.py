@@ -90,66 +90,30 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
      
     agents = Agents( mdl_list, verbose=verbose)
     
+    mom = agents.compute_moments()
     
-    n_mark = agents.state_codes['Couple and child']
-    n_marnk = agents.state_codes['Couple, no children']
-    n_single = agents.state_codes['Female, single']
-    n_singlek = agents.state_codes['Female and child']
+    nmar_25,nmar_30,nmar_35,nmar_40 = \
+            [mom['never married at {}'.format(z)] for z in [25,30,35,40]]
     
+    div_25,div_30,div_35,div_40 = \
+        [mom['divorced right now at {}'.format(z)] for z in [25,30,35,40]]
+        
+    nkid_25,nkid_30,nkid_35 = \
+        [mom['no kids at {}'.format(z)] for z in [25,30,35]]
     
-    is_mar = (agents.state == n_mark) | (agents.state == n_marnk)
-    is_mark = (agents.state == n_mark)
+    nkid_25_mar,nkid_30_mar,nkid_35_mar = \
+        [mom['no kids at {} if married'.format(z)] for z in [25,30,35]]
     
-    ever_mar = (np.cumsum(is_mar,axis=1) > 0)
-    div_now =  (ever_mar) & ((agents.state==n_single) | (agents.state==n_singlek))
-    ever_kid = ( np.cumsum( (agents.state == n_mark) | (agents.state == n_singlek),axis=1) > 0)
+    no_kids_1_mar,no_kids_2_mar,no_kids_3_mar = \
+        [mom['no kids {} after marriage'.format(z)] 
+                for z in ['1 year','2 years','3 years']]
+    mean_x = mom['mean x share']
     
-    have_kid = (agents.state == n_mark) | (agents.state == n_singlek)
-    num_mar = np.cumsum( agents.agreed, axis = 1 )
-    one_mar = (num_mar == 1)
+    km_25,km_30,km_35 = \
+        [mom['k then m at {}'.format(z)] for z in [25,30,35]]
     
-    share_x = agents.x / np.maximum(1e-3, agents.x  + agents.c)
-    mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
-    
-    nmar_25 = 1-ever_mar[:,4].mean()
-    nmar_30 = 1-ever_mar[:,9].mean()
-    nmar_35 = 1-ever_mar[:,14].mean()
-    nmar_40 = 1-ever_mar[:,19].mean()
-    
-    div_25 = div_now[ever_mar[:,4],4].mean()
-    div_30 = div_now[ever_mar[:,9],9].mean()
-    div_35 = div_now[ever_mar[:,14],14].mean()
-    div_40 = div_now[ever_mar[:,19],19].mean()
-    
-    
-    nkid_25 = 1-ever_kid[:,4].mean()
-    nkid_30 = 1-ever_kid[:,9].mean()
-    nkid_35 = 1-ever_kid[:,14].mean()
-    
-    nkid_25_mar = 1-ever_kid[is_mar[:,4],4].mean() if np.any(is_mar[:,4]) else 0.0
-    nkid_30_mar = 1-ever_kid[is_mar[:,9],9].mean() if np.any(is_mar[:,9]) else 0.0
-    nkid_35_mar = 1-ever_kid[is_mar[:,14],14].mean() if np.any(is_mar[:,14]) else 0.0
-    
-    
-    #mkids_0_mar = (agents.state[:,1:] == n_mark)[ ~is_mar[:,0:-1] & is_mar[:,1:]].mean()
-    no_kids_1_mar = 1 - ( have_kid[:,2:][ ~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:]] ).mean()
-    no_kids_2_mar = 1 - ( have_kid[:,3:][ ~is_mar[:,0:-3] & is_mar[:,3:] & one_mar[:,3:]] ).mean()
-    no_kids_3_mar = 1 - ( have_kid[:,4:][ ~is_mar[:,0:-4] & is_mar[:,4:] & one_mar[:,4:]] ).mean()
-    
-    
-    in_sample = (agents.k_m) | (agents.m_k)
-    
-    km_25 = agents.k_m[in_sample[:,4],4].mean()
-    km_30 = agents.k_m[in_sample[:,9],9].mean()
-    km_35 = agents.k_m[in_sample[:,14],14].mean()
-    
-    just_km_25 = agents.agreed_k[:,4].mean()
-    just_km_30 = agents.agreed_k[:,9].mean()
-    just_km_35 = agents.agreed_k[:,14].mean()
-    
-    share_planned = agents.planned_preg[(agents.planned_preg) | (agents.unplanned_preg)].mean()
-    
-    
+    just_km_25,just_km_30,just_km_35 = \
+        [mom['just k & m at {}'.format(z)] for z in [25,30,35]]
     
     sim = np.array([nmar_25,nmar_30,nmar_35,nmar_40,
                     div_25,div_30,div_35,div_40,
