@@ -15,7 +15,8 @@ import os
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
-def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
+def mdl_resid(x=None,targets=None,weights={},
+              save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
               rel_diff=True):
     
@@ -89,84 +90,22 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
             
      
     agents = Agents( mdl_list, verbose=verbose)
-    
     mom = agents.compute_moments()
     
-    nmar_25,nmar_30,nmar_35,nmar_40 = \
-            [mom['never married at {}'.format(z)] for z in [25,30,35,40]]
-    
-    div_25,div_30,div_35,div_40 = \
-        [mom['divorced right now at {}'.format(z)] for z in [25,30,35,40]]
-        
-    nkid_25,nkid_30,nkid_35 = \
-        [mom['no kids at {}'.format(z)] for z in [25,30,35]]
-    
-    nkid_25_mar,nkid_30_mar,nkid_35_mar = \
-        [mom['no kids at {} if married'.format(z)] for z in [25,30,35]]
-    
-    no_kids_1_mar,no_kids_2_mar,no_kids_3_mar = \
-        [mom['no kids {} after marriage'.format(z)] 
-                for z in ['1 year','2 years','3 years']]
-    mean_x = mom['mean x share']
-    
-    km_25,km_30,km_35 = \
-        [mom['k then m at {}'.format(z)] for z in [25,30,35]]
-    
-    just_km_25,just_km_30,just_km_35 = \
-        [mom['just k & m at {}'.format(z)] for z in [25,30,35]]
-    
-    sim = np.array([nmar_25,nmar_30,nmar_35,nmar_40,
-                    div_25,div_30,div_35,div_40,
-                    nkid_25,nkid_30,nkid_35,
-                    nkid_25_mar,nkid_30_mar,nkid_35_mar,
-                    no_kids_1_mar,no_kids_2_mar,no_kids_3_mar,
-                    mean_x,
-                    km_25,km_30,km_35,
-                    just_km_25,just_km_30,just_km_35])
-    
-    '''
-    dat = np.array([0.75,0.38,0.21,0.15,
-                    0.057,0.084,0.11,0.15,
-                    0.90,0.60,0.34,
-                    0.71,0.39,0.17,
-                    0.81,0.66,0.51,
-                    0.4,
-                    0.21,0.12,0.10,
-                    0.0058,0.0081,0.0046])
-    '''
-    
-    dat = np.array([0.75,0.38,0.21,0.15,
-                    0.057,0.084,0.11,0.15,
-                    0.90,0.60,0.34,
-                    0.71,0.39,0.17,
-                    0.81,0.66,0.51,
-                    0.4,
-                    0.21,0.12,0.10,
-                    0.0058,0.0081,0.0046])
-    
-    
-    W = np.eye(sim.size)/(sim.size)
-    
-    
-    
-    if len(dat) != len(sim):
-        sim = np.full_like(dat,1.0e6)
-        
-    if not rel_diff:    
-        res_all=(dat-sim)
+    if targets is None:
+        from targets import target_values
+        tar = target_values()
     else:
-        res_all = (dat-sim)/(dat)
+        tar = targets
+    
+    resid_all, resid_sc, dist = distance_to_targets(mom,tar,weights=weights,
+                                                    report=verbose)
+    
+    #if verbose:
+    #    print('data moments are {}'.format(dat))
+    #    print('simulated moments are {}'.format(sim))
     
     
-    if verbose:
-        print('data moments are {}'.format(dat))
-        print('simulated moments are {}'.format(sim))
-    
-    resid_all = np.array([x if (not np.isnan(x) and not np.isinf(x)) else 1e6 for x in res_all])
-    
-    resid_sc = resid_all*np.sqrt(np.diag(W)) # all residuals scaled
-    
-    dist =  np.dot(np.dot(resid_all,W),resid_all)
 
 
     print('Distance is {}'.format(dist))
@@ -194,3 +133,31 @@ def mdl_resid(x=None,save_to=None,load_from=None,return_format=['distance'],
     if len(out) == 1: out = out[0]
   
     return out
+
+
+def distance_to_targets(moments,targets,weights={},relative=True,report=False):
+    num = len(targets)
+    
+    
+    resid = np.zeros((num,),dtype=np.float32)
+    W = np.eye(num,dtype=np.float32)
+    for i, (name, targ) in enumerate(targets.items()):
+        try:
+            mom = moments[name]
+        except KeyError:
+            print('Warning: cannot find {} in moments'.format(name))
+            raise(Exception('cannot compute moments'))
+        resid[i] = (mom - targ)/targ if relative else (mom-targ)
+        
+        if report:
+            print('{} is {:01.2g} (target {:01.2g})'.format(name,mom,targ))
+        
+        try:
+            W[i,i] = weights[name]
+        except:
+            W[i,i] = 1/num
+            
+    resid_scaled = resid*np.sqrt(np.diag(W))
+    dist = np.dot(np.dot(resid,W),resid)    
+    
+    return resid, resid_scaled, dist

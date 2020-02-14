@@ -64,9 +64,11 @@ if __name__ == '__main__':
             xnew[f] = x_comp[f]
         xlist.append(xnew)
     
-    xlist.append(x_base)
-    replace_fields = ['base'] + replace_fields + ['compare']
     
+    replace_fields = ['base'] + replace_fields + ['compare']
+    xlist.append(x_comp)
+    
+    assert False
     agents_list = list()
     for x, rf in zip(xlist,replace_fields):        
         print(rf)

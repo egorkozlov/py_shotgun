@@ -31,6 +31,7 @@ from numpy.random import random_sample as rs
 from tiktak import tiktak
 print('Hi!')
 
+
 from residuals import mdl_resid
 from calibration_params import calibration_params
 
@@ -45,6 +46,8 @@ if __name__ == '__main__':
                 'util_kap': 0.92348031}
     else:
         xfix = None
+        
+    
         
     lb, ub, xdef, keys, translator = calibration_params(xfix=xfix)
     

@@ -20,7 +20,8 @@ if system() != 'Darwin' and system() != 'Windows':
  
  
 from residuals import mdl_resid
- 
+from targets import target_values
+
 print('Hi!')
  
 import os
@@ -39,7 +40,9 @@ if __name__ == '__main__':
          'preg_20': 0.03915073600027051,
          'preg_30': 0.10173830697979773}
     
-    out, mdl, agents, res = mdl_resid(x=x,return_format=['distance','models','agents','scaled residuals'],
+    tar = target_values('high education')
+    
+    out, mdl, agents, res = mdl_resid(x=x,targets=tar,return_format=['distance','models','agents','scaled residuals'],
                                       load_from='mdl.pkl',
                                       verbose=True,draw=True)
                          
