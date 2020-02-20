@@ -45,6 +45,41 @@ def target_values(mode='high education'):
         targets['just k & m at 30'] = 0.0081
         targets['just k & m at 35'] = 0.0046
         
+    elif mode=='low education':
+    
+        targets['never married at 25'] = 0.63
+        targets['never married at 30'] = 0.43
+        targets['never married at 35'] = 0.30
+        targets['never married at 40'] = 0.22
+    
+        targets['divorced right now at 25'] = 0.20
+        targets['divorced right now at 30'] = 0.22
+        targets['divorced right now at 35'] = 0.25
+        targets['divorced right now at 40'] = 0.28
+        
+        targets['no kids at 25'] = 0.50
+        targets['no kids at 30'] = 0.34
+        targets['no kids at 35'] = 0.25
+        
+        targets['no kids at 25 if married'] = 0.24
+        targets['no kids at 30 if married'] = 0.15
+        targets['no kids at 35 if married'] = 0.11
+        
+        targets['no kids 1 year after marriage'] = 0.36
+        targets['no kids 2 years after marriage'] = 0.30
+        targets['no kids 3 years after marriage'] = 0.24
+        
+        targets['mean x share'] = 0.4
+        
+        targets['k then m at 25'] = 0.44
+        targets['k then m at 30'] = 0.37
+        targets['k then m at 35'] = 0.33
+        
+        targets['just k & m at 25'] = 0.0194
+        targets['just k & m at 30'] = 0.0143
+        targets['just k & m at 35'] = 0.0082
+        
+        
     else:
         raise Exception('this mode for targets is not found')
     

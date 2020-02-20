@@ -32,6 +32,10 @@ def mdl_resid(x=None,targets=None,weights={},
 
     if type(x) is dict:
         kwords = x
+        
+        if 'targets' in x:
+            targets = x.pop('targets')
+        
     else:
         lb, ub, xdef, keys, translator = calibration_params()
     
@@ -95,6 +99,9 @@ def mdl_resid(x=None,targets=None,weights={},
     if targets is None:
         from targets import target_values
         tar = target_values()
+    elif type(targets) is str:
+        from targets import target_values
+        tar = target_values(mode=targets)
     else:
         tar = targets
     

@@ -37,13 +37,14 @@ from calibration_params import calibration_params
 
 if __name__ == '__main__':
     
-    fix_values = False
+    fix_values = True
     if fix_values:
         xfix = {'u_shift_mar': 1.691189,
                 'sigma_psi': 0.4584274,
                 'sigma_psi_mult': 3.79805726,
                 'util_alp': 0.98122074,
-                'util_kap': 0.92348031}
+                'util_kap': 0.92348031,
+                'targets':'low education'}
     else:
         xfix = None
         
@@ -59,15 +60,15 @@ if __name__ == '__main__':
     print('')
     print('')
     
-   
-
+    
+    
     #Tik Tak Optimization
     param=tiktak(N=500,N_st=20,skip_local=True,skip_global=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
     #Now Re do the computation with graphs!
-    out, mdl = mdl_resid(param[1],return_format=['distance','model'],calibration_report=False,
+    out, mdl = mdl_resid(param[1],return_format=['distance','model'],
                          verbose=True,draw=True)
     
     
