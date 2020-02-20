@@ -43,8 +43,7 @@ if __name__ == '__main__':
                 'sigma_psi': 0.4584274,
                 'sigma_psi_mult': 3.79805726,
                 'util_alp': 0.98122074,
-                'util_kap': 0.92348031,
-                'targets':'low education'}
+                'util_kap': 0.92348031}
     else:
         xfix = None
         

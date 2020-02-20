@@ -38,8 +38,7 @@ if __name__ == '__main__':
          'util_alp': 0.6534190912803465,
          'util_kap': 1.9136130954048896,
          'preg_20': 0.03915073600027051,
-         'preg_30': 0.10173830697979773,
-         'targets':'high education'}
+         'preg_30': 0.10173830697979773}
     
     tar = target_values('high education')
     
