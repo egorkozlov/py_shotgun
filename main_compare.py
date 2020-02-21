@@ -37,6 +37,8 @@ if __name__ == '__main__':
          'preg_30': 0.10173830697979773,
          'high education': True}
     
+    
+    
     x_comp = {'u_shift_mar': 0.78012885,
          'sigma_psi': 0.22466639,
          'sigma_psi_mult': 1.34982032,

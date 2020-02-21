@@ -39,11 +39,9 @@ if __name__ == '__main__':
     
     fix_values = True
     if fix_values:
-        xfix = {'u_shift_mar': 1.691189,
-                'sigma_psi': 0.4584274,
-                'sigma_psi_mult': 3.79805726,
-                'util_alp': 0.98122074,
-                'util_kap': 0.92348031}
+        xfix = {'u_shift_mar': 0.725863356303563,
+                'util_alp': 0.6534190912803465,
+                'util_kap': 1.9136130954048896}
     else:
         xfix = None
         
@@ -62,7 +60,7 @@ if __name__ == '__main__':
     
     
     #Tik Tak Optimization
-    param=tiktak(N=500,N_st=20,skip_local=True,skip_global=False)
+    param=tiktak(xfix=xfix,N=500,N_st=20,skip_local=True,skip_global=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
