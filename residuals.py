@@ -15,7 +15,11 @@ import os
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
-def mdl_resid(x=None,targets=None,weights={},
+
+w = {'divorced if k then m and one marriage':10,
+     'divorced if m then k and one marriage':10}
+
+def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
               rel_diff=True):

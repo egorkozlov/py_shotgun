@@ -97,8 +97,8 @@ def compute_moments(self):
     divorced_km_1m = div_now[:,:20][self.k_m[:,:20] & one_mar[:,:20]].mean()
     divorced_mk_1m = div_now[:,:20][self.m_k[:,:20] & one_mar[:,:20]].mean()    
     if self.verbose: print('One mar: divorced k_m = {}, divorced m_k = {}'.format(divorced_km_1m,divorced_mk_1m))
-    moments['divorced if km and one marriage'] = divorced_km_1m
-    moments['divorced if mk and one marriage'] = divorced_mk_1m
+    moments['divorced if k then m and one marriage'] = divorced_km_1m
+    moments['divorced if m then k and one marriage'] = divorced_mk_1m
     
     e_divorced_upp  = ever_div[ever_upp[:,20],20].mean()
     e_divorced_nupp = ever_div[~ever_upp[:,20],20].mean()    

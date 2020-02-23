@@ -106,24 +106,21 @@ class Model(object):
             
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
-                if EV is None:            
-                    V, c, s = setup.vs_last_grid(female,ushift,return_cs=True)
-                else:
-                    V, c, s = v_iter_single(setup,t,EV,female,ushift)             
+                
+                V, c, s = v_iter_single(setup,t,EV,female,ushift)       
+                
                 return {desc: {'V':V,'c':c,'s':s}}   
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
                 haschild = (desc== 'Couple and child')
-                if EV is None:                    
-                    V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift,haschild)
-                else:
-                    V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)            
+                
+                V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)  
+                
                 return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             elif desc == 'Female and child':
-                if EV is None:
-                    V, c, x, s, fls, V_all_l = setup.vsk_last_grid(ushift)
-                else:
-                    V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
+                
+                V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
+                
                 return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             else:
                 raise Exception('I do not know this type...')
@@ -161,7 +158,7 @@ class Model(object):
                 
                 return vout, dec
             def initialize(desc,t):
-                vout = v_iterator(self.setup,desc,None)
+                vout = v_iterator(self.setup,desc,t,None)
                 if timed: self.time('Initialization for {}'.format(desc))
                 dec = {}
                 self.wrap_decisions(desc,dec,vout)

@@ -25,7 +25,9 @@ def calibration_params(xin=None,xfix=None):
               util_alp=(0.01,4.0,1.5),
               util_kap=(0.01,4.0,1.5),
               preg_20=(0.01,0.5,0.1),
-              preg_30=(0.01,0.5,0.1)
+              preg_30=(0.01,0.5,0.1),
+              sm_shift=(-1.0,1.0,0.0),
+              poutsm = (0.05,1.0,1/3)
                         )
              
     

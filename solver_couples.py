@@ -36,7 +36,8 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     dtype = setup.dtype
     
-    EV_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
+    
+    
     
     
     
@@ -76,6 +77,11 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     nexo = setup.pars['nexo_t'][t]
     shp = (setup.na,nexo,setup.ntheta)
+    
+    if EV_tuple is None:
+        EV_by_l, EV_fem_by_l, EV_mal_by_l = np.zeros((3,) + shp + (nls,),dtype=setup.dtype)
+    else:
+        EV_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
     
     # type conversion
     sgrid,sigma,beta = (dtype(x) for x in (sgrid,sigma,beta))

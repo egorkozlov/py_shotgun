@@ -435,14 +435,23 @@ class ModelSetup(object):
         ezfmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
         ezmmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zm_t'],p['m_wage_trend'])])
         
-        
-        mmin = 0.95*ezmmin
+        self.money_min = 0.95*min(self.ls_levels_sk)*min(ezmmin,ezfmin) # cause FLS can be up to 0
+        mmin = self.money_min
         mmax = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
-        self.mgrid_c = np.linspace(mmin,mmax,600)
+        mint = (ezfmax + ezmmax) # poin where more dense grid begins
         
-        mmin_s = 0.95*min(self.ls_levels_sk)*ezfmin
-        mmax_s = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
-        self.mgrid_s = np.linspace(mmin_s,mmax_s,600)
+        ndense = 600
+        nm = 1500
+        
+        gsparse = np.linspace(mint,mmax,nm-ndense)
+        gdense = np.linspace(mmin,mint,ndense+1) # +1 as there is a common pt
+        
+        self.mgrid = np.zeros(nm,dtype=np.float32)
+        self.mgrid[ndense:] = gsparse
+        self.mgrid[:(ndense+1)] = gdense
+        self.mgrid_c = self.mgrid
+        self.mgrid_s = self.mgrid
+        assert np.all(np.diff(self.mgrid)>0)
         
         self.u_precompute()
         self.unplanned_pregnancy_probability()
@@ -712,127 +721,6 @@ class ModelSetup(object):
         umult = 1.0
         l = self.ls_levels_sk[il]
         return umult*self.u(c) + self.u_pub(x,l) + ushift
-    
-    def vm_last_grid(self,ushift,haschild):
-        # this returns value of vm on the grid corresponding to vm
-        s = self.agrid_c[:,None]
-        zm = self.exogrid.all_t[-1][:,1][None,:]
-        zf = self.exogrid.all_t[-1][:,0][None,:]
-        psi = self.exogrid.all_t[-1][:,2][None,:,None]
-        theta = self.thetagrid[None,None,:]
-        
-        nl = self.nls_k if haschild else self.nls_nk
-        
-        na, nexo, ntheta = self.na, self.pars['nexo_t'][-1], self.ntheta
-        
-        shp = (na,nexo,ntheta,nl)
-        
-        u_couple_g, u_f_g, u_m_g, income_g, c_g, x_g =np.zeros((6,) + shp,dtype=self.dtype)
-        
-        
-        ftrend = self.pars['f_wage_trend'][-1]
-        mtrend = self.pars['m_wage_trend'][-1]
-        
-        
-        if haschild:
-            lsl, upc, ucoup, upart = \
-                self.ls_levels_k, self.ucouple_precomputed_x_k, self.u_couple_k, self.u_part_k
-        else:
-            lsl, upc, ucoup, upart = \
-                self.ls_levels_nk, self.ucouple_precomputed_x_nk, self.u_couple_nk, self.u_part_nk
-        
-        
-        for il in range(len(lsl)):
-           
-            inc = self.pars['R_t'][-1]*s + np.exp(zm+mtrend) +  np.exp(zf+ftrend)*lsl[il]
-            income_g[...,il]  = inc[...,None]
-            
-            
-            for itheta in range(ntheta):
-                
-                vals = upc[:,itheta,il]
-                x_g[...,itheta,il] = np.interp(inc,self.mgrid_c,vals)
-                c_g[...,itheta,il] = inc - x_g[...,itheta,il]
-            
-            u_couple_g[...,il] = ucoup(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
-            u_f_g[...,il], u_m_g[...,il] = upart(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
-             
-        #Get optimal FLS
-        ls=np.argmax(u_couple_g,axis=3)
-        lsi=ls[...,None]
-        u_c, u_f, u_m, x, c = (np.take_along_axis(x,lsi,axis=3).squeeze(axis=3)
-                                for x in (u_couple_g,u_f_g,u_m_g,x_g,c_g))
-        
-        V  = u_c 
-        VM = u_m 
-        VF = u_f 
-        
-        return V.astype(self.dtype), VF.astype(self.dtype), VM.astype(self.dtype), c.astype(self.dtype), x.astype(self.dtype), np.zeros_like(c).astype(self.dtype), ls.astype(np.int16), u_couple_g.astype(self.dtype)
-    
-    
-
-    def vs_last(self,s,z_plus_trend,ushift,return_cs=False):  
-        # generic last period utility for single agent
-        income = self.pars['R_t'][-1]*s+np.exp(z_plus_trend) 
-        if return_cs:
-            return self.u(income).astype(self.dtype) + ushift, income.astype(self.dtype), np.zeros_like(income.astype(self.dtype))
-        else:
-            return self.u(income)
-    
-    def vs_last_grid(self,female,ushift,return_cs=False):
-        # this returns value of vs on the grid corresponding to vs
-        s_in = self.agrid_s[:,None]
-        z_in = self.exogrid.zf_t[-1][None,:] if female else self.exogrid.zm_t[-1][None,:]
-        trend = self.pars['f_wage_trend'][-1] if female else self.pars['m_wage_trend'][-1]        
-        return self.vs_last(s_in,z_in+trend,ushift,return_cs)
-        
-    
-    
-    def vsk_last_grid(self,ushift):
-        # this returns value of vm on the grid corresponding to vm
-        s = self.agrid_s[:,None]
-        zf = self.exogrid.zf_t[-1][None,:]
-        
-        nl = self.nls_sk
-        
-        na, nexo = self.na, self.pars['n_zf_t'][-1]
-        
-        shp = (na,nexo,nl)
-        
-        u_g, income_g, c_g, x_g =np.zeros((4,) + shp,dtype=self.dtype)
-        
-        
-        ftrend = self.pars['f_wage_trend'][-1]
-        
-        
-   
-        lsl, upc, ufun = \
-            self.ls_levels_sk, self.ucouple_precomputed_x_sk, self.u_single_k
-        
-        
-        for il in range(len(lsl)):
-           
-            inc = self.pars['R_t'][-1]*s + np.exp(zf+ftrend)*lsl[il]
-            income_g[...,il]  = inc
-            
-            vals = upc[...,il]
-            x_g[...,il] = np.interp(inc,self.mgrid_s,vals)
-            c_g[...,il] = inc - x_g[...,il]
-            
-                
-            #(c,x,il,ushift)
-            u_g[...,il] = ufun(c_g[...,il],x_g[...,il],il,ushift)
-        assert np.all(c_g>0)
-        #Get optimal FLS
-        ls=np.argmax(u_g,axis=-1)
-        lsi=ls[...,None]
-        u_c, x, c = (np.take_along_axis(x,lsi,axis=-1).squeeze(axis=-1)
-                                for x in (u_g,x_g,c_g))
-        
-        V  = u_c 
-        
-        return V.astype(self.dtype), c.astype(self.dtype), x.astype(self.dtype), np.zeros_like(c).astype(self.dtype), ls.astype(np.int16), u_g.astype(self.dtype)
-    
     
     def u_precompute(self):
         from intratemporal import int_with_x

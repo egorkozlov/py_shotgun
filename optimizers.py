@@ -108,7 +108,7 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,use_gp
             
             # preallocation helps a bit here          
             V, c, x, s = np.empty((4,na,nexo,ntheta),dtype=dtype)
-            i_opt = -np.ones((na,nexo,ntheta),dtype=np.int16)                 
+            i_opt = -np.ones((na,nexo,ntheta),dtype=np.int16)     
             v_couple_local_intu(money_left,sgrid,EV_here,mgrid,util,xvals,beta,ushift,V,i_opt,c,x,s)
             
         else:
@@ -275,6 +275,7 @@ def v_couple_local_intu(money,sgrid,EV,mgrid,u_on_mgrid,x_on_mgrid,beta,uadd,V_o
             # finds index of maximum savings
             money_i = money[ind_a,ind_exo]
             money_minus_coh = money_i - coh_min
+            assert money_minus_coh>0
             
             ind_s = np.minimum( np.searchsorted(sgrid,money_minus_coh)-1,ns-1)
             
@@ -298,7 +299,7 @@ def v_couple_local_intu(money,sgrid,EV,mgrid,u_on_mgrid,x_on_mgrid,beta,uadd,V_o
                 bEVval = beta*EV[:,ind_exo,ind_theta]
                 
                 io = 0
-                Vo = -1e6
+                Vo = -1e12
                 
                 
                 for i_cand in range(ind_s+1):
@@ -319,9 +320,8 @@ def v_couple_local_intu(money,sgrid,EV,mgrid,u_on_mgrid,x_on_mgrid,beta,uadd,V_o
                 x_opt[ind_a,ind_exo,ind_theta] = x
                 c_opt[ind_a,ind_exo,ind_theta] = money_i - x - sgrid[io]
                 s_opt[ind_a,ind_exo,ind_theta] = sgrid[io]        
-                assert Vo > -1e6
-            
-    
+                assert Vo > -1e12
+                
 
 from math import ceil
 from numba import cuda

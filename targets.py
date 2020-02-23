@@ -7,7 +7,7 @@ Created on Fri Feb 14 07:59:29 2020
 """
 
         
-def target_values(mode='low education'):
+def target_values(mode='high education'):
     targets = dict()
         
         
@@ -22,6 +22,8 @@ def target_values(mode='low education'):
         targets['divorced right now at 30'] = 0.084
         targets['divorced right now at 35'] = 0.11
         targets['divorced right now at 40'] = 0.15
+        
+        
         
         targets['no kids at 25'] = 0.90
         targets['no kids at 30'] = 0.60
@@ -44,6 +46,9 @@ def target_values(mode='low education'):
         targets['just k & m at 25'] = 0.0058
         targets['just k & m at 30'] = 0.0081
         targets['just k & m at 35'] = 0.0046
+        
+        targets['divorced if k then m and one marriage'] = 0.147
+        targets['divorced if m then k and one marriage'] = 0.053
         
     elif mode=='low education':
     
@@ -78,6 +83,9 @@ def target_values(mode='low education'):
         targets['just k & m at 25'] = 0.0194
         targets['just k & m at 30'] = 0.0143
         targets['just k & m at 35'] = 0.0082
+        
+        targets['divorced if k then m and one marriage'] = 0.172
+        targets['divorced if m then k and one marriage'] = 0.139
         
         
     else:

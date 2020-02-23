@@ -32,6 +32,8 @@ def v_iter_single(setup,t,EV,female,ushift):
     
     money_t = (R*agrid_s,np.exp(zvals + ztrend))
     
+    if EV is None:
+        EV = np.zeros((agrid_s.size,zvals.size),dtype=setup.dtype)    
     
     V_ret, c_opt, s_opt = v_optimize_single(money_t,sgrid_s,(ind,p,EV),sigma,beta,ushift,dtype=dtype)
     
@@ -64,6 +66,9 @@ def v_iter_single_mom(setup,t,EV,ushift):
     wm0 = np.zeros_like(zvals + ztrend)
     money_t = (R*agrid_s,np.exp(zvals + ztrend),wm0)
     
+    
+    if EV is None:
+        EV = np.zeros((agrid_s.size,zvals.size,ls.size),dtype=setup.dtype)
     
     # I add virtual theta axis
     EV_t = (ind,p,EV[...,None,:])

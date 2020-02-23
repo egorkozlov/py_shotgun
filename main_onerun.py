@@ -38,12 +38,15 @@ if __name__ == '__main__':
          'util_alp': 0.6534190912803465,
          'util_kap': 1.9136130954048896,
          'preg_20': 0.03915073600027051,
-         'preg_30': 0.10173830697979773}
+         'preg_30': 0.10173830697979773,
+         'sm_shift':0.0,
+         'poutsm':1/3}
     
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=x,return_format=['distance','models','agents','scaled residuals'],
-                                      load_from='mdl.pkl',
+    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
+                                      return_format=['distance','models','agents','scaled residuals'],
+                                      save_to='mdl.pkl',
                                       verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))
