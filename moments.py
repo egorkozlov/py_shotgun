@@ -83,9 +83,9 @@ def compute_moments(self):
     moments['just k & m at 35'] = self.agreed_k[:,14].mean()
     
     
-    moments['divorced with kids at 30']      = div_now[ ever_kid[:,9],9].mean()
-    moments['divorced never kids at 30']     = div_now[~ever_kid[:,9],9].mean()
-    moments['never married with kids at 30'] = (~ever_mar)[ever_kid[:,9],9].mean()
+    moments['divorced with kids at 30']      = (div_now[:,9]     &  ever_kid[:,9])[ever_mar[:,9]].mean()
+    moments['divorced never kids at 30']     = (div_now[:,9]     & ~ever_kid[:,9])[ever_mar[:,9]].mean()
+    moments['never married with kids at 30'] = ((~ever_mar)[:,9] &  ever_kid[:,9]).mean()
     
     
     
