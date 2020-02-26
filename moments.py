@@ -48,6 +48,7 @@ def compute_moments(self):
     moments['never married at 35'] = 1-ever_mar[:,14].mean()
     moments['never married at 40'] = 1-ever_mar[:,19].mean()
     
+    moments['more than one mar at 40'] = (num_mar[:,19]>1).mean()
     
     moments['divorced right now at 25'] = div_now[ever_mar[:,4],4].mean()
     moments['divorced right now at 30'] = div_now[ever_mar[:,9],9].mean()
@@ -80,6 +81,13 @@ def compute_moments(self):
     moments['just k & m at 25'] = self.agreed_k[:,4].mean()
     moments['just k & m at 30'] = self.agreed_k[:,9].mean()
     moments['just k & m at 35'] = self.agreed_k[:,14].mean()
+    
+    
+    moments['divorced with kids at 30']      = div_now[ ever_kid[:,9],9].mean()
+    moments['divorced never kids at 30']     = div_now[~ever_kid[:,9],9].mean()
+    moments['never married with kids at 30'] = (~ever_mar)[ever_kid[:,9],9].mean()
+    
+    
     
     share_planned = self.planned_preg[(self.planned_preg) | (self.unplanned_preg)].mean()
     moments['share of planned pregnancies'] = share_planned
