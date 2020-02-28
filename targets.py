@@ -57,6 +57,11 @@ def target_values(mode='high education'):
         targets['never married with kids at 30'] = 0.0443802
         targets['more than one mar at 40']       = 0.1225949
     
+        targets['std earnings at 24, female'] = 0.41251325
+        targets['std earnings at 30, female'] = 0.42495642
+        
+        targets['log earnings coef at 25'] = -0.0143944
+        targets['log earnings coef at 30'] = -0.0110653
         
     elif mode=='low education':
     
@@ -94,6 +99,8 @@ def target_values(mode='high education'):
         
         targets['divorced if k then m and one marriage'] = 0.172
         targets['divorced if m then k and one marriage'] = 0.139
+        
+        
         
         
     else:

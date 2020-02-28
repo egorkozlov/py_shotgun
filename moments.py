@@ -121,10 +121,42 @@ def compute_moments(self):
     moments['ever divorced if never km'] = e_divorced_nupp
     
     
-
-    print('')
-    print('')
-    print('Key target: km {}, mk {}, ratio {}'.format(divorced_km_1m,divorced_mk_1m,divorced_km_1m/divorced_mk_1m))
+    
+    def std_pos(x):
+        return np.std(x[x>0])
+    
+    sd_f_24 = std_pos(self.female_earnings[:,3])
+    sd_f_30 = std_pos(self.female_earnings[:,9])
+    
+    sd_m_24 = std_pos(self.male_earnings[:,3])
+    sd_m_30 = std_pos(self.male_earnings[:,9])
+    
+    moments['std earnings at 24, female'] = sd_f_24
+    moments['std earnings at 30, female'] = sd_f_30
+    moments['std earnings at 24, male'] = sd_m_24
+    moments['std earnings at 30, male'] = sd_m_30
+    
+    if self.verbose:
+        print('std of earnings is {} at 24 and {} at 30 for males'.format(sd_m_24,sd_m_30))
+        print('std of earnings is {} at 24 and {} at 30 for females'.format(sd_f_24,sd_f_30))
+    
+    
+    above_med_25 = (self.female_wage[:,4] >= np.median(self.female_wage[:,4]))
+    below_med_25 = (self.female_wage[:,4] <= np.median(self.female_wage[:,4]))
+    above_med_30 = (self.female_wage[:,9] >= np.median(self.female_wage[:,9]))
+    below_med_30 = (self.female_wage[:,9] <= np.median(self.female_wage[:,9]))
+    
+    moments['log earnings coef at 25'] = ever_kid[above_med_25,4].mean() - ever_kid[below_med_25,4].mean() 
+    moments['log earnings coef at 30'] = ever_kid[above_med_30,4].mean() - ever_kid[below_med_30,4].mean()
+    
+    
+    if self.verbose:
+        print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
+    
+    if self.verbose:
+        print('')
+        print('')
+        print('Key target: km {}, mk {}, ratio {}'.format(divorced_km_1m,divorced_mk_1m,divorced_km_1m/divorced_mk_1m))
 
 
     

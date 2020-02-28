@@ -155,6 +155,7 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
     for i, (name, targ) in enumerate(targets.items()):
         try:
             mom = moments[name]
+            mom = mom if not np.isnan(mom) else 1000.0
         except KeyError:
             print('Warning: cannot find {} in moments'.format(name))
             raise(Exception('cannot compute moments'))

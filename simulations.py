@@ -146,6 +146,7 @@ class Agents:
             self.policy_ind[:] = 0
             
         if not nosim: self.simulate()
+        self.compute_aux()
             
         
     def simulate(self):
@@ -630,10 +631,65 @@ class Agents:
                 else:
                     raise Exception('unsupported state?')
         
-        assert not np.any(np.isnan(self.state[:,t+1]))       
+        assert not np.any(np.isnan(self.state[:,t+1]))   
+        
+    def compute_aux(self):
+        # this should be ran after the last simulations
+        couple_k = (self.state == self.state_codes['Couple and child'])
+        single_k = (self.state == self.state_codes['Female and child'])
+        self.labor_supply = np.ones((self.N,self.T),dtype=np.float32)
+        
+        self.female_wage = -np.ones((self.N,self.T),dtype=np.float32)
+        self.male_wage = -np.ones((self.N,self.T),dtype=np.float32)
+        self.female_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        self.male_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        self.couple_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        
+        
+        self.labor_supply[couple_k] = self.setup.ls_levels_k[self.ils_i[couple_k]]
+        self.labor_supply[single_k] = self.setup.ls_levels_sk[self.ils_i[single_k]]
+        
+        # fill wage & earnings
+        
+        for t in range(self.T):
+            tm = self.setup.pars['m_wage_trend'][t]
+            tf = self.setup.pars['f_wage_trend'][t]
+            
+            
+            for state, i_state in self.state_codes.items():
+                pick = (self.state[:,t] == i_state)
+                if not np.any(pick): continue
+                iexo = self.iexo[pick,t] # reshaped
+                
+                
+                
+                if state == 'Female, single' or state == 'Female and child':
+                    wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + 0*tf)
+                    self.female_wage[pick,t] = wage
+                    self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
+                    assert np.all(wage>0)
+                elif state == 'Male, single':                    
+                    wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + 0*tm)
+                    self.male_wage[pick,t] = wage
+                    self.male_earnings[pick,t] = wage # !!!
+                    assert np.all(wage>0)
+                elif state == 'Couple and child' or state == 'Couple, no children':
+                    iall, izf, izm, ipsi = self.setup.all_indices(t,iexo)
+                    wage_f = np.exp(self.setup.exogrid.zf_t[t][izf] + 0*tf)
+                    wage_m = np.exp(self.setup.exogrid.zm_t[t][izm] + 0*tm)
+                    self.female_wage[pick,t] = wage_f
+                    self.male_wage[pick,t] = wage_m
+                    self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
+                    self.male_earnings[pick,t] = wage_m
+                    self.couple_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]
+                    assert np.all(wage_f>0)
+                    assert np.all(wage_m>0)
+                else:
+                    raise Exception('unsupported state code?')
         
         
         
+            
     def compute_moments(self):
         import moments
         return moments.compute_moments(self)

@@ -28,11 +28,7 @@ class ModelSetup(object):
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
-        p['sig_zf_0']  = 0.513 #0.25
-        p['sig_zf']    = np.sqrt(0.038)#0.084
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
-        p['sig_zm_0']  = 0.525 #0.25
-        p['sig_zm']    = np.sqrt(0.027)#0.097
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
@@ -47,6 +43,9 @@ class ModelSetup(object):
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
         p['pmeet_t'] = 0.0
+        
+        p['m_zf'] = 1.0
+        p['m_zf0'] = 1.0
         
         p['poutsm'] = 1/3
         p['z_drift'] = -0.1
@@ -63,37 +62,35 @@ class ModelSetup(object):
         p['sm_shift'] = 0.0
         
         
-        
         '''
-        p['f_wage_trend'] = np.array(
-                            [0.0 + 
-                             0.068386*(min(t,30) - 5)
-                             - 0.0040512*((min(t,30)-5)**2)
-                             + 0.0000784*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
-        p['m_wage_trend'] = np.array(
-                                    [0.1457256 + 0.0676344*(min(t,30)-5) - 
-                                         0.002752*((min(t,30)-5)**2) 
-                                         + 0.0000784*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
+            Condition is h_male==1
+            Age 24, h_male==1: .44558678
+            Age 30, h_male==1: .45272711
+            Implied standard deviation if h_male==1 is .03269622
+            Implied initial if h_male==1 is .44197336
+            Condition is h_female==1
+            Age 24, h_female==1: .41251325
+            Age 30, h_female==1: .42495642
+            Implied standard deviation if h_female==1 is .04167489
+            Implied initial if h_female==1 is .40614873
         '''
-        '''
-        se_05_m = 0.5596
-        se_20_m = 0.6735
         
-        sigma_m = np.sqrt( (se_20_m**2 - se_05_m**2)/15 )
-        sigma_m0 = np.sqrt(se_05_m**2 - 4*sigma_m**2)
-        
-        se_05_f = 0.5397
-        se_20_f = 0.6305
-        
-        sigma_f = np.sqrt( (se_20_f**2 - se_05_f**2)/15 )
-        sigma_f0 = np.sqrt(se_05_f**2 - 4*sigma_f**2)
-        
-        '''
+        if p['high education']:            
+            p['sig_zm']    = 0.03269622
+            p['sig_zm_0']  = 0.44197336
+            
+            
+            p['sig_zf']    = p['m_zf']*0.04167489
+            p['sig_zf_0']  = p['m_zf0']*0.40614873
+            
+        else:
+            p['sig_zm']    = 0.09294824
+            p['sig_zm_0']  = 0.40376647
+            
+            
+            p['sig_zf']    = 0.08942736
+            p['sig_zf_0']  = 0.39882978
+            
         
         
         # college
@@ -116,22 +113,37 @@ class ModelSetup(object):
             assert (key in p), 'wrong name?'
             p[key] = value
         
-        
-        
+        '''
+          h_female_T |   .0705356   .0003383   208.49   0.000     .0698725    .0711987
+         h_female_T2 |  -.0038776    .000036  -107.83   0.000    -.0039481   -.0038071
+         h_female_T3 |   .0000701   1.02e-06    68.55   0.000     .0000681    .0000721
+              h_male |   .0854382   .0014612    58.47   0.000     .0825742    .0883021
+            h_male_T |   .0694736   .0003904   177.94   0.000     .0687084    .0702389
+           h_male_T2 |  -.0032952   .0000402   -81.94   0.000     -.003374   -.0032163
+           h_male_T3 |    .000053   1.13e-06    47.04   0.000     .0000507    .0000552
+            l_female |  -.3668214   .0013738  -267.02   0.000    -.3695139   -.3641289
+          l_female_T |   .0264887   .0002932    90.35   0.000     .0259141    .0270633
+         l_female_T2 |  -.0012464   .0000339   -36.82   0.000    -.0013128   -.0011801
+         l_female_T3 |   .0000251   9.91e-07    25.33   0.000     .0000232    .0000271
+              l_male |  -.2424105   .0012105  -200.26   0.000    -.2447829    -.240038
+            l_male_T |    .037659   .0002255   167.01   0.000      .037217    .0381009
+           l_male_T2 |  -.0015337   .0000267   -57.45   0.000    -.0015861   -.0014814
+           l_male_T3 |    .000026   7.98e-07    32.64   0.000     .0000245    .0000276
+        '''
         
         if p['high education']:
             p['f_wage_trend'] = np.array(
                                 [0.0 + 
-                                 0.0844278*(min(t,30) - 5)
-                                 -0.0044622*((min(t,30)-5)**2)
-                                 + 0.0000788*((min(t,30)-5)**3)
+                                 0.0705356*(min(t,30) - 5)
+                                 -.0038776*((min(t,30)-5)**2)
+                                 + 0.0000701*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [0.0776162 + 0.0810113*(min(t,30)-5)  
-                                             - 0.0027093*((min(t,30)-5)**2) 
-                                             + 0.0000298*((min(t,30)-5)**3)
+                                        [0.0854382 + 0.0694736*(min(t,30)-5)  
+                                             -.0032952*((min(t,30)-5)**2) 
+                                             + 0.000053*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -139,17 +151,17 @@ class ModelSetup(object):
         # no college
         
             p['f_wage_trend'] = np.array(
-                                [-0.4153825 + 
-                                 0.031699*(min(t,30) - 5)
-                                 -0.0017101*((min(t,30)-5)**2)
-                                 +0.0000377*((min(t,30)-5)**3)
+                                [-0.3668214 + 
+                                 0.0264887*(min(t,30) - 5)
+                                 -0.0012464*((min(t,30)-5)**2)
+                                 +0.0000251*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [-0.2933313 + 0.041411*(min(t,30)-5)  
-                                             -0.0016752*((min(t,30)-5)**2) 
-                                             + 0.0000294*((min(t,30)-5)**3)
+                                        [-0.2424105 + 0.037659*(min(t,30)-5)  
+                                             -0.0015337*((min(t,30)-5)**2) 
+                                             + 0.000026*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
         
