@@ -19,9 +19,16 @@ from aux_routines import cp_take_along_axis
 
 
 #if system() != 'Darwin' and system() != 'Windows':
+
+
+
 if system() != 'Darwin':
-    import cupy as cp
-    ugpu = True
+    try:
+        import cupy as cp
+        ugpu = True
+    except:
+        ugpu = False
+        print('this is no-gpu mode')
 else:
     ugpu = False
 
