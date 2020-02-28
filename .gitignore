@@ -145,3 +145,4 @@ core.*
 histo.csv
 
 *.prof
+*.swp

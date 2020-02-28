@@ -77,7 +77,7 @@ def fun(x):
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-4, maxfun=100, bounds=(xl,xu),
+        res=dfols.solve(q, xc, rhobeg = 0.2, rhoend=1e-4, maxfun=200, bounds=(xl,xu),
                         scaling_within_bounds=True, objfun_has_noise=True)
         
         print(res)
