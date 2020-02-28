@@ -141,17 +141,38 @@ def compute_moments(self):
         print('std of earnings is {} at 24 and {} at 30 for females'.format(sd_f_24,sd_f_30))
     
     
-    above_med_25 = (self.female_wage[:,4] >= np.median(self.female_wage[:,4]))
-    below_med_25 = (self.female_wage[:,4] <= np.median(self.female_wage[:,4]))
-    above_med_30 = (self.female_wage[:,9] >= np.median(self.female_wage[:,9]))
-    below_med_30 = (self.female_wage[:,9] <= np.median(self.female_wage[:,9]))
+    i25 = 4
+    p25 = (self.male_wage[:,i25] > 0)
+    i30 = 9
+    p30 = (self.male_wage[:,i30] > 0)
+    i40 = 19
+    p40 = (self.male_wage[:,i40] > 0)
     
-    moments['log earnings coef at 25'] = ever_kid[above_med_25,4].mean() - ever_kid[below_med_25,4].mean() 
-    moments['log earnings coef at 30'] = ever_kid[above_med_30,4].mean() - ever_kid[below_med_30,4].mean()
+    
+    
+    
+    med_25 = np.median(self.male_wage[p25,i25])
+    med_30 = np.median(self.male_wage[p30,i30])    
+    
+    above_med_25 = ((self.male_wage[:,i25] >= med_25) & p25)
+    below_med_25 = ((self.male_wage[:,i25] <= med_25) & p25)
+    above_med_30 = ((self.male_wage[:,i30] >= med_30) & p30)
+    below_med_30 = ((self.male_wage[:,i30] <= med_30) & p30)
+    
+    moments['log earnings coef at 25'] = ever_kid[above_med_25,i25].mean() - ever_kid[below_med_25,i25].mean() 
+    moments['log earnings coef at 30'] = ever_kid[above_med_30,i30].mean() - ever_kid[below_med_30,i30].mean()
+    
+    
+    p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))
+    linc_own = np.log(self.female_wage[:,2:][p_1yr] )
+    linc_sp =  np.log(self.male_wage[:,2:][p_1yr])
+    
+    moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]
     
     
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
+    
     
     if self.verbose:
         print('')

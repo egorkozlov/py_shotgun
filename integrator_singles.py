@@ -103,8 +103,11 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     EV = 0.0
     ppreg = 0.0
     
-    i_assets_c, p_assets_c = setup.i_a_mat, setup.prob_a_mat
-    
+    if female:
+        i_assets_c, p_assets_c = setup.i_a_mat_female, setup.prob_a_mat_female
+    else:
+        i_assets_c, p_assets_c = setup.i_a_mat_male, setup.prob_a_mat_male
+        
     npart = i_assets_c.shape[1]
     
     

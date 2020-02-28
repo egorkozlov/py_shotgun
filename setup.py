@@ -38,8 +38,12 @@ class ModelSetup(object):
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
-        p['sig_partner_a'] = 0.6
-        p['sig_partner_z'] = 0.6
+        p['sig_partner_a'] = 0.1
+        p['mu_partner_a_female'] = 0.2
+        p['mu_partner_a_male'] = -0.2
+        p['sig_partner_z'] = 0.9
+        p['mu_partner_z_male'] = -0.1
+        p['mu_partner_z_female'] = 0.1
         p['m_bargaining_weight'] = 0.5
         p['pmeet'] = 0.5
         p['pmeet_t'] = 0.0
@@ -114,36 +118,36 @@ class ModelSetup(object):
             p[key] = value
         
         '''
-          h_female_T |   .0705356   .0003383   208.49   0.000     .0698725    .0711987
-         h_female_T2 |  -.0038776    .000036  -107.83   0.000    -.0039481   -.0038071
-         h_female_T3 |   .0000701   1.02e-06    68.55   0.000     .0000681    .0000721
-              h_male |   .0854382   .0014612    58.47   0.000     .0825742    .0883021
-            h_male_T |   .0694736   .0003904   177.94   0.000     .0687084    .0702389
-           h_male_T2 |  -.0032952   .0000402   -81.94   0.000     -.003374   -.0032163
-           h_male_T3 |    .000053   1.13e-06    47.04   0.000     .0000507    .0000552
-            l_female |  -.3668214   .0013738  -267.02   0.000    -.3695139   -.3641289
-          l_female_T |   .0264887   .0002932    90.35   0.000     .0259141    .0270633
-         l_female_T2 |  -.0012464   .0000339   -36.82   0.000    -.0013128   -.0011801
-         l_female_T3 |   .0000251   9.91e-07    25.33   0.000     .0000232    .0000271
-              l_male |  -.2424105   .0012105  -200.26   0.000    -.2447829    -.240038
-            l_male_T |    .037659   .0002255   167.01   0.000      .037217    .0381009
-           l_male_T2 |  -.0015337   .0000267   -57.45   0.000    -.0015861   -.0014814
-           l_male_T3 |    .000026   7.98e-07    32.64   0.000     .0000245    .0000276
+              h_female_T |   .0685814   .0004133   165.92   0.000     .0677713    .0693915
+             h_female_T2 |  -.0038631   .0000449   -86.03   0.000    -.0039511   -.0037751
+             h_female_T3 |   .0000715   1.30e-06    55.20   0.000      .000069    .0000741
+                  h_male |   .0818515   .0018308    44.71   0.000     .0782632    .0854398
+                h_male_T |   .0664369   .0005108   130.07   0.000     .0654358    .0674379
+               h_male_T2 |  -.0032096   .0000528   -60.77   0.000    -.0033131   -.0031061
+               h_male_T3 |   .0000529   1.48e-06    35.68   0.000       .00005    .0000558
+                l_female |  -.3715448   .0015389  -241.43   0.000    -.3745611   -.3685285
+              l_female_T |   .0258538   .0003048    84.83   0.000     .0252564    .0264512
+             l_female_T2 |  -.0012931   .0000378   -34.20   0.000    -.0013672    -.001219
+             l_female_T3 |   .0000273   1.15e-06    23.79   0.000     .0000251    .0000296
+                  l_male |  -.2587716   .0014324  -180.66   0.000     -.261579   -.2559641
+                l_male_T |   .0348409   .0002597   134.14   0.000     .0343319      .03535
+               l_male_T2 |  -.0013866   .0000328   -42.27   0.000    -.0014509   -.0013223
+               l_male_T3 |    .000024   1.01e-06    23.79   0.000     .0000221     .000026
         '''
         
         if p['high education']:
             p['f_wage_trend'] = np.array(
                                 [0.0 + 
-                                 0.0705356*(min(t,30) - 5)
-                                 -.0038776*((min(t,30)-5)**2)
-                                 + 0.0000701*((min(t,30)-5)**3)
+                                 0.0685814*(min(t,30) - 5)
+                                 -.0038631*((min(t,30)-5)**2)
+                                 + 0.0000715*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [0.0854382 + 0.0694736*(min(t,30)-5)  
-                                             -.0032952*((min(t,30)-5)**2) 
-                                             + 0.000053*((min(t,30)-5)**3)
+                                        [0.0818515 + 0.0664369*(min(t,30)-5)  
+                                             -.0032096*((min(t,30)-5)**2) 
+                                             + 0.0000529*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -470,7 +474,7 @@ class ModelSetup(object):
         
         
         
-    def mar_mats_assets(self,npoints=4,abar=0.1):
+    def _mar_mats_assets(self,npoints=4,female=True,abar=0.1):
         # for each grid point on single's grid it returns npoints positions
         # on (potential) couple's grid's and assets of potential partner 
         # (that can be off grid) and correpsonding probabilities. 
@@ -482,6 +486,7 @@ class ModelSetup(object):
         agrid_c = self.agrid_c
         
         s_a_partner = self.pars['sig_partner_a']
+        mu_a_partner = self.pars['mu_partner_a_female'] if female else self.pars['mu_partner_a_male']
         
         
         prob_a_mat = np.zeros((na,npoints),dtype=self.dtype)
@@ -501,17 +506,17 @@ class ModelSetup(object):
                 s_a_partner*np.flip(np.arange(i_neg.sum())) 
             
             # TODO: this needs to be checked
-            p_a = int_prob(lagrid_t,mu=0,sig=s_a_partner,n_points=npoints)
+            p_a = int_prob(lagrid_t,mu=mu_a_partner,sig=s_a_partner,n_points=npoints)
             i_pa = (-p_a).argsort()[:npoints] # this is more robust then nonzero
             p_pa = p_a[i_pa]
             prob_a_mat[ia,:] = p_pa
             i_a_mat[ia,:] = i_pa
         
-        
-        self.prob_a_mat = prob_a_mat
-        self.i_a_mat = i_a_mat
+        return prob_a_mat, i_a_mat
             
-            
+    def mar_mats_assets(self,npoints=4,abar=0.1):
+        self.prob_a_mat_female, self.i_a_mat_female = self._mar_mats_assets(npoints=npoints,female=True,abar=abar)
+        self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
         
     
     def mar_mats_iexo(self,t,female=True,trim_lvl=0.001):
@@ -525,6 +530,7 @@ class ModelSetup(object):
         nexo = setup.pars['nexo_t'][t]
         sigma_psi_init = setup.pars['sigma_psi_init']
         sig_z_partner = setup.pars['sig_partner_z']
+        mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
         
@@ -549,10 +555,10 @@ class ModelSetup(object):
         for iz in range(n_zown):
             p_psi = int_prob(psi_couple,mu=0,sig=sigma_psi_init)
             if female:
-                p_zm  = int_prob(z_partner, mu=z_own[iz],sig=sig_z_partner)
+                p_zm  = int_prob(z_partner, mu=z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zf  = zmat_own[iz,:]
             else:
-                p_zf  = int_prob(z_partner, mu=z_own[iz],sig=sig_z_partner)
+                p_zf  = int_prob(z_partner, mu=z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zm  = zmat_own[iz,:]
             #sm = sf
         
@@ -583,13 +589,17 @@ class ModelSetup(object):
         # this is relevant for testing and simulations
         
         
-        pmat_a = self.prob_a_mat
-        imat_a = self.i_a_mat
-        
         self.matches = dict()
         
         for female in [True,False]:
             desc = 'Female, single' if female else 'Male, single'
+            
+            
+            if female:
+                pmat_a, imat_a = self.prob_a_mat_female, self.i_a_mat_female
+            else:
+                pmat_a, imat_a = self.prob_a_mat_male, self.i_a_mat_male
+            
             
             pmats = self.part_mats[desc] 
             
