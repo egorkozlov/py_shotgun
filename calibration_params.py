@@ -18,7 +18,7 @@ def calibration_params(xin=None,xfix=None):
     # just in case...
     params = OrderedDict(
               u_shift_mar=(0.0,3.0,1.0),
-              sigma_psi=(0.0,0.5,0.1),
+              sigma_psi=(0.0,0.75,0.1),
               sigma_psi_mult=(1.0,8.0,3.0),
               pmeet=(0.0,1.0,0.4),
               pmeet_t=(-0.1,0.0,-0.05),
@@ -26,10 +26,10 @@ def calibration_params(xin=None,xfix=None):
               util_kap=(0.01,4.0,1.5),
               preg_20=(0.01,0.5,0.1),
               preg_30=(0.01,0.5,0.1),
-              sm_shift=(-1.0,1.0,0.0),
+              sm_shift=(-4.0,2.0,0.0),
               util_qbar=(0.0,5.0,0.1),
-              m_zf = (0.5,3.0,1.0),
-              m_zf0 = (0.5,3.0,1.0)              
+              m_zf = (0.75,2.0,1.0),
+              m_zf0 = (0.5,2.0,1.0)              
                         )
              
     
