@@ -131,6 +131,8 @@ def compute_moments(self):
     sd_m_24 = std_pos(self.male_earnings[:,3])
     sd_m_30 = std_pos(self.male_earnings[:,9])
     
+    
+    
     moments['std earnings at 24, female'] = sd_f_24
     moments['std earnings at 30, female'] = sd_f_30
     moments['std earnings at 24, male'] = sd_m_24
@@ -151,6 +153,9 @@ def compute_moments(self):
     
     
     
+    
+    
+    
     med_25 = np.median(self.male_wage[p25,i25])
     med_30 = np.median(self.male_wage[p30,i30])    
     
@@ -161,6 +166,9 @@ def compute_moments(self):
     
     moments['log earnings coef at 25'] = ever_kid[above_med_25,i25].mean() - ever_kid[below_med_25,i25].mean() 
     moments['log earnings coef at 30'] = ever_kid[above_med_30,i30].mean() - ever_kid[below_med_30,i30].mean()
+    
+    
+    moments['out of lf at 30 if mar and kids'] = (self.labor_supply[is_mark[:,9],9] == self.setup.ls_levels_k[0]).mean()
     
     
     p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))

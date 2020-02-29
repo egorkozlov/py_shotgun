@@ -60,12 +60,9 @@ def target_values(mode='high education'):
         targets['std earnings at 24, female'] = 0.41251325
         targets['std earnings at 30, female'] = 0.42495642
         
-        targets['log earnings coef at 25'] = -0.0177554
-        #targets['log earnings coef at 30'] =  0.0045791
-        
-        #targets['spouse log coef at 25'] = 0.1853794
-        #targets['spouse log coef at 40'] = 0.1394379
-        #targets['spouse log coef 1 year after'] = 0.2261541
+        targets['log earnings coef at 25'] =  -0.0229083
+        #targets['log earnings coef at 30'] = -.0065753
+        targets['out of lf at 30 if mar and kids'] = 0.260325
     
         
     elif mode=='low education':

@@ -205,11 +205,12 @@ class ModelSetup(object):
         
         lmin = 0.2
         lmax = 1.0
-        nl = 4
+        nl = 2
         
         ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
-        ps = p['pls']*(1-np.linspace(0.0,2.0,nl,dtype=self.dtype))
-        ps[-2:] = 0.0 # !!! think about this carefully
+        ps = np.array([p['pls'],0.0]) 
+        #p['pls']*(1-np.linspace(0.0,2.0,nl,dtype=self.dtype))
+        #ps[-2:] = 0.0 # !!! think about this carefully
         
         self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
         self.ls_levels_k = ls
