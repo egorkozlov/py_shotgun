@@ -170,6 +170,12 @@ def compute_moments(self):
     
     moments['out of lf at 30 if mar and kids'] = (self.labor_supply[is_mark[:,9],9] == self.setup.ls_levels_k[0]).mean()
     
+    moments['out of lf at 30 if mar and kids coef'] = \
+        (self.labor_supply[is_mark[:,9] & above_med_30,9] == self.setup.ls_levels_k[0]).mean() - \
+        (self.labor_supply[is_mark[:,9] & below_med_30,9] == self.setup.ls_levels_k[0]).mean() 
+        
+    
+    
     
     p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))
     linc_own = np.log(self.female_wage[:,2:][p_1yr] )
