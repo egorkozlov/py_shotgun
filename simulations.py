@@ -638,6 +638,9 @@ class Agents:
         couple_k = (self.state == self.state_codes['Couple and child'])
         single_k = (self.state == self.state_codes['Female and child'])
         self.labor_supply = np.ones((self.N,self.T),dtype=np.float32)
+        self.psi_couple = -1000*np.ones((self.N,self.T),dtype=np.float32)
+        self.theta_couple = -1*np.ones((self.N,self.T),dtype=np.float32)
+        
         
         self.female_wage = -np.ones((self.N,self.T),dtype=np.float32)
         self.male_wage = -np.ones((self.N,self.T),dtype=np.float32)
@@ -682,6 +685,10 @@ class Agents:
                     self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
                     self.male_earnings[pick,t] = wage_m
                     self.couple_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]
+                    
+                    self.theta_couple[pick,t] = self.setup.thetagrid_fine[self.itheta[pick,t]]
+                    self.psi_couple[pick,t] = self.setup.exogrid.psi_t[t][ipsi]
+                    
                     assert np.all(wage_f>0)
                     assert np.all(wage_m>0)
                 else:
