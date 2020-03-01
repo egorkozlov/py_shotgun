@@ -33,6 +33,10 @@ def fun(x):
         return mdl_resid()
     elif action == 'compute':
         return mdl_resid(args)
+    elif action == 'moments':
+        agents = mdl_resid(args,return_format=['agents'])
+        mom = agents.compute_moments()
+        return mom
     elif action == 'minimize':	
         
         import dfols

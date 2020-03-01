@@ -61,6 +61,8 @@ class ModelSetup(object):
         p['pls'] = 1.0
         
         
+        p['preg_mult'] = 1.0
+        
         p['u_shift_mar'] = 0.0
         p['u_shift_coh'] = 0.0
         p['sm_shift'] = 0.0
@@ -176,9 +178,9 @@ class ModelSetup(object):
         
         
         
-        dp = (p['preg_30'] - p['preg_20'])/10
+        dp = (p['preg_mult']*p['preg_30'] - p['preg_mult']*p['preg_20'])/10
          
-        p['preg_a0'] = p['preg_20']
+        p['preg_a0'] = p['preg_mult']*p['preg_20']
         p['preg_at'] = dp
         p['preg_az'] = 0.00
         p['preg_azt'] = 0.00
