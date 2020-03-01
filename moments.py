@@ -34,13 +34,13 @@ def compute_moments(self):
     num_mar = np.cumsum( self.agreed, axis = 1 )
     one_mar = (num_mar == 1)
     
-    share_x = self.x / np.maximum(1e-3, self.x  + self.c)
+    #share_x = self.x / np.maximum(1e-3, self.x  + self.c)  
+    #mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
     
+    share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
+    mean_x = np.median(share_x)
     
-    
-    mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
     moments['mean x share'] = mean_x
-    
     
     
     moments['never married at 25'] = 1-ever_mar[:,4].mean()
