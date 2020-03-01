@@ -87,6 +87,7 @@ def compute_moments(self):
     moments['divorced never kids at 30']     = (div_now[:,9]     & ~ever_kid[:,9])[ever_mar[:,9]].mean()
     moments['never married with kids at 30'] = ((~ever_mar)[:,9] &  ever_kid[:,9]).mean()
     
+    moments['share of divorced with kids at 30'] = moments['divorced with kids at 30']/(moments['divorced with kids at 30'] + moments['divorced never kids at 30'])
     
     
     share_planned = self.planned_preg[(self.planned_preg) | (self.unplanned_preg)].mean()
