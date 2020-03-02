@@ -30,25 +30,24 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
      
-    x = {'u_shift_mar': 2.0415312646276234,
-         'sigma_psi': 0.3424730326985349,
-         'sigma_psi_mult': 3.3858306398842473,
-         'pmeet': 0.4247289616489994,
-         'pmeet_t': -0.004604640269509339,
-         'util_alp': 1.6320658827348236,
-         'util_kap': 1.4259194141270437,
-         'preg_20': 0.058445449688699594,
-         'preg_30': 0.04351737584566795,
-         'sm_shift': 0.09515539741538825,
-         'util_qbar': 2.0898404131498056,
-         'm_zf': 2.6016884179397683,
-         'm_zf0': 2.057811638685381}
+    x = {'u_shift_mar': 1.513283479062665,
+     'sigma_psi': 0.5843113309708895,
+     'sigma_psi_mult': 3.8226850007122897,
+     'pmeet': 0.3271653553125473,
+     'pmeet_t': -0.008108358997352225,
+     'util_alp': 0.7457467041652874,
+     'util_kap': 1.3223533546970248,
+     'preg_20': 0.03980279614565633,
+     'preg_30': 0.11395486976467334,
+     'poutsm': 0.125,
+     'util_qbar': 2.8312530407001595}
+
     
     tar = target_values('high education')
     
     out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
-                                      load_from='mdl.pkl',
+                                      save_to='mdl.pkl',
                                       verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))

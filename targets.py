@@ -54,8 +54,9 @@ def target_values(mode='high education'):
         
         #targets['divorced with kids at 30']      = 0.0251494
         #targets['divorced never kids at 30']     = 0.0398391
-        targets['share of divorced with kids at 30'] = 0.0251494/(0.0251494+0.0398391)
+        #targets['share of divorced with kids at 30'] = 0.0251494/(0.0251494+0.0398391)
         #targets['never married with kids at 30'] = 0.0443802
+        
         targets['more than one mar at 40']       = 0.1225949
     
         #targets['std earnings at 24, female'] = 0.41251325
