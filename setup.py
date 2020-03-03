@@ -104,7 +104,7 @@ class ModelSetup(object):
             
         
         
-        p['util_lam'] = 0.4
+        p['util_lam'] = 0.7
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
@@ -205,13 +205,12 @@ class ModelSetup(object):
         
         # female labor supply
         
-        lmin = 0.1
+        lmin = 0.25
         lmax = 0.9
         nl = 4
         
-        ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
-        ps = p['pls']*(1-np.linspace(0.0,1.0,nl,dtype=self.dtype))
-        ps[-1] = 0.0 # !!! think about this carefully
+        ls = np.array([0.25,0.5,0.75,0.9]) #np.linspace(lmin,lmax,nl,dtype=self.dtype)
+        ps = np.array([p['pls'],0.5*p['pls'],0.0,0.0])
         
         self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
         self.ls_levels_k = ls

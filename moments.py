@@ -40,7 +40,15 @@ def compute_moments(self):
     share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
     mean_x = np.median(share_x)
     
+    
+    ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
+    
+    
     moments['mean x share'] = mean_x
+    moments['labor supply at 30 if kids'] = ls_fem_30
+    
+    
+    
     
     
     moments['never married at 25'] = 1-ever_mar[:,4].mean()
@@ -48,7 +56,7 @@ def compute_moments(self):
     moments['never married at 35'] = 1-ever_mar[:,14].mean()
     moments['never married at 40'] = 1-ever_mar[:,19].mean()
     
-    moments['more than one mar at 40'] = (num_mar[:,19]>1).mean()
+    
     
     moments['divorced right now at 25'] = div_now[ever_mar[:,4],4].mean()
     moments['divorced right now at 30'] = div_now[ever_mar[:,9],9].mean()
@@ -59,6 +67,12 @@ def compute_moments(self):
     moments['no kids at 25'] = 1-ever_kid[:,4].mean()
     moments['no kids at 30'] = 1-ever_kid[:,9].mean()
     moments['no kids at 35'] = 1-ever_kid[:,14].mean()
+    
+    
+    moments['more than one mar at 40'] = (num_mar[:,19]>1).mean()
+    moments['more than one mar at 30'] = (num_mar[:,9]>1).mean()
+    moments['ever kids if remarried at 30'] = ever_kid[(num_mar[:,9]>1),9].mean()
+    
     
     moments['no kids at 25 if married'] = 1-ever_kid[is_mar[:,4],4].mean() if np.any(is_mar[:,4]) else 0.0
     moments['no kids at 30 if married'] = 1-ever_kid[is_mar[:,9],9].mean() if np.any(is_mar[:,9]) else 0.0
