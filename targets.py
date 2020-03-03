@@ -46,7 +46,7 @@ def target_values(mode='high education'):
         
         targets['just k & m at 25'] = 0.0058392
         #targets['just k & m at 30'] = 0.0081263
-        #targets['just k & m at 35'] = 0.0046128
+        targets['just k & m at 35'] = 0.0046128
         
         targets['divorced if k then m and one marriage'] = 0.147
         targets['divorced if m then k and one marriage'] = 0.053

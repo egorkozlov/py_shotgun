@@ -32,7 +32,7 @@ class ModelSetup(object):
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
-        p['R_t'] = [1.04]*T
+        p['R_t'] = [1/0.98]*T
         p['n_psi_t']     = [12]*T
         p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
