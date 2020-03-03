@@ -109,7 +109,7 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,use_gp
         util = utilint[...,i]
         xvals = xint[...,i]
         
-        money_left = money - (1-lval)*wf.reshape((1,nexo))
+        money_left = (money - (1-lval)*wf.reshape((1,nexo))).astype(dtype)
         
         if not use_gpu:
             

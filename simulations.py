@@ -12,7 +12,7 @@ from gridvec import VecOnGrid
 
 class Agents:
     
-    def __init__(self,Mlist,pswitchlist=None,N=15000,T=None,verbose=True,nosim=False):
+    def __init__(self,Mlist,pswitchlist=None,N=15000,T=30,verbose=True,nosim=False):
             
             
         np.random.seed(18)
@@ -300,19 +300,22 @@ class Agents:
                 
                 
                 
-                if sname == "Female, single":
+                if sname == "Female, single" or sname == "Female and child":
                     # TODO: this is temporary version, it computes partners for
                     # everyone and after that imposes meet / no meet, this should
                     # not happen.
                     
                     # meet a partner
                     
-                    pmeet = self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
+                    pcoef = self.Mlist[ipol].setup.pars['pmeet_multiplier_fem']
+                    
+                    
+                    pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
                     
                     
                     # divide by 2 subgroups
                     
-                    matches = self.Mlist[ipol].decisions[t]['Female, single']
+                    matches = self.Mlist[ipol].decisions[t][sname]
                     
                     
                     ia = self.iassets[ind,t+1] # note that timing is slightly inconsistent  
@@ -321,7 +324,7 @@ class Agents:
                     # TODO: fix the seed
                     iznow = self.iexo[ind,t]
                     
-                    pmat = matches['Not pregnant']['p'][ia,iznow,:]
+                    pmat = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical
                     
                     pmat_cum = pmat.cumsum(axis=1)
                     
@@ -390,8 +393,12 @@ class Agents:
                     
                     self.disagreed[ind,t] = i_disagree_and_meet
                     
-                    become_sm = (i_disagree_and_meet) & (i_preg)
-                    become_single = (i_disagree_or_nomeet) & ~(become_sm)   
+                    if not sname=='Female and child':
+                        become_sm = (i_disagree_and_meet) & (i_preg)
+                        become_single = (i_disagree_or_nomeet) & ~(become_sm)   
+                    else:
+                        become_sm = (i_disagree_or_nomeet) & (i_preg)
+                        become_single = np.zeros_like(become_sm,dtype=np.bool)
                     assert np.all(i_disagree_or_nomeet == ((become_sm) | (become_single)))
                     
                     i_agree = ~i_disagree_or_nomeet
@@ -409,8 +416,7 @@ class Agents:
                     nmar, ncoh, ndis, nnom = np.sum(i_agree_mar),np.sum(i_agree_coh),np.sum(i_disagree_and_meet),np.sum(i_nomeet)
                     ntot = sum((nmar, ncoh, ndis, nnom))
                     
-                    #if self.verbose: print('{} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(nmar,ncoh,ndis,nnom,ntot))
-                    #assert np.all(ismar==(i_agree )
+                    if self.verbose: print('for sname = {}: {} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(sname,nmar,ncoh,ndis,nnom,ntot))
                     
                     if np.any(i_agree_mar):
                         
@@ -437,6 +443,8 @@ class Agents:
                         
                     if np.any(i_agree_coh):
                         
+                        assert not sname=='Female and child'
+                        
                         self.itheta[ind[i_agree_coh],t+1] = it_out[i_agree_coh]
                         self.iexo[ind[i_agree_coh],t+1] = iall[i_agree_coh]
                         self.state[ind[i_agree_coh],t+1] = self.state_codes['Couple, no children']
@@ -456,6 +464,9 @@ class Agents:
                         # do not touch assets
                         fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
                         
+                        
+                        if sname=='Female and child': assert not np.any(become_single)
+                        
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = izf[i_disagree_or_nomeet]
                         #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_single],t+1] = self.state_codes['Female, single']
@@ -465,18 +476,18 @@ class Agents:
                                                                        izf[become_sm]]
                         
                         
-                elif sname == "Female and child":
+                #elif sname == "Female and child":
+                #    
+                #    pout = self.Mlist[ipol].setup.pars['poutsm_t'][t]
+                #    i_out_sm = (self.shocks_outsm[ind,t]<pout)
+                #    self.state[ind[ i_out_sm],t+1] = self.state_codes['Female, single']
+                #    self.state[ind[~i_out_sm],t+1] = self.state_codes['Female and child']
+                #    
+                #   fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
                     
-                    pout = self.Mlist[ipol].setup.pars['poutsm_t'][t]
-                    i_out_sm = (self.shocks_outsm[ind,t]<pout)
-                    self.state[ind[ i_out_sm],t+1] = self.state_codes['Female, single']
-                    self.state[ind[~i_out_sm],t+1] = self.state_codes['Female and child']
-                    
-                    fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
-                    
-                    self.ils_i[ind[ i_out_sm],t+1] = self.ils_def
-                    self.ils_i[ind[~i_out_sm],t+1] = fls_policy[self.iassets[ind[~i_out_sm],t+1],
-                                                                       self.iexo[ind[~i_out_sm],t+1]]
+                #    self.ils_i[ind[ i_out_sm],t+1] = self.ils_def
+                #    self.ils_i[ind[~i_out_sm],t+1] = fls_policy[self.iassets[ind[~i_out_sm],t+1],
+                #                                                       self.iexo[ind[~i_out_sm],t+1]]
                     
                 
                 

@@ -51,7 +51,6 @@ class ModelSetup(object):
         p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
         
-        p['poutsm'] = 1/3
         p['z_drift'] = -0.1
         p['no kids at meeting'] = True
         p['high education'] = True # what trend to pick
@@ -66,6 +65,11 @@ class ModelSetup(object):
         p['u_shift_mar'] = 0.0
         p['u_shift_coh'] = 0.0
         p['sm_shift'] = 0.0
+        
+        p['disutil_marry_sm_fem_coef'] = 0.0
+        p['disutil_marry_sm_mal_coef'] = 10.0
+        p['pmeet_multiplier_fem'] = 1.0
+        p['p_to_meet_sm_if_mal'] = 0.1
         
         
         '''
@@ -177,6 +181,10 @@ class ModelSetup(object):
         p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
         
         
+        p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
+        p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
+        
+        
         
         dp = (p['preg_mult']*p['preg_30'] - p['preg_mult']*p['preg_20'])/10
          
@@ -191,7 +199,7 @@ class ModelSetup(object):
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
         p['pmeet_t'] = [np.clip(p['pmeet'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
-        p['poutsm_t'] = [p['poutsm']]*T
+        #p['poutsm_t'] = [p['poutsm']]*T
         
         
         self.pars = p

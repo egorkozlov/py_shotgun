@@ -50,41 +50,62 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     
     dec = {'Not pregnant':dec_np, 'Pregnant':dec_p}
     
+    
+    
     return (1-pmeet)*EV_nomeet + pmeet*EV_meet, dec
 
 
 
 def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
-    pout = setup.pars['poutsm_t'][t]
-    na = sown.size
-    nz = setup.pars['n_zf_t'][t]
-    nl = setup.nls_sk    
-    EV = np.zeros((na,nz,nl),dtype=setup.dtype)
+    # behave as if meet & pregnant
+    # expected value of single person meeting a partner with a chance pmeet
+    pmeet = setup.pars['pmeet_t'][t]*setup.pars['pmeet_multiplier_fem']
     
+    female = True
     
+    skip_mar = (pmeet < 1e-5)
+
+    EV_meet, dec, ppreg = ev_single_meet(setup,V,sown,female,t,
+                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
+                                      unplanned_preg=True,single_mom=True)
+        
+    
+    nl = len(setup.ls_levels_sk)
+    
+    # FIXME: when people meet their skill depreciation stops for one period.
+    # This may be minor but is a bit inconsistent
+    
+    EV_stay = np.zeros(EV_meet.shape + (nl,),dtype=setup.dtype)
     
     for il in range(nl):
-         M = setup.exogrid.zf_t_mat_by_l_sk[il][t]
-         EV_out = np.dot(V['Female, single']['V'],M.T)
-         EV_stay = np.dot(V['Female and child']['V'],M.T)
-         EV[...,il] = EV_out*pout + EV_stay*(1-pout)
-        
-    return EV, {}
+         M = setup.exogrid.zf_t_mat_by_l_sk[il][t]         
+         EV_stay[...,il] = np.dot(V['Female and child']['V'],M.T)
+    
+    
+    dec = {'Not pregnant':dec, 'Pregnant':dec}
+    
+    return (1-pmeet)*EV_stay + pmeet*EV_meet[...,None], dec
     
 
 
 def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
-                   unplanned_preg=False,trim_lvl=0.001):
+                   unplanned_preg=False,single_mom=False,trim_lvl=0.001):
     # computes expected value of single person meeting a partner
     
     # this creates potential partners and integrates over them
     # this also removes unlikely combinations of future z and partner's 
     # characteristics so we have to do less bargaining
     
+    # single_mom emulates unplanned pregnancy but add utility punishments
+    
     nexo = setup.pars['nexo_t'][t]
     cangiveabirth = setup.pars['is fertile'][t]
     ns = sown.size
     no_kids_at_meet = setup.pars['no kids at meeting']
+    
+    
+    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else 0.0
+    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else 0.0
     
     
     p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T
@@ -125,23 +146,26 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         
         
         if not skip_mar:
-            if not unplanned_preg:
+            if not unplanned_preg and not single_mom:
                 # compare whether to give or not to give a birth
                 res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                         female=female,giveabirth=False)
+                                         female=female,giveabirth=False,
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
                 
                 if cangiveabirth and (not no_kids_at_meet):
                     # maybe cannot give a birth at all
                     res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                         female=female,giveabirth=True)
+                                         female=female,giveabirth=True,
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
                 else:            
                     res_m = res_c
             else:
                 # no choices
-                assert cangiveabirth
+                if unplanned_preg and (not single_mom): assert cangiveabirth
                 res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                     unplanned_pregnancy=True,
-                                         female=female,giveabirth=True)
+                                         female=female,giveabirth=True,
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
                 res_c = res_m
                 
         else:
@@ -167,14 +191,14 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         dec[:,:,iconv[:,i]] = (i_birth*decm + (1-i_birth)*decc)[:,None,:]
         tht[:,:,iconv[:,i]] = (i_birth*thtm + (1-i_birth)*thtc)[:,None,:]
         
-        if not unplanned_preg:
+        if not unplanned_preg and not single_mom:
             morc[:,:,iconv[:,i]] = i_birth[:,None,:]
         else:
             morc[:,:,iconv[:,i]] = True
         
         
         ppreg_res = cangiveabirth*p_preg_all[:,inds] # if not fertile force zeros
-        punp[:,:,iconv[:,i]] = ppreg_res[:,None,:]
+        punp[:,:,iconv[:,i]] = ppreg_res[:,None,:] if not single_mom else 1.0
             
         V_next[:,inds] = vout
         

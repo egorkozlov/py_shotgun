@@ -27,7 +27,7 @@ def calibration_params(xin=None,xfix=None):
               preg_20=(0.01,0.5,0.1),
               preg_30=(0.01,0.5,0.1),
               util_qbar=(0.0,8.0,0.1),
-              poutsm = (1/6,2/3,1/3)
+              disutil_marry_sm_mal_coef = (0.1,20.0,2.0)
                         )
              
     
