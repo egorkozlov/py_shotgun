@@ -39,10 +39,10 @@ if __name__ == '__main__':
     
     fix_values = True
     if fix_values:
-        xfix = {'u_shift_mar': 1.4622468191770523,
-                'util_alp': 1.5035902442038718,
-                'util_kap': 7.862043282658021,
-                'high education':False}
+        xfix = {'u_shift_mar': 1.2375741262803743,
+                'util_alp': 1.1316659121221422,
+                'util_kap': 6.9221292953673315,
+                'util_qbar': 1.4656511339567124}
     else:
         xfix = None
         
