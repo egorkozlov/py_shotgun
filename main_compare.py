@@ -80,16 +80,15 @@ if __name__ == '__main__':
     replace_fields = ['base'] + replace_fields + ['compare']
     xlist.append(x_comp)
     
-    assert False
     agents_list = list()
     for x, rf in zip(xlist,replace_fields):        
         print(rf)
         print(x)
         out, agents = mdl_resid(x=x,return_format=['distance','agents'],
                                 verbose=False,draw=False)
-        agents_list.append(agents)
-                         
+        #agents_list.append(agents)
+        del(agents)                 
         print('Done. Residual in point x0 is {}'.format(out))
         
-    dill.dump((agents_list,replace_fields,xlist),open('comparison.pkl','wb+'))            
+    #dill.dump((agents_list,replace_fields,xlist),open('comparison.pkl','wb+'))            
         

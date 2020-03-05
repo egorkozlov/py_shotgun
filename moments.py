@@ -189,7 +189,7 @@ def compute_moments(self):
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
     
     
-    if self.verbose:
+    if self.verbose or True:
         print('')
         print('')
         print('Key target: km {}, mk {}, ratio {}'.format(divorced_km_1m,divorced_mk_1m,divorced_km_1m/divorced_mk_1m))
