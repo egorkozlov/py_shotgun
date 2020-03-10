@@ -45,13 +45,14 @@ class ModelSetup(object):
         p['mu_partner_z_male'] = -0.1
         p['mu_partner_z_female'] = 0.1
         p['m_bargaining_weight'] = 0.5
-        p['pmeet'] = 0.5
+        p['pmeet_0'] = 0.5
         p['pmeet_t'] = 0.0
+        p['pmeet_t2'] = 0.0
         
         p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
         
-        p['z_drift'] = -0.1
+        p['z_drift'] = -0.12
         p['no kids at meeting'] = True
         p['high education'] = True # what trend to pick
         
@@ -115,8 +116,8 @@ class ModelSetup(object):
         p['util_qbar'] = 0.0
         
         
-        p['preg_20'] = 0.2
-        p['preg_30'] = 0.2
+        p['preg_a0'] = 0.2
+        p['preg_at'] = 0.0
         
         
         for key, value in kwargs.items():
@@ -185,11 +186,6 @@ class ModelSetup(object):
         p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
         
         
-        
-        dp = (p['preg_mult']*p['preg_30'] - p['preg_mult']*p['preg_20'])/10
-         
-        p['preg_a0'] = p['preg_mult']*p['preg_20']
-        p['preg_at'] = dp
         p['preg_az'] = 0.00
         p['preg_azt'] = 0.00
         
@@ -198,7 +194,7 @@ class ModelSetup(object):
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
-        p['pmeet_t'] = [np.clip(p['pmeet'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
+        p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         #p['poutsm_t'] = [p['poutsm']]*T
         
         
