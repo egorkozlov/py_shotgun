@@ -22,7 +22,7 @@ def calibration_params(xin=None,xfix=None):
               sigma_psi_mult=(1.0,8.0,3.0),
               pmeet_0=(0.0,1.0,0.4),
               pmeet_t=(-0.1,0.0,-0.05),
-              pmeet_t2=(-0.01,0.0,-0.001),
+              pmeet_t2=(-0.007,0.0,-0.001),
               util_alp=(0.1,4.0,1.5),
               util_kap=(2.0,12.0,8.0),
               preg_a0=(0.01,0.5,0.1),
