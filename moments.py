@@ -92,9 +92,9 @@ def compute_moments(self):
     moments['k then m at 30'] = self.k_m[in_sample[:,9],9].mean()
     moments['k then m at 35'] = self.k_m[in_sample[:,14],14].mean()
     
-    moments['just k & m at 25'] = self.agreed_k[:,4].mean()
-    moments['just k & m at 30'] = self.agreed_k[:,9].mean()
-    moments['just k & m at 35'] = self.agreed_k[:,14].mean()
+    moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()
+    moments['just k & m at 30'] = (self.agreed_k & one_mar)[:,9].mean()
+    moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
     
     
     moments['divorced with kids at 30']      = (div_now[:,9]     &  ever_kid[:,9])[ever_mar[:,9]].mean()
