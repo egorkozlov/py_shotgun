@@ -44,8 +44,68 @@ def compute_moments(self):
     ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
     
     
+    age = np.broadcast_to((21+np.arange(self.T)[None,:]),(self.N,self.T))
+    
+    age_m30 = age - 30
+    
+    
+    
     moments['mean x share'] = mean_x
     moments['labor supply at 30 if kids'] = ls_fem_30
+    
+    age_pick = ((age>=21) & (age<=40))
+    
+    never_mar = 1 - ever_mar
+    reg_y = never_mar[age_pick]
+    reg_x = age_m30[age_pick]
+    pol = np.polyfit(reg_x,reg_y,2)
+    moments['never married by age, b0'] = pol[2]
+    moments['never married by age, b1'] = pol[1]
+    moments['never married by age, b2'] = pol[0]
+    
+    
+    reg_y = ever_kid[age_pick]
+    reg_x = age_m30[age_pick]
+    pol = np.polyfit(reg_x,reg_y,2)
+    moments['ever kids by age, b0'] = pol[2]
+    moments['ever kids by age, b1'] = pol[1]
+    moments['ever kids by age, b2'] = pol[0]
+    
+    
+    yaftmar_pick = (self.yaftmar>=1) & (self.yaftmar<=10)
+    pick = yaftmar_pick & age_pick & one_mar & is_mar
+    
+    if np.any(pick):
+        reg_y = ever_kid[pick]
+        reg_x = self.yaftmar[pick]
+        pol = np.polyfit(reg_x,reg_y,2)
+    else:
+        pol = [1,1,1]
+        
+    moments['ever kids by years after marriage, b0'] = pol[2]
+    moments['ever kids by years after marriage, b1'] = pol[1]
+    moments['ever kids by years after marriage, b2'] = pol[0]
+    
+    pick = yaftmar_pick & age_pick & one_mar
+    if np.any(pick):
+        reg_y = div_now[pick]
+        reg_x = self.yaftmar[pick]
+        pol = np.polyfit(reg_x,reg_y,2)
+    else:
+        pol = [1,1,1]
+        
+    moments['divorced by years after marriage, b0'] = pol[2]
+    moments['divorced by years after marriage, b1'] = pol[1]
+    moments['divorced by years after marriage, b2'] = pol[0]
+    
+    
+    
+    moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()
+    
+    
+    
+    
+    
     
     
     
@@ -58,10 +118,14 @@ def compute_moments(self):
     
     
     
+    
+    
+    
     moments['divorced right now at 25'] = div_now[ever_mar[:,4],4].mean()
     moments['divorced right now at 30'] = div_now[ever_mar[:,9],9].mean()
     moments['divorced right now at 35'] = div_now[ever_mar[:,14],14].mean()
     moments['divorced right now at 40'] = div_now[ever_mar[:,19],19].mean()
+    
     
     
     moments['no kids at 25'] = 1-ever_kid[:,4].mean()
@@ -91,6 +155,23 @@ def compute_moments(self):
     moments['k then m at 25'] = self.k_m[in_sample[:,4],4].mean()
     moments['k then m at 30'] = self.k_m[in_sample[:,9],9].mean()
     moments['k then m at 35'] = self.k_m[in_sample[:,14],14].mean()
+    
+    
+    
+    pick = age_pick & in_sample
+    
+    if np.any(pick):
+        reg_y = self.k_m[pick]
+        reg_x = age_m30[pick]
+        pol = np.polyfit(reg_x,reg_y,2)
+    else:
+        pol = [0,0,0]
+        
+    moments['k then m by age, b0'] = pol[2]
+    moments['k then m by age, b1'] = pol[1]
+    moments['k then m by age, b2'] = pol[0]
+    
+    
     
     moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()
     moments['just k & m at 30'] = (self.agreed_k & one_mar)[:,9].mean()

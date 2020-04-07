@@ -13,64 +13,44 @@ def target_values(mode='high education'):
         
     if mode=='high education':
         
-        targets['never married at 25'] = 0.7526164 
-        targets['never married at 30'] = 0.3789449
-        targets['never married at 35'] = 0.2119567
-        targets['never married at 40'] = 0.1519036
+        targets['never married by age, b0'] = (0.3948181, 0.000777)
+        targets['never married by age, b1'] = (-0.0507542, 0.0000895)
+        targets['never married by age, b2'] = (0.2119567, 0.0000174)
 
     
-        targets['divorced right now at 25'] = 0.0407639
-        targets['divorced right now at 30'] = 0.0649885
-        targets['divorced right now at 35'] = 0.0908754
-        targets['divorced right now at 40'] = 0.1231106
+        targets['ever kids by age, b0'] = (0.4100186,0.0007724)
+        targets['ever kids by age, b1'] = (0.0497961,0.0000801)
+        targets['ever kids by age, b2'] = (-0.0011349,0.0000177)
+        
+        targets['ever kids by years after marriage, b0'] = (0.0306335,0.0029289)
+        targets['ever kids by years after marriage, b1'] = (0.1760231,0.0012216)
+        targets['ever kids by years after marriage, b2'] = (-0.0094863,0.0001077)
 
+        targets['divorced by years after marriage, b0'] = (0.0306335,0.0029289)
+        targets['divorced by years after marriage, b1'] = (0.1760231,0.0012216)
+        targets['divorced by years after marriage, b2'] = (-0.0094863,0.0001077)
         
-        targets['no kids at 25'] = 0.9027082
-        targets['no kids at 30'] = 0.5998235
-        targets['no kids at 35'] = 0.3383375
+        targets['divorced at 30 if one marriage'] = (0.0619966, 0.0005809)
         
-        #targets['no kids at 25 if married'] = 0.7139946
-        #targets['no kids at 30 if married'] = 0.3992189
-        #targets['no kids at 35 if married'] = 0.177255
-        
-        targets['no kids 1 year after marriage'] = 0.8111601
-        targets['no kids 2 years after marriage'] = 0.6579388
-        targets['no kids 3 years after marriage'] = 0.5090055
-
-        
-        targets['mean x share'] = 0.4
-        
-        targets['k then m at 25'] = 0.2069427
-        targets['k then m at 30'] = 0.1156287
-        targets['k then m at 35'] = 0.1011743
-        
-        #targets['just k & m at 25'] = 0.0058392
-        targets['just k & m at 30'] = 0.0081263
-        #targets['just k & m at 35'] = 0.0046128
-        
-        targets['divorced if k then m and one marriage'] = 0.147
-        targets['divorced if m then k and one marriage'] = 0.053
+        targets['mean x share'] = (0.4,0.001)
         
         
-        targets['divorced with kids at 30']      = 0.0251494
-        targets['divorced never kids at 30']     = 0.0398391
-        #targets['share of divorced with kids at 30'] = 0.0251494/(0.0251494+0.0398391)
-        targets['never married with kids at 30'] = 0.0443802
+        targets['k then m by age, b0'] = (0.1199747,0.0009933)
+        targets['k then m by age, b1'] = (-0.0100934,0.000355)
+        targets['k then m by age, b2'] = (0.0006642,0.0000398)
         
-        targets['more than one mar at 40']      = 0.1225949
-        #targets['more than one mar at 30']      = 0.0283695
-        #targets['ever kids if remarried at 30'] = 0.6055755
-    
-        #targets['std earnings at 24, female'] = 0.41251325
-        #targets['std earnings at 30, female'] = 0.42495642
         
-        targets['labor supply at 30 if kids'] = 0.75192561
-        #targets['log earnings coef at 25'] = -0.0177554
-        #targets['log earnings coef at 30'] =  0.0045791
         
-        #targets['spouse log coef at 25'] = 0.1853794
-        #targets['spouse log coef at 40'] = 0.1394379
-        #targets['spouse log coef 1 year after'] = 0.2261541
+        targets['divorced if k then m and one marriage'] = (0.1474027, 0.00243)
+        targets['divorced if m then k and one marriage'] = (0.0531433, 0.0004851)
+        
+        
+        targets['divorced with kids at 30']      = (0.0251494,0.0007414)
+        targets['divorced never kids at 30']     = (0.0398391,0.0009261)
+        targets['never married with kids at 30'] = (0.0443802,0.0007902)      
+        targets['more than one mar at 40']      = (0.1225949,0.0012733)
+        
+        targets['labor supply at 30 if kids'] = (0.7480682,0.004982)
     
         
     elif mode=='low education':

@@ -159,15 +159,27 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
         except KeyError:
             print('Warning: cannot find {} in moments'.format(name))
             raise(Exception('cannot compute moments'))
-        resid[i] = (mom - targ)/targ if relative else (mom-targ)
+            
+        if type(targ) is tuple:
+            targ0, weights[name] = targ[0], targ[1]**2 # should be variances on the diagonal
+            relative_here = False
+        else:
+            targ0 = targ
+            relative_here = relative
+        
+        resid[i] = (mom - targ0)/targ0 if relative_here else (mom-targ0)
         
         if report:
-            print('{} is {:01.2g} (target {:01.2g})'.format(name,mom,targ))
+            print('{} is {:01.2g} (target {:01.2g})'.format(name,mom,targ0))
         
         try:
             W[i,i] = weights[name]
         except:
             W[i,i] = 1/num
+            
+    # normalize W
+    W = W/np.sum(W)
+    
             
     resid_scaled = resid*np.sqrt(np.diag(W))
     dist = np.dot(np.dot(resid,W),resid)    

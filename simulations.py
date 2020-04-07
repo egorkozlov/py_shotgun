@@ -99,6 +99,8 @@ class Agents:
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
         
+        self.yaftmar = -np.ones((N,T),dtype=np.int8)
+        
         self.iexo[:,0] = iexoinit
         
         
@@ -440,6 +442,8 @@ class Agents:
                         self.ils_i[ind[i_agree_mar],t+1] = \
                             fls_policy[self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1],self.itheta[ind[i_agree_mar],t+1]]
                         
+                        self.yaftmar[ind[i_agree_mar],t+1] = 0
+                        
                         
                     if np.any(i_agree_coh):
                         
@@ -451,14 +455,15 @@ class Agents:
                         self.iassets[ind[i_agree_coh],t+1] = ia_out[i_agree_coh]
                         
                         # FLS decision
-                        tg = self.Mlist[ipol].setup.v_thetagrid_fine
+                        #tg = self.Mlist[ipol].setup.v_thetagrid_fine
                         #fls_policy = self.V[t+1]['Couple, no children']['fls']
                         fls_policy = self.Mlist[ipol].decisions[t+1]['Couple, no children']['fls']
                         
                         self.ils_i[ind[i_agree_coh],t+1] = \
                             fls_policy[self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1],self.itheta[ind[i_agree_coh],t+1]]
                         
-                    
+                        self.yaftmar[ind[i_agree_coh],t+1] = 0
+                        
                         
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
@@ -541,8 +546,8 @@ class Agents:
                     zf_grid = self.setup.exo_grids['Female, single'][t]
                     zm_grid = self.setup.exo_grids['Male, single'][t]
                     
-                    
-                     
+                    assert np.all(self.yaftmar[ind,t]>=0)
+                    self.yaftmar[ind,t+1] = self.yaftmar[ind,t] + 1 # extra year past marriage
                     
                     if np.any(i_div):
                         
