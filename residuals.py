@@ -161,7 +161,7 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
             raise(Exception('cannot compute moments'))
             
         if type(targ) is tuple:
-            targ0, weights[name] = targ[0], targ[1]**2 # should be variances on the diagonal
+            targ0, weights[name] = targ[0], 1/targ[1]**2 # should be inverse variances on the diagonal
             relative_here = False
         else:
             targ0 = targ
