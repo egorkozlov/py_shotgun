@@ -480,6 +480,10 @@ class Agents:
                         self.ils_i[ind[become_sm],t+1] = fls_policy[self.iassets[ind[become_sm],t+1],
                                                                        izf[become_sm]]
                         
+                        self.yaftmar[ind[i_disagree_or_nomeet],t+1] = \
+                            (self.yaftmar[ind[i_disagree_or_nomeet],t] + 1)*\
+                                 (self.yaftmar[ind[i_disagree_or_nomeet],t]>=0)+\
+                            (-1)*(self.yaftmar[ind[i_disagree_or_nomeet],t]<0)
                         
                 #elif sname == "Female and child":
                 #    
