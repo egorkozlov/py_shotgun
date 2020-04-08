@@ -15,7 +15,7 @@ def target_values(mode='high education'):
         
         targets['never married by age, b0'] = (0.3948181, 0.000777)
         targets['never married by age, b1'] = (-0.0507542, 0.0000895)
-        targets['never married by age, b2'] = (0.2119567, 0.0000174)
+        targets['never married by age, b2'] = (0.0026662,   0.0000174)
 
     
         targets['ever kids by age, b0'] = (0.4100186,0.0007724)
