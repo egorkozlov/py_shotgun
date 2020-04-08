@@ -178,7 +178,8 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
             W[i,i] = 1/num
             
     # normalize W
-    W = W/np.sum(W)
+    #W = W/np.sum(W)
+    
     
             
     resid_scaled = resid*np.sqrt(np.diag(W))

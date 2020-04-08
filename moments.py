@@ -171,6 +171,19 @@ def compute_moments(self):
     moments['k then m by age, b1'] = pol[1]
     moments['k then m by age, b2'] = pol[0]
     
+    pick = self.agreed & one_mar & age_pick
+    just_mark = self.agreed_k
+    
+    if np.any(pick):
+        reg_y = just_mark[pick]
+        reg_x = age_m30[pick]
+        pol = np.polyfit(reg_x,reg_y,2)
+    else:
+        pol = [0,0,0]
+        
+    moments['share of kids in new marriages, b0'] = pol[2]
+    moments['share of kids in new marriages, b1'] = pol[1]
+    moments['share of kids in new marriages, b2'] = pol[0]
     
     
     moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()
