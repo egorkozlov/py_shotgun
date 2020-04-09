@@ -428,7 +428,7 @@ class Agents:
                         self.iassets[ind[i_agree_mar],t+1] = ia_out[i_agree_mar]
                         
                         self.agreed_k[ind[i_agree_mar],t] = True
-                        self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]
+                        self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]*(sname=='Female, single')
                         
                         self.k_m[ind[i_agree_mar],t:] = True
                         self.k_m_true[ind[i_agree_mar],t:] = i_preg[i_agree_mar][:,None]

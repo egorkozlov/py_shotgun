@@ -135,7 +135,12 @@ def compute_moments(self):
     
     moments['more than one mar at 40'] = (num_mar[:,19]>1).mean()
     moments['more than one mar at 30'] = (num_mar[:,9]>1).mean()
-    moments['ever kids if remarried at 30'] = ever_kid[(num_mar[:,9]>1),9].mean()
+    
+    if np.any(num_mar[:,9]>1):
+        moments['ever kids if remarried at 30'] = ever_kid[(num_mar[:,9]>1),9].mean()
+    else:
+        moments['ever kids if remarried at 30'] = 0.0
+    
     
     
     moments['no kids at 25 if married'] = 1-ever_kid[is_mar[:,4],4].mean() if np.any(is_mar[:,4]) else 0.0
@@ -172,18 +177,17 @@ def compute_moments(self):
     moments['k then m by age, b2'] = pol[0]
     
     pick = self.agreed & one_mar & age_pick
-    just_mark = self.agreed_k
+    just_mark_t0 = self.agreed_unplanned
     
     if np.any(pick):
-        reg_y = just_mark[pick]
+        reg_y = just_mark_t0[pick]
         reg_x = age_m30[pick]
-        pol = np.polyfit(reg_x,reg_y,2)
+        pol = np.polyfit(reg_x,reg_y,1)
     else:
         pol = [0,0,0]
         
-    moments['share of kids in new marriages, b0'] = pol[2]
-    moments['share of kids in new marriages, b1'] = pol[1]
-    moments['share of kids in new marriages, b2'] = pol[0]
+    moments['share of kids in new marriages, b0'] = pol[1]
+    moments['share of kids in new marriages, b1'] = pol[0]
     
     
     moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()

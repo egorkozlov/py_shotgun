@@ -40,9 +40,8 @@ def target_values(mode='high education'):
         targets['k then m by age, b2'] = (0.0006642,0.0000398)
         
         
-        targets['share of kids in new marriages, b0'] = (0.1517,0.00286)
-        targets['share of kids in new marriages, b1'] = (0.0166,0.00053)
-        targets['share of kids in new marriages, b2'] = (0.000505,0.0001026)
+        targets['share of kids in new marriages, b0'] = (0.058445,0.0010725)
+        targets['share of kids in new marriages, b1'] = (0.0031754,0.0002467)
         
         targets['divorced if k then m and one marriage'] = (0.1474027, 0.00243)
         targets['divorced if m then k and one marriage'] = (0.0531433, 0.0004851)
