@@ -52,7 +52,7 @@ class ModelSetup(object):
         p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
         
-        p['z_drift'] = -0.12
+        p['z_drift'] = -0.09
         p['no kids at meeting'] = True
         p['high education'] = True # what trend to pick
         
@@ -824,11 +824,11 @@ class ModelSetup(object):
         self.ucouple_precomputed_x_sk = xout_s
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
-        #p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
-        #    self.pars['preg_at']*((t-9)**2) + \
-        #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
-        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+        p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
+            self.pars['preg_at']*((t-9)**2) + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+        #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+        #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         return np.clip(p,0.0,1.0)
     
     def unplanned_pregnancy_probability(self):

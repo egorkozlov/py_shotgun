@@ -25,10 +25,10 @@ def calibration_params(xin=None,xfix=None):
               pmeet_t2=(-0.007,0.0,-0.001),
               util_alp=(0.1,4.0,1.5),
               util_kap=(2.0,12.0,8.0),
-              preg_a0=(0.01,0.5,0.1),
+              preg_a0=(0.005,0.5,0.1),
               preg_at=(-0.1,0.1,-0.01),
               preg_at2=(-0.01,0.00,-0.01),
-              util_qbar=(0.0,4.0,1.7),
+              util_qbar=(0.0,5.0,1.7),
               disutil_marry_sm_mal_coef = (4.0,16.0,8.0)
                         )
              
