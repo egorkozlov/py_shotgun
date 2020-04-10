@@ -17,7 +17,7 @@ def calibration_params(xin=None,xfix=None):
     # I am not sure if this should be ordered or not but let's do ordered
     # just in case...
     params = OrderedDict(
-              u_shift_mar=(0.0,3.0,1.5),
+              u_shift_mar=(0.0,4.0,1.5),
               sigma_psi=(0.0,0.4,0.1),
               sigma_psi_mult=(1.0,8.0,3.0),
               pmeet_0=(0.0,1.0,0.4),
@@ -27,6 +27,7 @@ def calibration_params(xin=None,xfix=None):
               util_kap=(2.0,12.0,8.0),
               preg_a0=(0.01,0.5,0.1),
               preg_at=(-0.1,0.1,-0.01),
+              preg_at2=(-0.01,0.00,-0.01),
               util_qbar=(0.0,4.0,1.7),
               disutil_marry_sm_mal_coef = (4.0,16.0,8.0)
                         )

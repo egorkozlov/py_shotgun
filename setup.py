@@ -116,8 +116,9 @@ class ModelSetup(object):
         p['util_qbar'] = 0.0
         
         
-        p['preg_a0'] = 0.2
-        p['preg_at'] = 0.0
+        p['preg_a0'] = 0.05
+        p['preg_at'] = 0.01
+        p['preg_at2'] = -0.001
         
         
         for key, value in kwargs.items():
@@ -823,6 +824,9 @@ class ModelSetup(object):
         self.ucouple_precomputed_x_sk = xout_s
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
+        #p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
+        #    self.pars['preg_at']*((t-9)**2) + \
+        #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         return np.clip(p,0.0,1.0)

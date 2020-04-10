@@ -30,18 +30,21 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
-    x = {'u_shift_mar': 2.454083991840396,
-         'sigma_psi': 0.16666295932923875,
-         'sigma_psi_mult': 4.2578420743166365,
-         'pmeet_0': 0.512603449144626,
-         'pmeet_t': -0.00392071562690105,
-         'pmeet_t2': -0.002523247366351184,
-         'util_alp': 1.0610200316606404,
-         'util_kap': 8.104853182716534,
-         'preg_a0': 0.10791736157187538,
-         'preg_at': -0.0319145736956649,
-         'util_qbar': 3.2532324599246265,
-         'disutil_marry_sm_mal_coef': 7.441147983430074}
+    x = {'u_shift_mar': 2.7230034052298824,
+         'sigma_psi': 0.17572487206371926,
+         'sigma_psi_mult': 4.100699121313946,
+         'pmeet_0': 0.5921205737287893,
+         'pmeet_t': -0.014010138916286219,
+         'pmeet_t2': -0.00139459803708393,
+         'util_alp': 1.1170675899324138,
+         'util_kap': 6.928722658429808,
+         'preg_a0': 0.061387059514552235,
+         'preg_at': -0.021028784919175134,
+         'preg_at2': 0.0,
+         'util_qbar': 2.570238658000373,
+         'disutil_marry_sm_mal_coef': 6.62134049339284}
+    
+    
 
 
 
@@ -51,7 +54,7 @@ if __name__ == '__main__':
     
     out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
-                                      load_from='mdl.pkl',
+                                      save_to='mdl.pkl',
                                       verbose=True,draw=True)
                          
     print('Done. Residual in point x0 is {}'.format(out))
