@@ -26,9 +26,9 @@ def target_values(mode='high education'):
         targets['ever kids by years after marriage, b1'] = (0.1760231,0.0012216)
         targets['ever kids by years after marriage, b2'] = (-0.0094863,0.0001077)
 
-        targets['divorced by years after marriage, b0'] = (0.0306335,0.0029289)
-        targets['divorced by years after marriage, b1'] = (0.1760231,0.0012216)
-        targets['divorced by years after marriage, b2'] = (-0.0094863,0.0001077)
+        targets['divorced by years after marriage, b0'] = (-.0139552,.0012282)
+        targets['divorced by years after marriage, b1'] = (0.0191589,0.0006924)
+        targets['divorced by years after marriage, b2'] = (-0.0006421,0.0000691)
         
         targets['divorced at 30 if one marriage'] = (0.0619966, 0.0005809)
         
