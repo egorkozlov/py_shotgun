@@ -58,7 +58,10 @@ def compute_moments(self):
     never_mar = 1 - ever_mar
     reg_y = never_mar[age_pick]
     reg_x = age_m30[age_pick]
-    pol = np.polyfit(reg_x,reg_y,2)
+    try:
+        pol = np.polyfit(reg_x,reg_y,2)
+    except:
+        pol = [0,0,0]
     moments['never married by age, b0'] = pol[2]
     moments['never married by age, b1'] = pol[1]
     moments['never married by age, b2'] = pol[0]
@@ -66,7 +69,10 @@ def compute_moments(self):
     
     reg_y = ever_kid[age_pick]
     reg_x = age_m30[age_pick]
-    pol = np.polyfit(reg_x,reg_y,2)
+    try:
+        pol = np.polyfit(reg_x,reg_y,2)
+    except:
+        pol = [0,0,0]
     moments['ever kids by age, b0'] = pol[2]
     moments['ever kids by age, b1'] = pol[1]
     moments['ever kids by age, b2'] = pol[0]
@@ -280,8 +286,10 @@ def compute_moments(self):
     linc_own = np.log(self.female_wage[:,2:][p_1yr] )
     linc_sp =  np.log(self.male_wage[:,2:][p_1yr])
     
-    moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]
-    
+    try:
+        moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]
+    except:
+        moments['spouse log coef 1 year after'] = 0.0
     
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
