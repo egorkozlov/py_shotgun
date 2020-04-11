@@ -60,7 +60,7 @@ if __name__ == '__main__':
     
     
     #Tik Tak Optimization
-    param=tiktak(xfix=xfix,N=1000,N_st=50,skip_local=False,skip_global=False,resume_local=False)
+    param=tiktak(xfix=xfix,N=2000,N_st=150,skip_local=False,skip_global=False,resume_local=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
