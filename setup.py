@@ -825,7 +825,7 @@ class ModelSetup(object):
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
         p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
-            self.pars['preg_at']*((t-9)**2) + \
+            self.pars['preg_at2']*((t-9)**2) + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
         #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z

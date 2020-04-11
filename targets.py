@@ -13,8 +13,8 @@ def target_values(mode='high education'):
         
     if mode=='high education':
         
-        targets['never married by age, b0'] = (0.3948181, 0.000777)
-        targets['never married by age, b1'] = (-0.0507542, 0.0000895)
+        targets['never married by age, b0'] = (0.3948181,    0.000777)
+        targets['never married by age, b1'] = (-0.0507542,  0.0000895)
         targets['never married by age, b2'] = (0.0026662,   0.0000174)
 
     
@@ -43,14 +43,14 @@ def target_values(mode='high education'):
         targets['share of kids in new marriages, b0'] = (0.058445,0.0010725)
         targets['share of kids in new marriages, b1'] = (0.0031754,0.0002467)
         
-        targets['divorced if k then m and one marriage'] = (0.1474027, 0.00243)
-        targets['divorced if m then k and one marriage'] = (0.0531433, 0.0004851)
+        targets['divorced if k then m and one marriage'] = (0.1474027, 0.2*0.00243)
+        targets['divorced if m then k and one marriage'] = (0.0531433, 0.2*0.0004851)
         
         
         targets['divorced with kids at 30']      = (0.0251494,0.0007414)
         targets['divorced never kids at 30']     = (0.0398391,0.0009261)
         targets['never married with kids at 30'] = (0.0443802,0.0007902)      
-        targets['more than one mar at 40']      = (0.1225949,0.0012733)
+        targets['more than one mar at 40']       = (0.1225949,0.0012733)
         
         targets['labor supply at 30 if kids'] = (0.7480682,0.004982)
     
