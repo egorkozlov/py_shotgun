@@ -55,6 +55,10 @@ def v_ren_new(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         V['Male, single']['V'], V_fem,
         izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
     
+    print(vf_n.mean())
+    print(vm_n.mean())
+    
+    print((haschild,canswitch))
     
     if return_vdiv_only:
         return {'Value of Divorce, male': vm_n,
@@ -101,6 +105,7 @@ def v_ren_new(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         
     result  = v_ren_core_interp(setup,v_y, vf_y, vm_y, vf_n, vm_n, is_unil, rescale=rescale)
+    
     
     if not haschild:
         result['Give a birth'] = switch
@@ -155,14 +160,14 @@ def v_no_ren(setup,V,haschild,canswitch,t):
         
      
         
-    def r(x): return x.astype(np.float32)
+    def r(x): return x.astype(setup.dtype)
     
     shape_notheta = v_y.shape[:-1]
     yes = np.full(shape_notheta,True)
     ntheta = setup.ntheta_fine
     i_theta_out = np.broadcast_to(np.arange(ntheta,dtype=np.int16)[None,None,:],v_y.shape).copy()
         
-    vf_n, vm_n = np.full((2,) + shape_notheta,-np.inf,dtype=np.float32)
+    vf_n, vm_n = np.full((2,) + shape_notheta,-np.inf,dtype=setup.dtype)
     
     result =  {'Decision': yes, 'thetas': i_theta_out,
             'Values': (r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
@@ -244,7 +249,7 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
     
    
     ins = [Vfm,Vmm,Vfs,Vms,gamma]
-    ins = [np.float32(x) for x in ins] # optional type conversion
+    ins = [setup.dtype(x) for x in ins] # optional type conversion
     vfout, vmout, nbsout, agree, ithetaout = mar_mat(*ins)
     
 
@@ -260,7 +265,7 @@ def v_no_mar(setup,t,V,icouple,ind_or_inds,*,female,giveabirth):
     vmout, vfout = V['Male, single']['V'][:,izm], V['Female, single']['V'][:,izf]
     
     
-    nbsout = np.zeros_like(vmout,dtype=np.float32)
+    nbsout = np.zeros_like(vmout,dtype=setup.dtype)
     ithetaout = -np.ones_like(vmout,dtype=np.int16)
     agree = np.full_like(vmout,False,dtype=np.bool)
     
@@ -362,7 +367,7 @@ def v_ren_core_interp(setup,vy,vfy,vmy,vf_n,vm_n,unilateral,show_sc=False,rescal
         
         i_theta_out[no] = -1
         
-        def r(x): return x.astype(np.float32)
+        def r(x): return setup.dtype(x)
         
         return {'Decision': yes, 'thetas': i_theta_out,
                 'Values': (r(v_out), r(vf_out), r(vm_out)),'Divorce':(vf_n,vm_n)}
@@ -444,7 +449,7 @@ def v_ren_core_interp(setup,vy,vfy,vmy,vf_n,vm_n,unilateral,show_sc=False,rescal
         print('Warning: m is broken is {} cases'.format(np.sum(vm_out<=vm_div_full - 1e-4)))
         
     
-    def r(x): return x.astype(np.float32)
+    def r(x): return setup.dtype(x)
     
    
     
@@ -476,7 +481,7 @@ def ren_loop(vy,vfy,vmy,vfn,vmn,thtgrid):
     vfout = vfy.copy()
     vmout = vmy.copy()
     
-    thetaout = -1*np.zeros(vout.shape,dtype=np.float32)
+    thetaout = -1*np.zeros(vout.shape,dtype=vy.dtype)
     
     for ia in range(na):
         for iexo in range(nexo):
@@ -550,7 +555,7 @@ def mar_loop(vfy,vmy,vfn,vmn,gamma):
             
             
             if good:
-                nbs = np.zeros(ntheta,dtype=np.float32)
+                nbs = np.zeros(ntheta,dtype=np.float64)
                 nbs[both] = (sf_i[both]**gamma) * (sm_i[both]**(1-gamma))
                 i_best = nbs.argmax()
                 nbs_best = nbs[i_best]
@@ -564,7 +569,7 @@ def mar_loop(vfy,vmy,vfn,vmn,gamma):
             
             
 
-@vectorize('float32(float32,float32,float32)')  
+@vectorize('float64(float64,float64,float64)')  
 def nbs(x,y,gamma):
     if x > 0 and y > 0:
         return (x**gamma) * (y**(1-gamma))
@@ -591,7 +596,7 @@ def mar_mat(vfy,vmy,vfn,vmn,gamma):
     # this reshapes things
     n_agree = np.sum(any_agree)
     
-    nbsout = np.zeros(vfn.shape,dtype=np.float32)
+    nbsout = np.zeros(vfn.shape,dtype=vfy.dtype)
     ithetaout = -1*np.ones(vfn.shape,dtype=np.int32)
     
     
@@ -599,7 +604,7 @@ def mar_mat(vfy,vmy,vfn,vmn,gamma):
         
         sf_a = sf[any_agree,:]
         sm_a = sm[any_agree,:]
-        nbs_a = np.zeros(sf_a.shape,dtype=np.float32)
+        nbs_a = np.zeros(sf_a.shape,dtype=vfy.dtype)
         
         a_pos = (sf_a>0) & (sm_a>0)
         

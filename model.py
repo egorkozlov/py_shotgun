@@ -67,6 +67,8 @@ class Model(object):
             self.time_dict[whatisdone] = [last_time]
         
     def time_statistics(self,remove_worst=True,remove_single=False):
+        
+        print('Total time is {}'.format(default_timer() - self.start))
         for what, timelist in self.time_dict.items():
             
             if remove_single and len(timelist) == 1: continue
@@ -79,8 +81,9 @@ class Model(object):
                 time_arr = time_arr[time_arr<time_worst]
                 extra = ' (excl the worst)'
                 
-            av_time = round(np.mean(time_arr),2)            
-            print('On average {} took {} sec{}'.format(what,av_time,extra))
+            av_time = round(np.mean(time_arr),2) 
+            tot_time = round(np.sum(np.array(timelist)),2) 
+            print('On average {} took {}, total {} sec'.format(what,av_time,tot_time,extra))
             
     
     def _get_iterator(self,name='default'):

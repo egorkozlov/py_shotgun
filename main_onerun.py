@@ -57,5 +57,7 @@ if __name__ == '__main__':
                                       return_format=['distance','models','agents','scaled residuals'],
                                       save_to='mdl.pkl',
                                       verbose=True,draw=True)
+    
+    mdl[0].time_statistics()
                          
     print('Done. Residual in point x0 is {}'.format(out))
