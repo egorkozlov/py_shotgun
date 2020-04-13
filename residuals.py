@@ -51,8 +51,8 @@ def mdl_resid(x=None,targets=None,weights=w,
     if verbose: print(kwords)
     
     # this is for the default model
-    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
-    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
+    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
+    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
     
     
     
@@ -150,8 +150,8 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
     num = len(targets)
     
     
-    resid = np.zeros((num,),dtype=np.float32)
-    W = np.eye(num,dtype=np.float32)
+    resid = np.zeros((num,),dtype=np.float64)
+    W = np.eye(num,dtype=np.float64)
     for i, (name, targ) in enumerate(targets.items()):
         try:
             mom = moments[name]

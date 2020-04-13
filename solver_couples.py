@@ -7,7 +7,6 @@ import numpy as np
 from timeit import default_timer
 
 
-from optimizers import get_EVM
 from optimizers import v_optimize_couple
 
 from platform import system
@@ -32,7 +31,6 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     agrid = setup.agrid_c
     sgrid = setup.sgrid_c
-    ind, p = setup.vsgrid_c.i, setup.vsgrid_c.wthis
     
     dtype = setup.dtype
     
@@ -40,16 +38,12 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     
     
+    key = 'Couple and child' if haschild else 'Couple, no children'
     
-    if haschild:
-        ls = setup.ls_levels_k
-        uu, ux = setup.ucouple_precomputed_u_k,setup.ucouple_precomputed_x_k
-        upart, ucouple = setup.u_part_k, setup.u_couple_k
-    else:
-        ls = setup.ls_levels_nk
-        uu, ux = setup.ucouple_precomputed_u_nk,setup.ucouple_precomputed_x_nk
-        upart, ucouple = setup.u_part_nk, setup.u_couple_nk
-        
+    ls = setup.ls_levels[key]
+    uu, ux = setup.u_precomputed[key]['u'],setup.u_precomputed[key]['x']
+    upart, ucouple = (setup.u_part_k, setup.u_couple_k) if haschild else (setup.u_part_nk, setup.u_couple_nk)
+
     nls = len(ls)
     
     
@@ -106,7 +100,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         assert ifinish > istart
         
         money_t = (R*agrid, wf[istart:ifinish], wm[istart:ifinish])
-        EV_t = (ind,p,EV_by_l[:,istart:ifinish,:,:])
+        EV_t = (setup.vsgrid_c,EV_by_l[:,istart:ifinish,:,:])
         
         
         
@@ -139,23 +133,29 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     assert np.all(c_opt > 0)
     
-    psi_r = psi[None,:,None].astype(dtype)
+    psi_r = psi[None,:,None].astype(setup.dtype,copy=False)
     
     # finally obtain value functions of partners
     uf, um = upart(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
     uc = ucouple(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
     
     
-    EVf_all, EVm_all, EV_all  = (get_EVM(ind,p,x) for x in (EV_fem_by_l, EV_mal_by_l,EV_by_l))
+    EVf_all, EVm_all, EV_all  = (setup.vsgrid_c.apply_preserve_shape(x) for x in (EV_fem_by_l, EV_mal_by_l,EV_by_l))
+    
     V_fem = uf + beta*np.take_along_axis(np.take_along_axis(EVf_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     V_mal = um + beta*np.take_along_axis(np.take_along_axis(EVm_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     V_all = uc + beta*np.take_along_axis(np.take_along_axis(EV_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
-    def r(x): return x.astype(dtype)
+    def r(x): return x
+    
+    assert V_all.dtype==EV_all.dtype==V_couple.dtype
     
     try:
         assert np.allclose(V_all,V_couple,atol=1e-4,rtol=1e-3)
+        print('similar')
     except:
-        #print('max difference in V is {}'.format(np.max(np.abs(V_all-V_couple))))
+        dff = np.max(np.abs(V_all-V_couple))
+        print('max difference in V is {}'.format(dff))
+        
         pass
     
     return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt, r(V_all_l)

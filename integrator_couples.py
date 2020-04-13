@@ -7,9 +7,8 @@ This is integrator for couples
 
 import numpy as np
 #from renegotiation import v_last_period_renegotiated, v_renegotiated_loop
-from ren_mar_alt import v_ren_new, v_no_ren
     
-from renegotiation_unilateral import v_ren_uni
+from renegotiation_unilateral import v_ren_uni, v_no_ren
 
 def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     # computes expected value of couple entering the next period with an option
@@ -20,11 +19,8 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     
     
     if can_divorce:
-        out = v_ren_new(setup,Vpostren,haschild,canswitch,t)
-        out2 = v_ren_uni(setup,Vpostren,haschild,canswitch,t)    
-        assert np.all(out['thetas']==out2['thetas'])
-        print('worked')
-            
+        out = v_ren_uni(setup,Vpostren,haschild,canswitch,t)
+        
     else:
         out = v_no_ren(setup,Vpostren,haschild,canswitch,t)
         

@@ -63,11 +63,6 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         V['Male, single']['V'], V_fem,
         izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
     
-    print(vf_n.mean())
-    print(vm_n.mean())
-    
-    print((haschild,canswitch))
-    
     assert vf_n.dtype == vm_n.dtype
     
     if return_vdiv_only:
@@ -105,7 +100,6 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         assert v_out.dtype == setup.dtype
          
     else:
-        
         if canswitch:
             if not ugpu:
                 v_out, vf_out, vm_out, itheta_out, switch = \
@@ -235,23 +229,40 @@ def v_div_byshare(setup,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,
 
 
 
-def v_no_ren(setup,V,marriage,t):
+def v_no_ren(setup,V,haschild,canswitch,t):
     
     # this works live v_ren_new but does not actually run renegotiation
     
     expnd = lambda x : setup.v_thetagrid_fine.apply(x,axis=2)
     
-    if marriage:
-        # if couple is married already
-        v_y = expnd(V['Couple, M']['V'])
-        vf_y = expnd(V['Couple, M']['VF'])
-        vm_y = expnd(V['Couple, M']['VM'])
+    
+    if haschild:
+        v_y = expnd(V['Couple and child']['V'])
+        vf_y = expnd(V['Couple and child']['VF'])
+        vm_y = expnd(V['Couple and child']['VM'])
     else:
-        # stay in cohabitation
-        v_y = expnd(V['Couple, C']['V'])
-        vf_y = expnd(V['Couple, C']['VF'])
-        vm_y = expnd(V['Couple, C']['VM'])
-        switch = np.full(vf_y.shape,False,dtype=np.bool)
+        v_y_nk = expnd(V['Couple, no children']['V'])
+        vf_y_nk = expnd(V['Couple, no children']['VF'])
+        vm_y_nk = expnd(V['Couple, no children']['VM'])
+        # make a baby
+        
+        if canswitch:
+            v_y_k = expnd(V['Couple and child']['V'])
+            vf_y_k = expnd(V['Couple and child']['VF'])
+            vm_y_k = expnd(V['Couple and child']['VM'])
+        else:
+            v_y_k = v_y_nk
+            vf_y_k = vf_y_nk
+            vm_y_k = vm_y_nk
+            
+        # switching criterion        
+        switch = (v_y_k > v_y_nk)
+        
+        if not canswitch: assert not np.any(switch)
+        
+        v_y = switch*v_y_k + (~switch)*v_y_nk
+        vf_y = switch*vf_y_k + (~switch)*vf_y_nk
+        vm_y = switch*vm_y_k + (~switch)*vm_y_nk
      
         
     def r(x): return x
@@ -266,9 +277,8 @@ def v_no_ren(setup,V,marriage,t):
     result =  {'Decision': yes, 'thetas': i_theta_out,
             'Values': (r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
     
-    if not marriage:
-        result['Cohabitation preferred to Marriage'] = ~switch
-        
+    if not haschild:
+        result['Give a birth'] = switch
         
         
     return result

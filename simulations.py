@@ -243,13 +243,9 @@ class Agents:
                 
                 if sname == 'Couple, no children' or sname == 'Couple and child' or sname == 'Female and child':
                     
-                    nls = self.setup.nls_k if (sname == 'Couple and child')  \
-                        else self.setup.nls_nk if (sname == 'Couple, no children') \
-                            else self.setup.nls_sk 
+                    nls = self.setup.nls[sname]
                             
-                    lvls = self.setup.ls_levels_k if (sname == 'Couple and child') \
-                        else self.setup.ls_levels_nk if (sname == 'Couple, no children')  \
-                            else self.setup.ls_levels_sk
+                    lvls = self.setup.ls_levels[sname]
                     
                     ls_val = self.ils_i[ind,t] 
                     
@@ -668,9 +664,17 @@ class Agents:
         self.male_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.couple_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         
+        self.total_expenditures = self.c + self.x + self.s
         
-        self.labor_supply[couple_k] = self.setup.ls_levels_k[self.ils_i[couple_k]]
-        self.labor_supply[single_k] = self.setup.ls_levels_sk[self.ils_i[single_k]]
+        
+        self.savings_to_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        
+        self.labor_supply[couple_k] = self.setup.ls_levels['Couple and child'][self.ils_i[couple_k]]
+        self.labor_supply[single_k] = self.setup.ls_levels['Female and child'][self.ils_i[single_k]]
+        
+        
+        assert np.all(self.x>=0)
+        
         
         # fill wage & earnings
         
@@ -690,11 +694,13 @@ class Agents:
                     wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + 0*tf)
                     self.female_wage[pick,t] = wage
                     self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
+                    self.savings_to_earnings[pick,t] = self.s[pick,t] / self.female_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Male, single':                    
                     wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + 0*tm)
                     self.male_wage[pick,t] = wage
                     self.male_earnings[pick,t] = wage # !!!
+                    self.savings_to_earnings[pick,t] = self.s[pick,t] / self.male_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Couple and child' or state == 'Couple, no children':
                     iall, izf, izm, ipsi = self.setup.all_indices(t,iexo)
@@ -705,14 +711,17 @@ class Agents:
                     self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
                     self.male_earnings[pick,t] = wage_m
                     self.couple_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]
-                    
+                    self.savings_to_earnings[pick,t] = self.s[pick,t] / self.couple_earnings[pick,t]
                     self.theta_couple[pick,t] = self.setup.thetagrid_fine[self.itheta[pick,t]]
                     self.psi_couple[pick,t] = self.setup.exogrid.psi_t[t][ipsi]
+                    
                     
                     assert np.all(wage_f>0)
                     assert np.all(wage_m>0)
                 else:
                     raise Exception('unsupported state code?')
+        
+        
         
         
         

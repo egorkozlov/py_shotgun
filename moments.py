@@ -108,9 +108,21 @@ def compute_moments(self):
     
     moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()
     
+    t = 9
+    pick = (self.state[:,t] == n_single)    
+    moments['median savings to earnings at 30, single'] = np.median(self.savings_to_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average savings to earnings at 30, single'] = np.mean(self.savings_to_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['median consumption to earnings at 30, single']  =  np.median(self.c[pick,t]/self.female_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average consumption to earnings at 30, single']  =  np.mean(self.c[pick,t]/self.female_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average savings at 30, single']  =  np.mean(self.s[pick,t]) if np.any(pick) else 0.0
     
     
-    
+    pick = is_mar[:,t]
+    moments['median savings to earnings at 30, couples'] = np.median(self.savings_to_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average savings to earnings at 30, couples'] = np.mean(self.savings_to_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['median consumption to earnings at 30, couples']  =  np.median(self.c[pick,t]/self.couple_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average consumption to earnings at 30, couples']  =  np.mean(self.c[pick,t]/self.couple_earnings[pick,t]) if np.any(pick) else 0.0
+    moments['average savings at 30, couple']  =  np.mean(self.s[pick,t]) if np.any(pick) else 0.0
     
     
     
@@ -194,6 +206,7 @@ def compute_moments(self):
         
     moments['share of kids in new marriages, b0'] = pol[1]
     moments['share of kids in new marriages, b1'] = pol[0]
+    
     
     
     moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()

@@ -7,7 +7,7 @@ This contains routines for intergation for singles
 import numpy as np
 #import dill as pickle
 
-from ren_mar_alt import v_mar_igrid, v_no_mar
+from marriage import v_mar_igrid, v_no_mar
     
 
 
@@ -70,7 +70,7 @@ def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
                                       unplanned_preg=True,single_mom=True)
         
     
-    nl = len(setup.ls_levels_sk)
+    nl = len(setup.ls_levels['Female and child'])
     
     # FIXME: when people meet their skill depreciation stops for one period.
     # This may be minor but is a bit inconsistent
@@ -111,7 +111,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T
    
         
-    V_next = np.ones((ns,nexo))*(-1e10)
+    V_next = np.ones((ns,nexo))*(-1e20)
     
     izf = setup.all_indices(t)[1]
     p_preg_all = np.broadcast_to(setup.upp_precomputed[t][izf][None,:],(ns,nexo))
@@ -137,7 +137,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     
     dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
     morc = np.zeros(matches['iexo'].shape,dtype=np.bool)
-    punp = np.zeros(matches['iexo'].shape,dtype=np.float32) # save probabilites of unplanned pregnancies
+    punp = np.zeros(matches['iexo'].shape,dtype=setup.dtype) # save probabilites of unplanned pregnancies
     tht = -1*np.ones(matches['iexo'].shape,dtype=np.int32)
     iconv = matches['iconv']
     

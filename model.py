@@ -111,19 +111,20 @@ class Model(object):
                 female = (desc == 'Female, single')
                 
                 V, c, s = v_iter_single(setup,t,EV,female,ushift)       
-                
+                assert V.dtype == c.dtype == setup.dtype
                 return {desc: {'V':V,'c':c,'s':s}}   
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
                 haschild = (desc== 'Couple and child')
                 
                 V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)  
+                assert V.dtype == VF.dtype == c.dtype == setup.dtype
                 
                 return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             elif desc == 'Female and child':
                 
                 V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
-                
+                assert V.dtype == c.dtype == setup.dtype
                 return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             else:
                 raise Exception('I do not know this type...')
@@ -135,12 +136,16 @@ class Model(object):
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
                 EV, dec = ev_single(setup,V_next,setup.agrid_s,female,t)
+                assert EV.dtype == setup.dtype
             elif desc == 'Couple and child':
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
+                assert EV[0].dtype == EV[1].dtype == EV[2].dtype == setup.dtype
             elif desc == 'Couple, no children':
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
+                assert EV[0].dtype == EV[1].dtype == EV[2].dtype == setup.dtype
             elif desc == 'Female and child':
                 EV, dec = ev_single_k(setup,V_next,setup.agrid_s,t)
+                assert EV.dtype == setup.dtype
             else:
                 raise Exception('I do not know this type...')
             return EV, dec
@@ -181,12 +186,13 @@ class Model(object):
         if desc == 'Couple and child' or desc == 'Couple, no children':
             
             #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2).astype(self.dtype)
+            sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2)
             
-            Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2).astype(self.dtype)
+            Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2)
             
-            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2).astype(self.dtype)
-            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2).astype(self.dtype)
+            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2)
+            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
+            assert sint.dtype == Vint.dtype == xint.dtype == self.setup.dtype
             
             if Vint.ndim < 4: Vint = Vint[:,:,:,None]
             
