@@ -12,7 +12,7 @@ def compute_moments(self):
     
     n_mark = self.state_codes['Couple and child']
     n_marnk = self.state_codes['Couple, no children']
-    n_single = self.state_codes['Female, single']
+    n_single = self.state_codes['Female, single'] if self.female else self.state_codes['Male, single']
     n_singlek = self.state_codes['Female and child']
     
     
@@ -213,6 +213,34 @@ def compute_moments(self):
     moments['just k & m at 30'] = (self.agreed_k & one_mar)[:,9].mean()
     moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
     
+    
+    inc = self.female_earnings if self.female else self.male_earnings
+    inc_30 = inc[:,9]
+    pick = (inc_30 >= np.median(inc_30))
+    im_pick = is_mar[:,9]    
+    em_pick = ever_mar[:,9]
+    moments['divorced at 30, above median'] = div_now[pick & em_pick,9].mean()
+    moments['ever married at 30, above median'] = ever_mar[pick,9].mean()
+    moments['ever kids at 30, above median'] = ever_kid[pick & im_pick,9].mean()
+    pick = (inc_30 <= np.median(inc_30))
+    moments['divorced at 30, below median'] = div_now[pick & em_pick,9].mean()
+    moments['ever married at 30, below median'] = ever_mar[pick,9].mean()
+    moments['ever kids at 30, below median'] = ever_kid[pick & im_pick,9].mean()
+    
+    try:
+        moments['divorced at 30, ratio'] = moments['divorced at 30, above median']/moments['divorced at 30, below median']
+    except:
+        moments['divorced at 30, ratio'] = 0.0
+        
+    try:
+        moments['ever married at 30, ratio'] = moments['ever married at 30, above median'] / moments['ever married at 30, below median'] 
+    except:
+        moments['ever married at 30, ratio'] = 0.0
+        
+    try:
+        moments['ever kids at 30, ratio'] = moments['ever kids at 30, above median'] / moments['ever kids at 30, below median']
+    except:
+        moments['ever kids at 30, ratio'] = 0.0
     
     moments['divorced with kids at 30']      = (div_now[:,9]     &  ever_kid[:,9])[ever_mar[:,9]].mean()
     moments['divorced never kids at 30']     = (div_now[:,9]     & ~ever_kid[:,9])[ever_mar[:,9]].mean()

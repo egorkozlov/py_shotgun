@@ -59,7 +59,7 @@ def v_iter_single(setup,t,EV,female,ushift):
     
     def r(x): return x.astype(dtype,copy=False)
     
-    return r(V_refine), r(c_opt), r(s_opt)#, s_opt/money
+    return r(V_refine), r(c_opt), r(s_opt)
 
 
 

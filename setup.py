@@ -32,18 +32,20 @@ class ModelSetup(object):
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
-        p['R_t'] = [1.025]*T
+        p['R_t'] = [1.04]*T
         p['n_psi_t']     = [12]*T
-        p['beta_t'] = [0.95]*T
+        p['beta_t'] = [1/1.04]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
         p['sig_partner_a'] = 0.1
-        p['mu_partner_a_female'] = 0.2
-        p['mu_partner_a_male'] = -0.2
-        p['sig_partner_z'] = 0.9
-        p['mu_partner_z_male'] = -0.1
-        p['mu_partner_z_female'] = 0.1
+        p['mu_partner_a_female'] = 0.00
+        p['mu_partner_a_male'] = -0.00
+        p['dump_factor_z'] = 0.85
+        
+        p['sig_partner_z'] = 1.2
+        p['mu_partner_z_male'] = -0.02
+        p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5
         p['pmeet_0'] = 0.5
         p['pmeet_t'] = 0.0
@@ -568,13 +570,15 @@ class ModelSetup(object):
         def ind_conv(a,b,c): return setup.all_indices(t,(a,b,c))[0]
         
         
+        df = setup.pars['dump_factor_z']
+        
         for iz in range(n_zown):
             p_psi = int_prob(psi_couple,mu=0,sig=sigma_psi_init)
             if female:
-                p_zm  = int_prob(z_partner, mu=z_own[iz] + mu_z_partner,sig=sig_z_partner)
+                p_zm  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zf  = zmat_own[iz,:]
             else:
-                p_zf  = int_prob(z_partner, mu=z_own[iz] + mu_z_partner,sig=sig_z_partner)
+                p_zf  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zm  = zmat_own[iz,:]
             #sm = sf
         
