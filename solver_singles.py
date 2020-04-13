@@ -54,12 +54,12 @@ def v_iter_single(setup,t,EV,female,ushift):
      
     EVexp = setup.vsgrid_s.apply_preserve_shape(EV)
     V_refine = setup.u(c_refine) + ushift + beta*np.take_along_axis(EVexp,i_opt,0)
-    print('after refinement V difference is {}'.format(np.abs(np.max(V_ret-V_refine))))
+    #print('after refinement V difference is {}'.format(np.abs(np.max(V_ret-V_refine))))
     
     
     def r(x): return x.astype(dtype,copy=False)
     
-    return r(V_ret), r(c_opt), r(s_opt)#, s_opt/money
+    return r(V_refine), r(c_opt), r(s_opt)#, s_opt/money
 
 
 
@@ -107,7 +107,7 @@ def v_iter_single_mom(setup,t,EV,ushift):
     
     EVexp = setup.vsgrid_s.apply_preserve_shape(EV)    
     V_refine = u + beta*np.take_along_axis(np.take_along_axis(EVexp,i_opt[...,None],0),ils[...,None],2).squeeze(axis=2)
-    print('After retirement (sm) max diff is {}'.format(np.max(np.abs(V_old-V_refine))))
+    #print('After retirement (sm) max diff is {}'.format(np.max(np.abs(V_old-V_refine))))
     
     def r(x): return x.astype(dtype,copy=False)
     

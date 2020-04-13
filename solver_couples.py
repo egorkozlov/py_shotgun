@@ -151,11 +151,10 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     try:
         assert np.allclose(V_all,V_couple,atol=1e-4,rtol=1e-3)
-        print('similar')
+        #print('similar')
     except:
-        dff = np.max(np.abs(V_all-V_couple))
-        print('max difference in V is {}'.format(dff))
-        
+        #dff = np.max(np.abs(V_all-V_couple))
+        #print('max difference in V is {}'.format(dff))
         pass
     
     return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt, r(V_all_l)

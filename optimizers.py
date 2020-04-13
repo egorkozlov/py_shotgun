@@ -17,8 +17,7 @@ from platform import system
 
 
 
-if system() != 'Darwin' and system() != 'Windows' and system()!='Linux':
-#if system() != 'Darwin':
+if system() != 'Darwin':
     ugpu = True
 else:
     ugpu = False
