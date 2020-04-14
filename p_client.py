@@ -29,7 +29,7 @@ except:
 
 
 # optionally this can apply function f_apply to the results
-def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0,nfails=3):
+def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0,nfails=3,resume=False):
       
     
     
@@ -44,9 +44,10 @@ def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0
     for ival in range(len(values)):
         namein = 'in{}.pkl'.format(ival)
         
-        [os.remove('Job/'+f) for f in os.listdir('Job') 
-         if (f.endswith('.pkl') and f.startswith('in')) or 
-            (f.endswith('.pkl') and f.startswith('out'))]
+        if not resume:
+            [os.remove('Job/'+f) for f in os.listdir('Job') 
+             if (f.endswith('.pkl') and f.startswith('in')) or 
+                (f.endswith('.pkl') and f.startswith('out'))]
         
         names_in.append(namein)
         nameout = 'out{}.pkl'.format(ival)
@@ -54,15 +55,23 @@ def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0
         
         
         
-    def create_in(fname,x):
+    def create_in(fname,x):        
         file_in = open('Job/'+fname,'wb+')  
         pickle.dump(x,file_in)
         file_in.close()
     
     
     # create bunch of in files and write values of them
-    for fname, x in zip(names_in,values):
-        create_in(fname,x)
+    
+    if not resume:
+        for fname, x in zip(names_in,values):
+            create_in(fname,x)
+    else:
+        olist = os.listdir('Job')
+        for fname_in, fname_out, x in zip(names_in,names_out,values):
+            if (fname_in not in olist) and (fname_out not in olist):
+                create_in(fname_in,x)
+                print('recreating {}'.format(fname_in))
         
         
         
@@ -137,7 +146,7 @@ def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0
         
         # this handles both lists and values
         val = pickle.load(file)
-        print(val,fout)
+        #print(val,fout)
         fout.append(f_apply(val))
         file.close()
         os.remove('Job/'+name)

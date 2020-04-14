@@ -15,7 +15,7 @@ from time import sleep
 import pickle
 from calibration_params import calibration_params
 
-def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_local=False):
+def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_global=False,resume_local=False):
     
     xl, xu, x0, keys, translator = calibration_params(xfix=xfix)
     #Initial cheks
@@ -43,7 +43,7 @@ def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_local=Fa
         #Get fitness of initial points
         
         pts = [ ('compute',translator(x_init[:,j])) for j in range(N)]
-        fx_init = compute_for_values(pts)
+        fx_init = compute_for_values(pts,resume=resume_global)
         
         fx_init = (np.array(fx_init)).squeeze()
          # !! not the optimizer returns squared value of mdl_resid
