@@ -147,7 +147,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     def v_rescale(v,it_out):
     
         vo = v.copy()
-        itheta_in = np.broadcast_to(np.arange(thtgrid.size)[None,None,:],it_out.shape)
+        itheta_in = np.broadcast_to(np.arange(thtgrid.size,dtype=np.int16)[None,None,:],it_out.shape)
         stay = (it_out!=-1)
         
         decrease = (it_out < itheta_in) & stay

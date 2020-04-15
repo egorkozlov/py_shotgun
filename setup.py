@@ -368,14 +368,14 @@ class ModelSetup(object):
         #Grid Couple
         self.na = 40
         self.amin = 0
-        self.amax = 30
-        self.agrid_c = np.linspace(self.amin,self.amax,self.na,dtype=self.dtype)
-        tune=1.5
+        self.amax = 50
+        self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
+        #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
         
         # this builds finer grid for potential savings
         s_between = 7 # default numer of points between poitns on agrid
-        s_da_min = 0.001 # minimal step (does not create more points)
+        s_da_min = 0.01 # minimal step (does not create more points)
         s_da_max = 0.1 # maximal step (creates more if not enough)
         
         self.sgrid_c = build_s_grid(self.agrid_c,s_between,s_da_min,s_da_max)
@@ -386,8 +386,8 @@ class ModelSetup(object):
         #Grid Single
         self.amin_s = 0
         self.amax_s = self.amax/2.0
-        self.agrid_s = np.linspace(self.amin_s,self.amax_s,self.na,dtype=self.dtype)
-        tune_s=1.5
+        self.agrid_s = self.agrid_c/2.0
+        #tune_s=1.5
         #self.agrid_s = np.geomspace(self.amin_s+tune_s,self.amax_s+tune_s,num=self.na)-tune_s
         
         self.sgrid_s = build_s_grid(self.agrid_s,s_between,s_da_min,s_da_max)
