@@ -667,6 +667,9 @@ class Agents:
         
     def compute_aux(self):
         # this should be ran after the last simulations
+        
+        
+        
         couple_k = (self.state == self.state_codes['Couple and child'])
         single_k = (self.state == self.state_codes['Female and child'])
         self.labor_supply = np.ones((self.N,self.T),dtype=np.float32)
@@ -701,7 +704,10 @@ class Agents:
             
             for state, i_state in self.state_codes.items():
                 pick = (self.state[:,t] == i_state)
+                
+                
                 if not np.any(pick): continue
+                if self.verbose: print('at t = {} max savings of {} is {}'.format(t,state,self.s[pick,t].max()))
                 iexo = self.iexo[pick,t] # reshaped
                 
                 

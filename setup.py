@@ -20,9 +20,9 @@ class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
         T = 55
-        Tret = 40 # first period when the agent is retired
+        Tret = 45 # first period when the agent is retired
         Tfert = 18 # first peroid when infertile
-        Tdiv = 35 # first period when cannot divorce / renegotiate
+        Tdiv = 56 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
         p['T'] = T
         p['Tret'] = Tret
@@ -368,7 +368,7 @@ class ModelSetup(object):
         #Grid Couple
         self.na = 40
         self.amin = 0
-        self.amax = 60
+        self.amax = 30
         self.agrid_c = np.linspace(self.amin,self.amax,self.na,dtype=self.dtype)
         tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
@@ -385,7 +385,7 @@ class ModelSetup(object):
          
         #Grid Single
         self.amin_s = 0
-        self.amax_s = self.amax/1.1
+        self.amax_s = self.amax/2.0
         self.agrid_s = np.linspace(self.amin_s,self.amax_s,self.na,dtype=self.dtype)
         tune_s=1.5
         #self.agrid_s = np.geomspace(self.amin_s+tune_s,self.amax_s+tune_s,num=self.na)-tune_s

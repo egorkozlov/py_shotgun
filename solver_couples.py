@@ -147,6 +147,12 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     V_all = uc + beta*np.take_along_axis(np.take_along_axis(EV_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     def r(x): return x
     
+    if V_all.shape[-1] > 1:
+        V_weighted = V_fem*setup.thetagrid[None,None,:] + V_mal*(1-setup.thetagrid[None,None,:])
+        vd_max = np.max(np.abs(V_weighted - V_all))
+        vd_mean = np.mean(np.abs(V_weighted - V_all))
+        print('max diff is {}, mean diff is {}'.format(vd_max,vd_mean))
+    
     assert V_all.dtype==EV_all.dtype==V_couple.dtype
     
     try:

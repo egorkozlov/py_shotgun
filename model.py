@@ -246,10 +246,29 @@ class Model(object):
             import pickle
             pickle.dump(self,open('model_save.pkl','wb+'))
         
+        
+    def x_reshape(self,x,t):
+        # this reshapes couple's values to multidimensional objects
+        ss = self.setup
+        
+        shp = (ss.na,ss.pars['n_zf_t'][t],
+                              ss.pars['n_zm_t'][t],
+                              ss.pars['n_psi_t'][t],
+                              ss.ntheta)
+        
+        x_reshape = x.reshape(shp)
+        return x_reshape
+    
+        
     def graph(self,ai,zfi,zmi,psii,ti,thi):        
         #Draw some graph of Value and Policy Functions
         V=graphs(self,ai,zfi,zmi,psii,ti,thi)        
         return V
+    
+    def diagnostics(self):
+        from diagnostics import check_value_functions
+        check_value_functions(self)
+        
       
         
     

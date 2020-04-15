@@ -33,7 +33,6 @@ def compute_for_values(values,f_apply=lambda x:x,timeout=1200.0,print_every=10.0
       
     
     
-    
     #assert type(values) is list
     
     names_in = list()

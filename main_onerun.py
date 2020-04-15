@@ -59,5 +59,6 @@ if __name__ == '__main__':
                                       verbose=True,draw=True)
     
     mdl[0].time_statistics()
+    mdl[0].diagnostics()
                          
     print('Done. Residual in point x0 is {}'.format(out))
