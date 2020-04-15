@@ -37,7 +37,9 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     Vren = {'M':{'VR':tk(_Vren2[0]),'VC':tk(_Vren2[1]), 'VF':tk(_Vren2[2]),'VM':tk(_Vren2[3])},
             'SF':Vpostren['Female, single'],
             'SM':Vpostren['Male, single']}
-
+    
+    '''
+    # this is false: instead of V0.min should be minimum of many things
     V0 = Vpostren['Couple and child']['V']
     V1 = _Vren2[1]
     
@@ -45,7 +47,7 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
         assert V1.max() <= V0.max() + 1e-4
         assert V1.min() >= V0.min() - 1e-4
         
-    
+    '''
     
         
     # accounts for exogenous transitions
