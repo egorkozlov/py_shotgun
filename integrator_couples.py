@@ -34,12 +34,12 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     
     tk = lambda x : x[:,:,setup.theta_orig_on_fine]
     
-    Vren = {'M':{'V':tk(_Vren2[0]),'VF':tk(_Vren2[1]),'VM':tk(_Vren2[2])},
+    Vren = {'M':{'VR':tk(_Vren2[0]),'VC':tk(_Vren2[1]), 'VF':tk(_Vren2[2]),'VM':tk(_Vren2[3])},
             'SF':Vpostren['Female, single'],
             'SM':Vpostren['Male, single']}
 
     V0 = Vpostren['Couple and child']['V'] if haschild else Vpostren['Couple, no children']['V']
-    V1 = _Vren2[0]
+    V1 = _Vren2[1]
     
     if haschild:
         characteristics = lambda x : (np.max(x), np.min(x), np.mean(x), np.std(x))
@@ -52,10 +52,10 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
         
     # accounts for exogenous transitions
     
-    EV, EVf, EVm = ev_couple_exo(setup,Vren['M'],t,haschild,use_sparse,down=False)
+    EVr, EVc, EVf, EVm = ev_couple_exo(setup,Vren['M'],t,haschild,use_sparse,down=False)
     
     
-    return (EV, EVf, EVm), dec
+    return (EVr, EVc, EVf, EVm), dec
 
 
 def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
@@ -86,8 +86,8 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     na, nexo, ntheta = setup.na, setup.pars['nexo_t'][t], setup.ntheta 
     
     
-    V, Vf, Vm = Vren['V'], Vren['VF'], Vren['VM']
-    EV, EVf, EVm = np.zeros((na,nexo,ntheta,nl)), np.zeros((na,nexo,ntheta,nl)), np.zeros((na,nexo,ntheta,nl))
+    Vr, Vc, Vf, Vm = Vren['VR'], Vren['VC'], Vren['VF'], Vren['VM']
+    EVr, EVc, EVf, EVm = np.zeros((4,na,nexo,ntheta,nl),dtype=setup.dtype)
     
     
     for il in range(nl):
@@ -97,7 +97,8 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
         
         
         for itheta in range(ntheta):
-            EV[...,itheta,il]  = mmult( V[...,itheta],M)
+            EVr[...,itheta,il]  = mmult(Vr[...,itheta],M)
+            EVc[...,itheta,il]  = mmult(Vc[...,itheta],M)
             EVf[...,itheta,il] = mmult(Vf[...,itheta],M)             
             EVm[...,itheta,il] = mmult(Vm[...,itheta],M)             
             
@@ -105,4 +106,4 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     #assert not np.allclose( EV[...,0], EV[...,1])
     
     
-    return EV, EVf, EVm
+    return EVr, EVc, EVf, EVm

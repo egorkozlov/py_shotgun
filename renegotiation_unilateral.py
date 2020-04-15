@@ -22,7 +22,7 @@ else:
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
 from renegotiation_unilateral_gpu import v_ren_gpu_twoopt
 
-def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rescale=False):
+def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rescale=True):
     # this returns value functions for couple that entered the period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     # 
@@ -161,7 +161,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         return vo
     
-    if rescale: v_out = v_rescale(v_out,itheta_out)
+    v_resc = v_rescale(v_out,itheta_out) if rescale else v_out
     
         
     def r(x): return x
@@ -177,7 +177,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     
     decision = np.any((itheta_out>=0),axis=2)
     result =  {'Decision': decision, 'thetas': itheta_out,
-                'Values': (r(v_out), r(vf_out), r(vm_out)),'Divorce':(vf_n,vm_n)}
+                'Values': (r(v_resc), r(v_out), r(vf_out), r(vm_out)),'Divorce':(vf_n,vm_n)}
     
     
     if not haschild:

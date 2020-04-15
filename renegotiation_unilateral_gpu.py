@@ -265,6 +265,7 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
             
 
 
+
 @cuda.jit   
 def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n, vm_n, itht, wntht, thtgrid, v_out, vm_out, vf_out, itheta_out, switch_out):
     # this assumes block is for the same a and theta

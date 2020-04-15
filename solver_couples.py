@@ -73,9 +73,9 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     shp = (setup.na,nexo,setup.ntheta)
     
     if EV_tuple is None:
-        EV_by_l, EV_fem_by_l, EV_mal_by_l = np.zeros((3,) + shp + (nls,),dtype=setup.dtype)
+        EVr_by_l, EVc_by_l, EV_fem_by_l, EV_mal_by_l = np.zeros((4,) + shp + (nls,),dtype=setup.dtype)
     else:
-        EV_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
+        EVr_by_l, EVc_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
     
     # type conversion
     sgrid,sigma,beta = (dtype(x) for x in (sgrid,sigma,beta))
@@ -100,7 +100,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         assert ifinish > istart
         
         money_t = (R*agrid, wf[istart:ifinish], wm[istart:ifinish])
-        EV_t = (setup.vsgrid_c,EV_by_l[:,istart:ifinish,:,:])
+        EV_t = (setup.vsgrid_c,EVr_by_l[:,istart:ifinish,:,:])
         
         
         
@@ -140,11 +140,11 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     uc = ucouple(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
     
     
-    EVf_all, EVm_all, EV_all  = (setup.vsgrid_c.apply_preserve_shape(x) for x in (EV_fem_by_l, EV_mal_by_l,EV_by_l))
+    EVf_all, EVm_all, EVc_all  = (setup.vsgrid_c.apply_preserve_shape(x) for x in (EV_fem_by_l, EV_mal_by_l,EVc_by_l))
     
     V_fem = uf + beta*np.take_along_axis(np.take_along_axis(EVf_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     V_mal = um + beta*np.take_along_axis(np.take_along_axis(EVm_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
-    V_all = uc + beta*np.take_along_axis(np.take_along_axis(EV_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
+    V_all = uc + beta*np.take_along_axis(np.take_along_axis(EVc_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     def r(x): return x
     
     if V_all.shape[-1] > 1:
@@ -153,15 +153,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         vd_mean = np.mean(np.abs(V_weighted - V_all))
         print('max diff is {}, mean diff is {}'.format(vd_max,vd_mean))
     
-    assert V_all.dtype==EV_all.dtype==V_couple.dtype
-    
-    try:
-        assert np.allclose(V_all,V_couple,atol=1e-4,rtol=1e-3)
-        #print('similar')
-    except:
-        #dff = np.max(np.abs(V_all-V_couple))
-        #print('max difference in V is {}'.format(dff))
-        pass
+    assert V_all.dtype==EVc_all.dtype==V_couple.dtype
     
     return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt, r(V_all_l)
 
