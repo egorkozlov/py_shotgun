@@ -9,7 +9,8 @@ from time import sleep
 from main import mdl_resid
 import numpy as np
 from tiktak import filer
-
+import gc
+from calibration_params import calibration_params
 
 #def mdl_resid(x=(0,)):
 #    sleep(1)
@@ -32,11 +33,17 @@ def fun(x):
         return mdl_resid()
     elif action == 'compute':
         return mdl_resid(args)
+    elif action == 'moments':
+        agents = mdl_resid(args,return_format=['agents'])
+        mom = agents.compute_moments()
+        return mom
     elif action == 'minimize':	
         
         import dfols
         
-        i, N_st, lb, ub = args
+        i, N_st, xfix = args
+        
+        xl, xu, x0, keys, translator = calibration_params(xfix=xfix)
         
         #Sort lists
         def sortFirst(val): return val[0]
@@ -64,20 +71,25 @@ def fun(x):
         
         def q(pt):
             try:
-                ans = mdl_resid(pt,return_format=['scaled residuals'])
+                ans = mdl_resid(translator(pt),return_format=['scaled residuals'])
             except:
                 print('During optimization function evaluation failed at {}'.format(pt))
                 ans = np.array([1e6])
             finally:
+                gc.collect()
                 return ans
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-4, maxfun=100, bounds=(lb,ub), scaling_within_bounds=True)
+        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-3, maxfun=100, bounds=(xl,xu),
+                        scaling_within_bounds=True, objfun_has_noise=False)
         
         print(res)
         
-        fbest = mdl_resid(res.x) # in prnciple, this can be inconsistent with
+        if res.flag == -1:
+            raise Exception('solver returned something creepy...')
+        
+        fbest = mdl_resid(translator(res.x)) # in prnciple, this can be inconsistent with
         # squared sum of residuals
         
         

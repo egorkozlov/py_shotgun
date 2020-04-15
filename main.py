@@ -31,32 +31,25 @@ from numpy.random import random_sample as rs
 from tiktak import tiktak
 print('Hi!')
 
+
 from residuals import mdl_resid
+from calibration_params import calibration_params
 
 if __name__ == '__main__':
     
+    fix_values = False
+    if fix_values:
+        xfix = {'u_shift_mar': 0.725863356303563,
+                'util_alp': 0.6534190912803465,
+                'util_kap': 1.9136130954048896}
+    else:
+        xfix = None
+        
     
-    #Build  data moments and pickle them
+        
+    lb, ub, xdef, keys, translator = calibration_params(xfix=xfix)
     
-    
-    
-    #Initialize the file with parameters
-
-    lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.01, -0.1])
-    ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.5,    0.0])
-    xdef = np.array( [ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.30045406, -0.01858392])
-
-    
-    
-    ##### FIRST LET'S TRY TO RUN THE FUNCTION IN FEW POINTS
-    
-    #print('Testing the workers...')
-    #from p_client import compute_for_values
-    #pts = [lb + rs(lb.shape)*(ub-lb) for _ in range(3)]
-    #pts = [('compute',x) for x in pts]    
-    #outs = compute_for_values(pts,timeout=3600.0)
-    #print('Everything worked, output is {}'.format(outs))
-    
+    print('calibration adjusts {}'.format(keys))
     
     print('')
     print('')
@@ -64,16 +57,16 @@ if __name__ == '__main__':
     print('')
     print('')
     
-   
-
+    
+    
     #Tik Tak Optimization
-    param=tiktak(400,400,20,lb,ub,mdl_resid,tole=1e-3,nelder=False,refine=False,
-                 skip_local=True,skip_global=False)
+    param=tiktak(xfix=xfix,N=2000,N_st=150,skip_local=False,skip_global=False,
+                             resume_global=False,resume_local=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
     
     #Now Re do the computation with graphs!
-    out, mdl = mdl_resid(param[1],return_format=['distance','model'],calibration_report=False,
+    out, mdl = mdl_resid(param[1],return_format=['distance','model'],
                          verbose=True,draw=True)
     
     

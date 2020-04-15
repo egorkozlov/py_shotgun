@@ -67,6 +67,8 @@ class Model(object):
             self.time_dict[whatisdone] = [last_time]
         
     def time_statistics(self,remove_worst=True,remove_single=False):
+        
+        print('Total time is {}'.format(default_timer() - self.start))
         for what, timelist in self.time_dict.items():
             
             if remove_single and len(timelist) == 1: continue
@@ -79,8 +81,9 @@ class Model(object):
                 time_arr = time_arr[time_arr<time_worst]
                 extra = ' (excl the worst)'
                 
-            av_time = round(np.mean(time_arr),2)            
-            print('On average {} took {} sec{}'.format(what,av_time,extra))
+            av_time = round(np.mean(time_arr),2) 
+            tot_time = round(np.sum(np.array(timelist)),2) 
+            print('On average {} took {}, total {} sec'.format(what,av_time,tot_time,extra))
             
     
     def _get_iterator(self,name='default'):
@@ -106,24 +109,22 @@ class Model(object):
             
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
-                if EV is None:            
-                    V, c, s = setup.vs_last_grid(female,ushift,return_cs=True)
-                else:
-                    V, c, s = v_iter_single(setup,t,EV,female,ushift)             
+                
+                V, c, s = v_iter_single(setup,t,EV,female,ushift)       
+                assert V.dtype == c.dtype == setup.dtype
                 return {desc: {'V':V,'c':c,'s':s}}   
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
                 haschild = (desc== 'Couple and child')
-                if EV is None:                    
-                    V, VF, VM, c, x, s, fls, V_all_l = setup.vm_last_grid(ushift,haschild)
-                else:
-                    V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)            
+                
+                V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)  
+                assert V.dtype == VF.dtype == c.dtype == setup.dtype
+                
                 return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             elif desc == 'Female and child':
-                if EV is None:
-                    V, c, x, s, fls, V_all_l = setup.vsk_last_grid(ushift)
-                else:
-                    V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
+                
+                V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
+                assert V.dtype == c.dtype == setup.dtype
                 return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
             else:
                 raise Exception('I do not know this type...')
@@ -135,12 +136,16 @@ class Model(object):
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
                 EV, dec = ev_single(setup,V_next,setup.agrid_s,female,t)
+                assert EV.dtype == setup.dtype
             elif desc == 'Couple and child':
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
+                assert EV[0].dtype == EV[1].dtype == EV[2].dtype ==  EV[3].dtype ==setup.dtype
             elif desc == 'Couple, no children':
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
+                assert EV[0].dtype == EV[1].dtype == EV[2].dtype == EV[3].dtype == setup.dtype
             elif desc == 'Female and child':
                 EV, dec = ev_single_k(setup,V_next,setup.agrid_s,t)
+                assert EV.dtype == setup.dtype
             else:
                 raise Exception('I do not know this type...')
             return EV, dec
@@ -161,7 +166,7 @@ class Model(object):
                 
                 return vout, dec
             def initialize(desc,t):
-                vout = v_iterator(self.setup,desc,None)
+                vout = v_iterator(self.setup,desc,t,None)
                 if timed: self.time('Initialization for {}'.format(desc))
                 dec = {}
                 self.wrap_decisions(desc,dec,vout)
@@ -181,12 +186,13 @@ class Model(object):
         if desc == 'Couple and child' or desc == 'Couple, no children':
             
             #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2).astype(self.dtype)
+            sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2)
             
-            Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2).astype(self.dtype)
+            Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2)
             
-            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2).astype(self.dtype)
-            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2).astype(self.dtype)
+            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2)
+            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
+            assert sint.dtype == Vint.dtype == xint.dtype == self.setup.dtype
             
             if Vint.ndim < 4: Vint = Vint[:,:,:,None]
             
@@ -240,10 +246,29 @@ class Model(object):
             import pickle
             pickle.dump(self,open('model_save.pkl','wb+'))
         
+        
+    def x_reshape(self,x,t):
+        # this reshapes couple's values to multidimensional objects
+        ss = self.setup
+        
+        shp = (ss.na,ss.pars['n_zf_t'][t],
+                              ss.pars['n_zm_t'][t],
+                              ss.pars['n_psi_t'][t],
+                              ss.ntheta)
+        
+        x_reshape = x.reshape(shp)
+        return x_reshape
+    
+        
     def graph(self,ai,zfi,zmi,psii,ti,thi):        
         #Draw some graph of Value and Policy Functions
         V=graphs(self,ai,zfi,zmi,psii,ti,thi)        
         return V
+    
+    def diagnostics(self):
+        from diagnostics import check_value_functions
+        check_value_functions(self)
+        
       
         
     

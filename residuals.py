@@ -9,42 +9,50 @@ Created on Sat Dec 14 10:58:43 2019
 
 # this defines model residuals
 import numpy as np
-import pickle, dill
+import dill
 import os
 
 
-lb = np.array(   [ 0.0,  1e-4,   0.5,  0.1,  -0.2,  0.01, 0.05,  0.05, -0.2])
-ub = np.array(   [ 2.0,  0.5,  10.0,  1.0,   0.0,   3.0,  3.0,  0.9,    0.0])
-#xdef = np.array(  [0.5,  0.05,   2.0,  0.4, -0.05, 0.8,   0.5,  0.6,  0.3 ])
-xdef = np.array([ 1.47052128,  0.31739663,  2.2436033 ,  0.2004341 , -0.00240084, 1.68427564,  1.7914976 ,  0.60045406, -0.01858392])
-    
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
-def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
+
+w = {'divorced if k then m and one marriage':1.0,
+     'divorced if m then k and one marriage':1.0}
+
+def mdl_resid(x=None,targets=None,weights=w,
+              save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
               rel_diff=True):
+    
+    
     
     
     
     from model import Model
     from setup import DivorceCosts
     from simulations import Agents
- 
-    mshift=x[0]
-    sigma_psi = x[1] 
-    sigma_psi_init = x[1]*x[2]
-    pmeet = x[3]
-    pmeet_t = x[4]
-    util_alp = x[5]
-    util_kap = x[6]
-    preg_a0 = x[7]
-    preg_at = x[8]
+    from calibration_params import calibration_params
+
+
+    if type(x) is dict:
+        kwords = x
+        
+        if 'targets' in x:
+            targets = x.pop('targets')
+        
+    else:
+        lb, ub, xdef, keys, translator = calibration_params()
     
-    
+        if x is None:
+            x = xdef
+        kwords = translator(x)
+            
+        
+    if verbose: print(kwords)
     
     # this is for the default model
-    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
-    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=0.0)
+    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
+    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
     
     
     
@@ -73,13 +81,6 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
                 
     if load_from is None:
         
-        kwords = dict(sigma_psi=sigma_psi,
-                        sigma_psi_init=sigma_psi_init,
-                        pmeet=pmeet,util_alp=util_alp,util_kap=util_kap,
-                        u_shift_mar=mshift,preg_a0=preg_a0,
-                        pmeet_t=pmeet_t,preg_at=preg_at)
-    
-        
         mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
                     divorce_costs_nk=dc_nk,**kwords)
         mdl_list = [mdl]
@@ -97,110 +98,34 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
             
      
     agents = Agents( mdl_list, verbose=verbose)
+    mom = agents.compute_moments()
     
+    agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
+    mom_men = agents_extra.compute_moments()
     
-    n_mark = agents.state_codes['Couple and child']
-    n_marnk = agents.state_codes['Couple, no children']
-    n_single = agents.state_codes['Female, single']
-    n_singlek = agents.state_codes['Female and child']
-    
-    
-    is_mar = (agents.state == n_mark) | (agents.state == n_marnk)
-    is_mark = (agents.state == n_mark)
-    
-    ever_mar = (np.cumsum(is_mar,axis=1) > 0)
-    div_now =  (ever_mar) & ((agents.state==n_single) | (agents.state==n_singlek))
-    ever_kid = ( np.cumsum( (agents.state == n_mark) | (agents.state == n_singlek),axis=1) > 0)
-    
-    have_kid = (agents.state == n_mark) | (agents.state == n_singlek)
-    num_mar = np.cumsum( agents.agreed, axis = 1 )
-    one_mar = (num_mar == 1)
-    
-    share_x = agents.x / np.maximum(1e-3, agents.x  + agents.c)
-    mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
-    
-    nmar_25 = 1-ever_mar[:,4].mean()
-    nmar_30 = 1-ever_mar[:,9].mean()
-    nmar_35 = 1-ever_mar[:,14].mean()
-    nmar_40 = 1-ever_mar[:,19].mean()
-    
-    div_25 = div_now[ever_mar[:,4],4].mean()
-    div_30 = div_now[ever_mar[:,9],9].mean()
-    div_35 = div_now[ever_mar[:,14],14].mean()
-    div_40 = div_now[ever_mar[:,19],19].mean()
-    
-    
-    nkid_25 = 1-ever_kid[:,4].mean()
-    nkid_30 = 1-ever_kid[:,9].mean()
-    nkid_35 = 1-ever_kid[:,14].mean()
-    
-    nkid_25_mar = 1-ever_kid[is_mar[:,4],4].mean() if np.any(is_mar[:,4]) else 0.0
-    nkid_30_mar = 1-ever_kid[is_mar[:,9],9].mean() if np.any(is_mar[:,9]) else 0.0
-    nkid_35_mar = 1-ever_kid[is_mar[:,14],14].mean() if np.any(is_mar[:,14]) else 0.0
-    
-    
-    #mkids_0_mar = (agents.state[:,1:] == n_mark)[ ~is_mar[:,0:-1] & is_mar[:,1:]].mean()
-    no_kids_1_mar = 1 - ( have_kid[:,2:][ ~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:]] ).mean()
-    no_kids_2_mar = 1 - ( have_kid[:,3:][ ~is_mar[:,0:-3] & is_mar[:,3:] & one_mar[:,3:]] ).mean()
-    no_kids_3_mar = 1 - ( have_kid[:,4:][ ~is_mar[:,0:-4] & is_mar[:,4:] & one_mar[:,4:]] ).mean()
-    
-    
-    in_sample = (agents.k_m) | (agents.m_k)
-    
-    km_25 = agents.k_m[in_sample[:,4],4].mean()
-    km_30 = agents.k_m[in_sample[:,9],9].mean()
-    km_35 = agents.k_m[in_sample[:,14],14].mean()
-    
-    just_km_25 = agents.agreed_k[:,4].mean()
-    just_km_30 = agents.agreed_k[:,9].mean()
-    just_km_35 = agents.agreed_k[:,14].mean()
-    
-    share_planned = agents.planned_preg[(agents.planned_preg) | (agents.unplanned_preg)].mean()
+    mom['men ever married at 30, ratio'] = mom_men['ever married at 30, ratio']    
+    mom['men divorced at 30, ratio'] = mom_men['divorced at 30, ratio']    
+    mom['men ever kids at 30, ratio'] = mom_men['ever kids at 30, ratio']
     
     
     
-    sim = np.array([nmar_25,nmar_30,nmar_35,nmar_40,
-                    div_25,div_30,div_35,div_40,
-                    nkid_25,nkid_30,nkid_35,
-                    nkid_25_mar,nkid_30_mar,nkid_35_mar,
-                    no_kids_1_mar,no_kids_2_mar,no_kids_3_mar,
-                    mean_x,
-                    km_25,km_30,km_35,
-                    just_km_25,just_km_30,just_km_35])
-    dat = np.array([0.75,0.38,0.21,0.15,
-                    0.057,0.084,0.11,0.15,
-                    0.90,0.60,0.34,
-                    0.71,0.39,0.17,
-                    0.81,0.66,0.51,
-                    0.4,
-                    0.21,0.12,0.10,
-                    0.0058,0.0081,0.0046])
-    
-    
-    
-    
-    W = np.eye(sim.size)/(sim.size)
-    
-    
-    
-    if len(dat) != len(sim):
-        sim = np.full_like(dat,1.0e6)
-        
-    if not rel_diff:    
-        res_all=(dat-sim)
+    if targets is None:
+        from targets import target_values
+        tar = target_values()
+    elif type(targets) is str:
+        from targets import target_values
+        tar = target_values(mode=targets)
     else:
-        res_all = (dat-sim)/(dat)
+        tar = targets
+    
+    resid_all, resid_sc, dist = distance_to_targets(mom,tar,weights=weights,
+                                                    report=verbose)
+    
+    #if verbose:
+    #    print('data moments are {}'.format(dat))
+    #    print('simulated moments are {}'.format(sim))
     
     
-    if verbose:
-        print('data moments are {}'.format(dat))
-        print('simulated moments are {}'.format(sim))
-    
-    resid_all = np.array([x if (not np.isnan(x) and not np.isinf(x)) else 1e6 for x in res_all])
-    
-    resid_sc = resid_all*np.sqrt(np.diag(W)) # all residuals scaled
-    
-    dist =  np.dot(np.dot(resid_all,W),resid_all)
 
 
     print('Distance is {}'.format(dist))
@@ -228,3 +153,45 @@ def mdl_resid(x=xdef,save_to=None,load_from=None,return_format=['distance'],
     if len(out) == 1: out = out[0]
   
     return out
+
+
+def distance_to_targets(moments,targets,weights={},relative=True,report=False):
+    num = len(targets)
+    
+    
+    resid = np.zeros((num,),dtype=np.float64)
+    W = np.eye(num,dtype=np.float64)
+    for i, (name, targ) in enumerate(targets.items()):
+        try:
+            mom = moments[name]
+            mom = mom if not np.isnan(mom) else 1000.0
+        except KeyError:
+            print('Warning: cannot find {} in moments'.format(name))
+            raise(Exception('cannot compute moments'))
+            
+        if type(targ) is tuple:
+            targ0, weights[name] = targ[0], 1/targ[1]**2 # should be inverse variances on the diagonal
+            relative_here = False
+        else:
+            targ0 = targ
+            relative_here = relative
+        
+        resid[i] = (mom - targ0)/targ0 if relative_here else (mom-targ0)
+        
+        if report:
+            print('{} is {:01.2g} (target {:01.2g})'.format(name,mom,targ0))
+        
+        try:
+            W[i,i] = weights[name]
+        except:
+            W[i,i] = 1/num
+            
+    # normalize W
+    #W = W/np.sum(W)
+    
+    
+            
+    resid_scaled = resid*np.sqrt(np.diag(W))
+    dist = np.dot(np.dot(resid,W),resid)    
+    
+    return resid, resid_scaled, dist

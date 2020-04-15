@@ -20,127 +20,190 @@ class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         p = dict()       
         T = 55
-        Tret = 40 # first period when the agent is retired
-        Tfert = 15 # first peroid when infertile
-        Tdiv = 35 # first period when cannot divorce / renegotiate
+        Tret = 45 # first period when the agent is retired
+        Tfert = 18 # first peroid when infertile
+        Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
         p['T'] = T
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
-        p['sig_zf_0']  = 0.513 #0.25
-        p['sig_zf']    = 0.084#np.sqrt(0.038)
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
-        p['sig_zm_0']  = 0.525 #0.25
-        p['sig_zm']    = 0.097 #np.sqrt(0.027)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
-        p['sigma_psi_init'] = 0.28
+        p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.04]*T
         p['n_psi_t']     = [12]*T
-        p['beta_t'] = [0.98]*T
+        p['beta_t'] = [1/1.04]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
         p['sig_partner_a'] = 0.1
-        p['sig_partner_z'] = 0.4
+        p['mu_partner_a_female'] = 0.00
+        p['mu_partner_a_male'] = -0.00
+        p['dump_factor_z'] = 0.85
+        
+        p['sig_partner_z'] = 1.2
+        p['mu_partner_z_male'] = -0.02
+        p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5
-        p['pmeet'] = 0.5
+        p['pmeet_0'] = 0.5
         p['pmeet_t'] = 0.0
+        p['pmeet_t2'] = 0.0
         
-        p['poutsm'] = 1/3
-        p['z_drift'] = -0.1
+        p['m_zf'] = 1.0
+        p['m_zf0'] = 1.0
         
+        p['z_drift'] = -0.09
+        p['no kids at meeting'] = True
+        p['high education'] = True # what trend to pick
         
         p['wret'] = 0.8
         p['uls'] = 0.2
         p['pls'] = 1.0
         
         
+        p['preg_mult'] = 1.0
+        
         p['u_shift_mar'] = 0.0
         p['u_shift_coh'] = 0.0
+        p['sm_shift'] = 0.0
         
+        p['disutil_marry_sm_fem_coef'] = 0.0
+        p['disutil_marry_sm_mal_coef'] = 10.0
+        p['pmeet_multiplier_fem'] = 1.0
+        p['p_to_meet_sm_if_mal'] = 0.1
         
         
         '''
-        p['f_wage_trend'] = np.array(
-                            [0.0 + 
-                             0.068386*(min(t,30) - 5)
-                             - 0.0040512*((min(t,30)-5)**2)
-                             + 0.0000784*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
-        p['m_wage_trend'] = np.array(
-                                    [0.1457256 + 0.0676344*(min(t,30)-5) - 
-                                         0.002752*((min(t,30)-5)**2) 
-                                         + 0.0000784*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        '''
-        '''
-        se_05_m = 0.5596
-        se_20_m = 0.6735
-        
-        sigma_m = np.sqrt( (se_20_m**2 - se_05_m**2)/15 )
-        sigma_m0 = np.sqrt(se_05_m**2 - 4*sigma_m**2)
-        
-        se_05_f = 0.5397
-        se_20_f = 0.6305
-        
-        sigma_f = np.sqrt( (se_20_f**2 - se_05_f**2)/15 )
-        sigma_f0 = np.sqrt(se_05_f**2 - 4*sigma_f**2)
-        
+            Condition is h_male==1
+            Age 24, h_male==1: .44558678
+            Age 30, h_male==1: .45272711
+            Implied standard deviation if h_male==1 is .03269622
+            Implied initial if h_male==1 is .44197336
+            Condition is h_female==1
+            Age 24, h_female==1: .41251325
+            Age 30, h_female==1: .42495642
+            Implied standard deviation if h_female==1 is .04167489
+            Implied initial if h_female==1 is .40614873
         '''
         
+        if p['high education']:            
+            p['sig_zm']    = 0.03269622
+            p['sig_zm_0']  = 0.44197336
+            
+            
+            p['sig_zf']    = p['m_zf']*0.04167489
+            p['sig_zf_0']  = p['m_zf0']*0.40614873
+            
+        else:
+            p['sig_zm']    = 0.09294824
+            p['sig_zm_0']  = 0.40376647
+            
+            
+            p['sig_zf']    = 0.08942736
+            p['sig_zf_0']  = 0.39882978
+            
         
         
-        
-        p['f_wage_trend'] = np.array(
-                            [0.0 + 
-                             0.0844278*(min(t,30) - 5)
-                             -0.0044622*((min(t,30)-5)**2)
-                             + 0.0000788*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
-        
-        p['m_wage_trend'] = np.array(
-                                    [0.0776162 + 0.0810113*(min(t,30)-5)  
-                                         - 0.0027093*((min(t,30)-5)**2) 
-                                         + 0.0000298*((min(t,30)-5)**3)
-                                         for t in range(T)]
-                                    )
+        # college
+            
+            
         
         
-        
-        p['util_lam'] = 0.4
+        p['util_lam'] = 0.7
         p['util_alp'] = 0.5
         p['util_xi'] = 1.5
         p['util_kap'] = 0.5
         p['util_qbar'] = 0.0
         
-        p['preg_a0'] = 0.25
-        p['preg_at'] = 0.0
-        p['preg_az'] = 0.00
-        p['preg_azt'] = 0.00
+        
+        p['preg_a0'] = 0.05
+        p['preg_at'] = 0.01
+        p['preg_at2'] = -0.001
         
         
         for key, value in kwargs.items():
             assert (key in p), 'wrong name?'
             p[key] = value
         
+        '''
+              h_female_T |   .0685814   .0004133   165.92   0.000     .0677713    .0693915
+             h_female_T2 |  -.0038631   .0000449   -86.03   0.000    -.0039511   -.0037751
+             h_female_T3 |   .0000715   1.30e-06    55.20   0.000      .000069    .0000741
+                  h_male |   .0818515   .0018308    44.71   0.000     .0782632    .0854398
+                h_male_T |   .0664369   .0005108   130.07   0.000     .0654358    .0674379
+               h_male_T2 |  -.0032096   .0000528   -60.77   0.000    -.0033131   -.0031061
+               h_male_T3 |   .0000529   1.48e-06    35.68   0.000       .00005    .0000558
+                l_female |  -.3715448   .0015389  -241.43   0.000    -.3745611   -.3685285
+              l_female_T |   .0258538   .0003048    84.83   0.000     .0252564    .0264512
+             l_female_T2 |  -.0012931   .0000378   -34.20   0.000    -.0013672    -.001219
+             l_female_T3 |   .0000273   1.15e-06    23.79   0.000     .0000251    .0000296
+                  l_male |  -.2587716   .0014324  -180.66   0.000     -.261579   -.2559641
+                l_male_T |   .0348409   .0002597   134.14   0.000     .0343319      .03535
+               l_male_T2 |  -.0013866   .0000328   -42.27   0.000    -.0014509   -.0013223
+               l_male_T3 |    .000024   1.01e-06    23.79   0.000     .0000221     .000026
+        '''
+        
+        if p['high education']:
+            p['f_wage_trend'] = np.array(
+                                [0.0 + 
+                                 0.0685814*(min(t,30) - 5)
+                                 -.0038631*((min(t,30)-5)**2)
+                                 + 0.0000715*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+            
+            p['m_wage_trend'] = np.array(
+                                        [0.0818515 + 0.0664369*(min(t,30)-5)  
+                                             -.0032096*((min(t,30)-5)**2) 
+                                             + 0.0000529*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+        
+        else:
+        # no college
+        
+            p['f_wage_trend'] = np.array(
+                                [-0.3668214 + 
+                                 0.0264887*(min(t,30) - 5)
+                                 -0.0012464*((min(t,30)-5)**2)
+                                 +0.0000251*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+            
+            p['m_wage_trend'] = np.array(
+                                        [-0.2424105 + 0.037659*(min(t,30)-5)  
+                                             -0.0015337*((min(t,30)-5)**2) 
+                                             + 0.000026*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+        
+        
+        
+        # derivative parameters
+        p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
+        
+        
+        p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
+        p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
+        
+        
+        p['preg_az'] = 0.00
+        p['preg_azt'] = 0.00
+        
         #Get the probability of meeting, adjusting for year-period
            
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
-        p['pmeet_t'] = [np.clip(p['pmeet'] + t*p['pmeet_t'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
-        p['poutsm_t'] = [p['poutsm']]*T
+        p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
+        #p['poutsm_t'] = [p['poutsm']]*T
         
         
         self.pars = p
         
-        self.dtype = np.float32 # type for all floats
+        self.dtype = np.float64 # type for all floats
         
        
         
@@ -149,25 +212,35 @@ class ModelSetup(object):
         
         # female labor supply
         
-        lmin = 0.2
-        lmax = 1.0
+        lmin = 0.25
+        lmax = 0.9
         nl = 4
         
-        ls = np.linspace(lmin,lmax,nl,dtype=self.dtype)
-        ps = p['pls']*(1-np.linspace(0.0,1.0,nl,dtype=self.dtype))
+        ls = np.array([0.25,0.5,0.75,0.9]) #np.linspace(lmin,lmax,nl,dtype=self.dtype)
+        ps = np.array([p['pls'],0.5*p['pls'],0.0,0.0])
         
-        self.ls_levels_nk = np.array([1.0],dtype=self.dtype)
-        self.ls_levels_k = ls
-        self.ls_levels_sk = ls
+        
+        self.ls_levels = dict()
+        self.ls_levels['Couple, no children'] = np.array([1.0],dtype=self.dtype)
+        self.ls_levels['Female, single'] = np.array([1.0],dtype=self.dtype)
+        self.ls_levels['Male, single'] = np.array([1.0],dtype=self.dtype)
+        self.ls_levels['Couple and child'] = ls
+        self.ls_levels['Female and child'] = ls
+        
         
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
-        self.ls_pdown_nk = np.array([0.0],dtype=self.dtype)
-        self.ls_pdown_k = ps
-        self.ls_pdown_sk = ps
-        self.nls_k = len(self.ls_levels_k)
-        self.nls_nk = len(self.ls_levels_nk)
-        self.nls_sk = len(self.ls_levels_sk)
-        
+        self.ls_pdown = dict()
+        self.ls_pdown['Couple, no children'] = np.array([0.0],dtype=self.dtype)
+        self.ls_pdown['Female, single'] = np.array([0.0],dtype=self.dtype)
+        self.ls_pdown['Male, single']   = np.array([0.0],dtype=self.dtype)
+        self.ls_pdown['Female and child'] = ps
+        self.ls_pdown['Couple and child'] = ps
+        self.nls = dict()
+        self.nls['Couple and child'] = len(self.ls_levels['Couple and child'])
+        self.nls['Couple, no children'] = len(self.ls_levels['Couple, no children'])
+        self.nls['Female and child'] = len(self.ls_levels['Female and child'])
+        self.nls['Female, single'] = len(self.ls_levels['Female, single'])
+        self.nls['Male, single'] = len(self.ls_levels['Male, single'])
         
         
         
@@ -254,23 +327,23 @@ class ModelSetup(object):
             
             all_t_mat_by_l_nk = [ [(1-p)*m + p*md if m is not None else None 
                                 for m , md in zip(all_t_mat,all_t_mat_down)]
-                               for p in self.ls_pdown_nk ]
+                               for p in self.ls_pdown['Couple, no children'] ]
             
             all_t_mat_by_l_spt_nk = [ [(1-p)*m + p*md if m is not None else None
                                     for m, md in zip(all_t_mat_sparse_T,all_t_mat_down_sparse_T)]
-                               for p in self.ls_pdown_nk ]
+                               for p in self.ls_pdown['Couple, no children'] ]
             
             all_t_mat_by_l_k = [ [(1-p)*m + p*md if m is not None else None 
                                 for m , md in zip(all_t_mat,all_t_mat_down)]
-                               for p in self.ls_pdown_k ]
+                               for p in self.ls_pdown['Couple and child'] ]
             
             all_t_mat_by_l_spt_k = [ [(1-p)*m + p*md if m is not None else None
                                     for m, md in zip(all_t_mat_sparse_T,all_t_mat_down_sparse_T)]
-                               for p in self.ls_pdown_k ]
+                               for p in self.ls_pdown['Couple and child'] ]
             
             zf_t_mat_by_l_sk = [ [(1-p)*m + p*md if md is not None else None 
                                 for m , md in zip(exogrid['zf_t_mat'],zf_bad)]
-                                   for p in self.ls_pdown_sk ]
+                                   for p in self.ls_pdown['Female and child'] ]
             
             
             exogrid['all_t_mat_by_l_nk'] = all_t_mat_by_l_nk
@@ -295,14 +368,14 @@ class ModelSetup(object):
         #Grid Couple
         self.na = 40
         self.amin = 0
-        self.amax = 60
-        self.agrid_c = np.linspace(self.amin,self.amax,self.na,dtype=self.dtype)
-        tune=1.5
+        self.amax = 50
+        self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
+        #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
         
         # this builds finer grid for potential savings
         s_between = 7 # default numer of points between poitns on agrid
-        s_da_min = 0.001 # minimal step (does not create more points)
+        s_da_min = 0.01 # minimal step (does not create more points)
         s_da_max = 0.1 # maximal step (creates more if not enough)
         
         self.sgrid_c = build_s_grid(self.agrid_c,s_between,s_da_min,s_da_max)
@@ -312,9 +385,9 @@ class ModelSetup(object):
          
         #Grid Single
         self.amin_s = 0
-        self.amax_s = self.amax/1.1
-        self.agrid_s = np.linspace(self.amin_s,self.amax_s,self.na,dtype=self.dtype)
-        tune_s=1.5
+        self.amax_s = self.amax/2.0
+        self.agrid_s = self.agrid_c/2.0
+        #tune_s=1.5
         #self.agrid_s = np.geomspace(self.amin_s+tune_s,self.amax_s+tune_s,num=self.na)-tune_s
         
         self.sgrid_s = build_s_grid(self.agrid_s,s_between,s_da_min,s_da_max)
@@ -368,7 +441,7 @@ class ModelSetup(object):
         
         self.utility_shifters = {'Female, single':0.0,
                                  'Male, single':0.0,
-                                 'Female and child':p['u_shift_mar'],
+                                 'Female and child':p['u_shift_mar'] + p['sm_shift'],
                                  'Couple and child':p['u_shift_mar'],
                                  'Couple, no children':p['u_shift_coh']}
         
@@ -396,21 +469,30 @@ class ModelSetup(object):
         ezfmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
         ezmmax = max([np.max(np.exp(g+t)) for g,t in zip(exogrid['zm_t'],p['m_wage_trend'])])
         
-        
-        mmin = 0.95*ezmmin
+        self.money_min = 0.95*min(self.ls_levels['Female and child'])*min(ezmmin,ezfmin) # cause FLS can be up to 0
+        mmin = self.money_min
         mmax = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
-        self.mgrid_c = np.linspace(mmin,mmax,600)
+        mint = (ezfmax + ezmmax) # poin where more dense grid begins
         
-        mmin_s = 0.95*min(self.ls_levels_sk)*ezfmin
-        mmax_s = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
-        self.mgrid_s = np.linspace(mmin_s,mmax_s,600)
+        ndense = 600
+        nm = 1500
+        
+        gsparse = np.linspace(mint,mmax,nm-ndense)
+        gdense = np.linspace(mmin,mint,ndense+1) # +1 as there is a common pt
+        
+        self.mgrid = np.zeros(nm,dtype=self.dtype)
+        self.mgrid[ndense:] = gsparse
+        self.mgrid[:(ndense+1)] = gdense
+        self.mgrid_c = self.mgrid
+        self.mgrid_s = self.mgrid
+        assert np.all(np.diff(self.mgrid)>0)
         
         self.u_precompute()
         self.unplanned_pregnancy_probability()
         
         
         
-    def mar_mats_assets(self,npoints=4,abar=0.1):
+    def _mar_mats_assets(self,npoints=4,female=True,abar=0.1):
         # for each grid point on single's grid it returns npoints positions
         # on (potential) couple's grid's and assets of potential partner 
         # (that can be off grid) and correpsonding probabilities. 
@@ -422,6 +504,7 @@ class ModelSetup(object):
         agrid_c = self.agrid_c
         
         s_a_partner = self.pars['sig_partner_a']
+        mu_a_partner = self.pars['mu_partner_a_female'] if female else self.pars['mu_partner_a_male']
         
         
         prob_a_mat = np.zeros((na,npoints),dtype=self.dtype)
@@ -441,17 +524,17 @@ class ModelSetup(object):
                 s_a_partner*np.flip(np.arange(i_neg.sum())) 
             
             # TODO: this needs to be checked
-            p_a = int_prob(lagrid_t,mu=0,sig=s_a_partner,n_points=npoints)
+            p_a = int_prob(lagrid_t,mu=mu_a_partner,sig=s_a_partner,n_points=npoints)
             i_pa = (-p_a).argsort()[:npoints] # this is more robust then nonzero
             p_pa = p_a[i_pa]
             prob_a_mat[ia,:] = p_pa
             i_a_mat[ia,:] = i_pa
         
-        
-        self.prob_a_mat = prob_a_mat
-        self.i_a_mat = i_a_mat
+        return prob_a_mat, i_a_mat
             
-            
+    def mar_mats_assets(self,npoints=4,abar=0.1):
+        self.prob_a_mat_female, self.i_a_mat_female = self._mar_mats_assets(npoints=npoints,female=True,abar=abar)
+        self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
         
     
     def mar_mats_iexo(self,t,female=True,trim_lvl=0.001):
@@ -465,6 +548,7 @@ class ModelSetup(object):
         nexo = setup.pars['nexo_t'][t]
         sigma_psi_init = setup.pars['sigma_psi_init']
         sig_z_partner = setup.pars['sig_partner_z']
+        mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
         
@@ -486,13 +570,15 @@ class ModelSetup(object):
         def ind_conv(a,b,c): return setup.all_indices(t,(a,b,c))[0]
         
         
+        df = setup.pars['dump_factor_z']
+        
         for iz in range(n_zown):
             p_psi = int_prob(psi_couple,mu=0,sig=sigma_psi_init)
             if female:
-                p_zm  = int_prob(z_partner, mu=z_own[iz],sig=sig_z_partner)
+                p_zm  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zf  = zmat_own[iz,:]
             else:
-                p_zf  = int_prob(z_partner, mu=z_own[iz],sig=sig_z_partner)
+                p_zf  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zm  = zmat_own[iz,:]
             #sm = sf
         
@@ -523,13 +609,17 @@ class ModelSetup(object):
         # this is relevant for testing and simulations
         
         
-        pmat_a = self.prob_a_mat
-        imat_a = self.i_a_mat
-        
         self.matches = dict()
         
         for female in [True,False]:
             desc = 'Female, single' if female else 'Male, single'
+            
+            
+            if female:
+                pmat_a, imat_a = self.prob_a_mat_female, self.i_a_mat_female
+            else:
+                pmat_a, imat_a = self.prob_a_mat_male, self.i_a_mat_male
+            
             
             pmats = self.part_mats[desc] 
             
@@ -651,13 +741,13 @@ class ModelSetup(object):
     
     def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
-        l = self.ls_levels_k[il]
+        l = self.ls_levels['Couple and child'][il]
         upub = self.u_pub(x,l) + ushift + psi
         return self.u(kf*c) + upub, self.u(km*c) + upub
     
     def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
-        l = self.ls_levels_k[il]
+        l = self.ls_levels['Couple and child'][il]
         return umult*self.u(c) + self.u_pub(x,l) + ushift + psi
     
     def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
@@ -671,131 +761,19 @@ class ModelSetup(object):
     
     def u_single_k(self,c,x,il,ushift):
         umult = 1.0
-        l = self.ls_levels_sk[il]
+        l = self.ls_levels['Female and child'][il]
         return umult*self.u(c) + self.u_pub(x,l) + ushift
     
-    def vm_last_grid(self,ushift,haschild):
-        # this returns value of vm on the grid corresponding to vm
-        s = self.agrid_c[:,None]
-        zm = self.exogrid.all_t[-1][:,1][None,:]
-        zf = self.exogrid.all_t[-1][:,0][None,:]
-        psi = self.exogrid.all_t[-1][:,2][None,:,None]
-        theta = self.thetagrid[None,None,:]
-        
-        nl = self.nls_k if haschild else self.nls_nk
-        
-        na, nexo, ntheta = self.na, self.pars['nexo_t'][-1], self.ntheta
-        
-        shp = (na,nexo,ntheta,nl)
-        
-        u_couple_g, u_f_g, u_m_g, income_g, c_g, x_g =np.zeros((6,) + shp,dtype=self.dtype)
-        
-        
-        ftrend = self.pars['f_wage_trend'][-1]
-        mtrend = self.pars['m_wage_trend'][-1]
-        
-        
-        if haschild:
-            lsl, upc, ucoup, upart = \
-                self.ls_levels_k, self.ucouple_precomputed_x_k, self.u_couple_k, self.u_part_k
-        else:
-            lsl, upc, ucoup, upart = \
-                self.ls_levels_nk, self.ucouple_precomputed_x_nk, self.u_couple_nk, self.u_part_nk
-        
-        
-        for il in range(len(lsl)):
-           
-            inc = self.pars['R_t'][-1]*s + np.exp(zm+mtrend) +  np.exp(zf+ftrend)*lsl[il]
-            income_g[...,il]  = inc[...,None]
-            
-            
-            for itheta in range(ntheta):
-                
-                vals = upc[:,itheta,il]
-                x_g[...,itheta,il] = np.interp(inc,self.mgrid_c,vals)
-                c_g[...,itheta,il] = inc - x_g[...,itheta,il]
-            
-            u_couple_g[...,il] = ucoup(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
-            u_f_g[...,il], u_m_g[...,il] = upart(c_g[...,il],x_g[...,il],il,theta,ushift,psi)
-             
-        #Get optimal FLS
-        ls=np.argmax(u_couple_g,axis=3)
-        lsi=ls[...,None]
-        u_c, u_f, u_m, x, c = (np.take_along_axis(x,lsi,axis=3).squeeze(axis=3)
-                                for x in (u_couple_g,u_f_g,u_m_g,x_g,c_g))
-        
-        V  = u_c 
-        VM = u_m 
-        VF = u_f 
-        
-        return V.astype(self.dtype), VF.astype(self.dtype), VM.astype(self.dtype), c.astype(self.dtype), x.astype(self.dtype), np.zeros_like(c).astype(self.dtype), ls.astype(np.int16), u_couple_g.astype(self.dtype)
-    
-    
-
-    def vs_last(self,s,z_plus_trend,ushift,return_cs=False):  
-        # generic last period utility for single agent
-        income = self.pars['R_t'][-1]*s+np.exp(z_plus_trend) 
-        if return_cs:
-            return self.u(income).astype(self.dtype) + ushift, income.astype(self.dtype), np.zeros_like(income.astype(self.dtype))
-        else:
-            return self.u(income)
-    
-    def vs_last_grid(self,female,ushift,return_cs=False):
-        # this returns value of vs on the grid corresponding to vs
-        s_in = self.agrid_s[:,None]
-        z_in = self.exogrid.zf_t[-1][None,:] if female else self.exogrid.zm_t[-1][None,:]
-        trend = self.pars['f_wage_trend'][-1] if female else self.pars['m_wage_trend'][-1]        
-        return self.vs_last(s_in,z_in+trend,ushift,return_cs)
-        
-    
-    
-    def vsk_last_grid(self,ushift):
-        # this returns value of vm on the grid corresponding to vm
-        s = self.agrid_s[:,None]
-        zf = self.exogrid.zf_t[-1][None,:]
-        
-        nl = self.nls_sk
-        
-        na, nexo = self.na, self.pars['n_zf_t'][-1]
-        
-        shp = (na,nexo,nl)
-        
-        u_g, income_g, c_g, x_g =np.zeros((4,) + shp,dtype=self.dtype)
-        
-        
-        ftrend = self.pars['f_wage_trend'][-1]
-        
-        
-   
-        lsl, upc, ufun = \
-            self.ls_levels_sk, self.ucouple_precomputed_x_sk, self.u_single_k
-        
-        
-        for il in range(len(lsl)):
-           
-            inc = self.pars['R_t'][-1]*s + np.exp(zf+ftrend)*lsl[il]
-            income_g[...,il]  = inc
-            
-            vals = upc[...,il]
-            x_g[...,il] = np.interp(inc,self.mgrid_s,vals)
-            c_g[...,il] = inc - x_g[...,il]
-            
-                
-            #(c,x,il,ushift)
-            u_g[...,il] = ufun(c_g[...,il],x_g[...,il],il,ushift)
-        assert np.all(c_g>0)
-        #Get optimal FLS
-        ls=np.argmax(u_g,axis=-1)
-        lsi=ls[...,None]
-        u_c, x, c = (np.take_along_axis(x,lsi,axis=-1).squeeze(axis=-1)
-                                for x in (u_g,x_g,c_g))
-        
-        V  = u_c 
-        
-        return V.astype(self.dtype), c.astype(self.dtype), x.astype(self.dtype), np.zeros_like(c).astype(self.dtype), ls.astype(np.int16), u_g.astype(self.dtype)
-    
-    
     def u_precompute(self):
+        
+        
+        self.u_precomputed = dict()
+        self.u_precomputed['Couple and child'] = dict()
+        self.u_precomputed['Couple, no children'] = dict()
+        self.u_precomputed['Female, single'] = dict()
+        self.u_precomputed['Male, single'] = dict()
+        self.u_precomputed['Female and child'] = dict()
+        
         from intratemporal import int_with_x
         sig = self.pars['crra_power']
         alp = self.pars['util_alp']
@@ -804,26 +782,49 @@ class ModelSetup(object):
         kap = self.pars['util_kap']
         qbar = self.pars['util_qbar']
         
+        
+        
+        # couple and child
         nm = self.mgrid_c.size
         ntheta = self.ntheta
-        nl = self.nls_k
+        nl = self.nls['Couple and child']
         
-        uout = np.empty((nm,ntheta,nl),dtype=np.float32)
-        xout = np.empty((nm,ntheta,nl),dtype=np.float32)
+        uout = np.empty((nm,ntheta,nl),dtype=self.dtype)
+        xout = np.empty((nm,ntheta,nl),dtype=self.dtype)
         
         for il in range(nl):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
-                ls = self.ls_levels_k[il]
+                ls = self.ls_levels['Couple and child'][il]
                 x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
                                         qlb=qbar,lbr=ls)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
                 
-        self.ucouple_precomputed_u_k = uout
-        self.ucouple_precomputed_x_k = xout
+        self.u_precomputed['Couple and child']['u'] = uout
+        self.u_precomputed['Couple and child']['x'] = xout
         
+        
+        
+        
+        
+        nm = self.mgrid_s.size
+        nl = self.nls['Female and child']
+        
+        uout_s = np.empty((nm,1,nl),dtype=self.dtype)
+        xout_s = np.empty((nm,1,nl),dtype=self.dtype)
+        
+        for il in range(nl):        
+            A = 1.0
+            ls = self.ls_levels['Female and child'][il]
+            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
+                                    qlb=qbar,lbr=ls)
+            uout_s[:,0,il] = u
+            xout_s[:,0,il] = x
+               
+        self.u_precomputed['Female and child']['u'] = uout_s
+        self.u_precomputed['Female and child']['x'] = xout_s
         
         
         
@@ -831,46 +832,61 @@ class ModelSetup(object):
         
         nm = self.mgrid_c.size
         ntheta = self.ntheta
-        nl = self.nls_nk
+        nl = self.nls['Couple, no children']
         
-        uout = np.empty((nm,ntheta,nl),dtype=np.float32)
-        xout = np.empty((nm,ntheta,nl),dtype=np.float32)
+        uout = np.empty((nm,ntheta,nl),dtype=self.dtype)
+        xout = np.empty((nm,ntheta,nl),dtype=self.dtype)
         
         for il in range(nl):
             for itheta in range(ntheta):
                 A = self.u_mult(self.thetagrid[itheta])
-                ls = self.ls_levels_nk[il]
+                ls = self.ls_levels['Couple, no children'][il]
                 x, c, u, q = int_no_x(self.mgrid_c,A=A,sig=sig)
                 uout[:,itheta,il] = u
                 xout[:,itheta,il] = x
                 
                 
-        self.ucouple_precomputed_u_nk = uout
-        self.ucouple_precomputed_x_nk = xout
+        self.u_precomputed['Couple, no children']['u'] = uout
+        self.u_precomputed['Couple, no children']['x'] = xout
+        
+        
+        
+        from intratemporal import int_no_x
         
         
         nm = self.mgrid_s.size
-        nl = self.nls_sk
+        ntheta = self.ntheta
+        nl = self.nls['Female, single'] # !!!
         
-        uout_s = np.empty((nm,nl),dtype=np.float32)
-        xout_s = np.empty((nm,nl),dtype=np.float32)
+        uout = np.empty((nm,1,nl),dtype=self.dtype)
+        xout = np.empty((nm,1,nl),dtype=self.dtype)
         
-        
-        for il in range(nl):        
-            A = 1.0
-            ls = self.ls_levels_sk[il]
-            x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
-                                    qlb=qbar,lbr=ls)
-            uout_s[:,il] = u
-            xout_s[:,il] = x
-
+        for il in range(nl):
+            A = 1
+            ls = self.ls_levels['Female, single'][il]
+            x, c, u, q = int_no_x(self.mgrid_s,A=A,sig=sig)
+            uout[:,0,il] = u
+            xout[:,0,il] = x
                 
-        self.ucouple_precomputed_u_sk = uout_s
-        self.ucouple_precomputed_x_sk = xout_s
+            
+                
+        self.u_precomputed['Female, single']['u'] = uout
+        self.u_precomputed['Female, single']['x'] = xout
+        
+        self.u_precomputed['Male, single']['u'] = uout
+        self.u_precomputed['Male, single']['x'] = xout
+        
+        
+        
+        
+        
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
-        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+        p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
+            self.pars['preg_at2']*((t-9)**2) + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+        #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+        #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         return np.clip(p,0.0,1.0)
     
     def unplanned_pregnancy_probability(self):
@@ -906,7 +922,7 @@ class DivorceCosts(object):
                  u_lost_m=0.0,u_lost_f=0.0, # pure utility losses b/c of divorce
                  money_lost_m=0.0,money_lost_f=0.0, # pure money (asset) losses b/c of divorce
                  money_lost_m_ez=0.0,money_lost_f_ez=0.0, # money losses proportional to exp(z) b/c of divorce
-                 eq_split=0.0 #The more of less equal way assets are split within divorce
+                 eq_split=1.0 #The more of less equal way assets are split within divorce
                  ): # 
         
         self.unilateral_divorce = unilateral_divorce # w
@@ -934,14 +950,14 @@ def tauchen_drift(z_now,z_next,rho,sigma,mu):
     z_now = np.atleast_1d(z_now)
     z_next = np.atleast_1d(z_next)
     if z_next.size == 1:
-        return np.ones((z_now.size,1),dtype=np.float32)
+        return np.ones((z_now.size,1),dtype=z_now.dtype)
     
     d = np.diff(z_next)
     assert np.ptp(d) < 1e-5, 'Step size should be fixed'
     
     h_half = d[0]/2
     
-    Pi = np.zeros((z_now.size,z_next.size),dtype=np.float32)
+    Pi = np.zeros((z_now.size,z_next.size),dtype=z_now.dtype)
     
     ez = rho*z_now + mu
     
@@ -955,7 +971,7 @@ def tauchen_drift(z_now,z_next,rho,sigma,mu):
 
 
 def build_s_grid(agrid,n_between,da_min,da_max):
-    sgrid = np.array([0.0],np.float64)
+    sgrid = np.array([0.0],agrid.dtype)
     for j in range(agrid.size-1):
         step = (agrid[j+1] - agrid[j])/n_between
         if step >= da_min and step <= da_max:
