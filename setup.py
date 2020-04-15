@@ -22,7 +22,7 @@ class ModelSetup(object):
         T = 55
         Tret = 45 # first period when the agent is retired
         Tfert = 18 # first peroid when infertile
-        Tdiv = 56 # first period when cannot divorce / renegotiate
+        Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
         p['T'] = T
         p['Tret'] = Tret
