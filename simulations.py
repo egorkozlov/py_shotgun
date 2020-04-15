@@ -109,6 +109,9 @@ class Agents:
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
         
+        self.ub_hit_single = False
+        self.ub_hit_couple = False
+        
         self.yaftmar = -np.ones((N,T),dtype=np.int8)
         
         self.iexo[:,0] = iexoinit
@@ -159,6 +162,10 @@ class Agents:
             
         if not nosim: self.simulate()
         self.compute_aux()
+        
+        if self.ub_hit_single: print('Assets upped bound is reached for singles')
+        if self.ub_hit_couple: print('Assets upped bound is reached for couples')
+        
             
         
     def simulate(self):
@@ -211,6 +218,8 @@ class Agents:
                     self.s[ind,t] = anext
                     self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t]]
                     self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t]]
+                    if np.any(self.iassets[ind,t+1]==self.setup.na-1): self.ub_hit_single=True
+                    
                 else:
                     
                     # interpolate in both assets and theta
@@ -224,6 +233,7 @@ class Agents:
                     self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
                     
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self.shocks_couple_a[ind,t])
+                    if np.any(self.iassets[ind,t+1]==self.setup.na-1): self.couple=True
                     
                 assert np.all(anext >= 0)
     
@@ -697,20 +707,25 @@ class Agents:
         
         # fill wage & earnings
         
+        max_savings = -np.ones(len(self.state_codes))
+        
         for t in range(self.T):
             tm = self.setup.pars['m_wage_trend'][t]
             tf = self.setup.pars['f_wage_trend'][t]
             
             
+            
             for state, i_state in self.state_codes.items():
                 pick = (self.state[:,t] == i_state)
                 
+            
                 
                 if not np.any(pick): continue
-                if self.verbose: print('at t = {} max savings of {} is {}'.format(t,state,self.s[pick,t].max()))
+                
+                
                 iexo = self.iexo[pick,t] # reshaped
                 
-                
+                max_savings[i_state] = max(max_savings[i_state],np.max(self.s[pick,t]))
                 
                 if state == 'Female, single' or state == 'Female and child':
                     wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + 0*tf)
@@ -743,7 +758,11 @@ class Agents:
                 else:
                     raise Exception('unsupported state code?')
         
-        
+        for state, i_state in self.state_codes.items():
+            if max_savings[i_state] < 0: continue
+            if self.verbose: print('Maximum savings for {} is {}'.\
+                                   format(state,max_savings[i_state]))
+            
         
         
         

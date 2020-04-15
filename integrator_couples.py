@@ -38,15 +38,13 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
             'SF':Vpostren['Female, single'],
             'SM':Vpostren['Male, single']}
 
-    V0 = Vpostren['Couple and child']['V'] if haschild else Vpostren['Couple, no children']['V']
+    V0 = Vpostren['Couple and child']['V']
     V1 = _Vren2[1]
     
     if haschild:
-        characteristics = lambda x : (np.max(x), np.min(x), np.mean(x), np.std(x))
-        print('raw value function, max is {}, min is {}, mean is {}, std is {}'.\
-              format(*characteristics(V0)))
-        print('ren value function, max is {}, min is {}, mean is {}, std is {}'.\
-              format(*characteristics(V1)))
+        assert V1.max() <= V0.max() + 1e-4
+        assert V1.min() >= V0.min() + 1e-4
+        
     
     
         
