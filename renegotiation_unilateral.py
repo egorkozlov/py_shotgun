@@ -308,7 +308,7 @@ def v_no_ren(setup,V,haschild,canswitch,t):
     
         
     result =  {'Decision': yes, 'thetas': i_theta_out,
-            'Values': (r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
+            'Values': (r(v_y), r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
     
     if not haschild:
         result['Give a birth'] = switch

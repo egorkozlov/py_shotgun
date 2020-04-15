@@ -43,7 +43,7 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     
     if haschild:
         assert V1.max() <= V0.max() + 1e-4
-        assert V1.min() >= V0.min() + 1e-4
+        assert V1.min() >= V0.min() - 1e-4
         
     
     
