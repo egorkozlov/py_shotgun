@@ -12,13 +12,19 @@ Both versions are needed as it is not clear whether we'll actually use cuda
 
 
 import numpy as np
-from numba import njit, prange
+from numba import njit, prange, cuda
 from platform import system
 
 
 
 if system() != 'Darwin':
-    ugpu = True
+    try:
+        g = cuda.device_array((2,5))
+        del(g)
+        ugpu = True
+    except:
+        print('no gpu mode')
+        ugpu = False
 else:
     ugpu = False
     
