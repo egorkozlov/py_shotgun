@@ -44,6 +44,7 @@ def compute_moments(self):
     ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
     
     
+    
     age = np.broadcast_to((21+np.arange(self.T)[None,:]),(self.N,self.T))
     
     age_m30 = age - 30
@@ -227,6 +228,17 @@ def compute_moments(self):
     moments['ever married at 30, below median'] = ever_mar[pick,9].mean()
     moments['ever kids at 30, below median'] = ever_kid[pick & im_pick,9].mean()
     
+    
+    #ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
+    me_med = np.median(self.male_earnings[is_mark[:,9],9])
+    pick_above = (self.male_earnings[:,9] >= me_med) & (is_mark[:,9])
+    ls_fem_30_abovemed = self.labor_supply[pick_above,9].mean()
+    pick_below = (self.male_earnings[:,9] <= me_med) & (is_mark[:,9])
+    ls_fem_30_below = self.labor_supply[pick_below,9].mean()
+    ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below
+    moments['labor supply at 30 if kids ratio'] = ls_fem_30_ratio
+    
+    
     try:
         moments['divorced at 30, ratio'] = moments['divorced at 30, above median']/moments['divorced at 30, below median']
     except:
@@ -322,6 +334,7 @@ def compute_moments(self):
     moments['log earnings coef at 25'] = ever_kid[above_med_25,i25].mean() - ever_kid[below_med_25,i25].mean() 
     moments['log earnings coef at 30'] = ever_kid[above_med_30,i30].mean() - ever_kid[below_med_30,i30].mean()
     
+
     
     p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))
     linc_own = np.log(self.female_wage[:,2:][p_1yr] )

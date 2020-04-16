@@ -728,21 +728,21 @@ class Agents:
                 max_savings[i_state] = max(max_savings[i_state],np.max(self.s[pick,t]))
                 
                 if state == 'Female, single' or state == 'Female and child':
-                    wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + 0*tf)
+                    wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + tf)
                     self.female_wage[pick,t] = wage
                     self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.female_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Male, single':                    
-                    wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + 0*tm)
+                    wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + tm)
                     self.male_wage[pick,t] = wage
                     self.male_earnings[pick,t] = wage # !!!
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.male_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Couple and child' or state == 'Couple, no children':
                     iall, izf, izm, ipsi = self.setup.all_indices(t,iexo)
-                    wage_f = np.exp(self.setup.exogrid.zf_t[t][izf] + 0*tf)
-                    wage_m = np.exp(self.setup.exogrid.zm_t[t][izm] + 0*tm)
+                    wage_f = np.exp(self.setup.exogrid.zf_t[t][izf] + tf)
+                    wage_m = np.exp(self.setup.exogrid.zm_t[t][izm] + tm)
                     self.female_wage[pick,t] = wage_f
                     self.male_wage[pick,t] = wage_m
                     self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
