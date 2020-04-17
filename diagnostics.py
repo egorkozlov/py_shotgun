@@ -14,10 +14,15 @@ def check_value_functions(self):
             a_diff = np.diff(Vt[key]['V'],axis=0)
             monotonic = (a_diff>0)
             if np.all(monotonic):
-                print('at t = {} for {} everything is monotonic'.format(t,key))                
+                pass
+                #print('at t = {} for {} everything is monotonic'.format(t,key))                
             else:
                 print('at t = {} for {} share of {} is not monotnoic'.format(t,key,np.mean(~monotonic)))
                 #assert False
                 
                 
+
+
+
+        
     

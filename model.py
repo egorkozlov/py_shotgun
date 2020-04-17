@@ -254,20 +254,68 @@ class Model(object):
         shp = (ss.na,ss.pars['n_zf_t'][t],
                               ss.pars['n_zm_t'][t],
                               ss.pars['n_psi_t'][t],
-                              ss.ntheta)
+                              x.shape[-1])
         
         x_reshape = x.reshape(shp)
         return x_reshape
     
         
-    def graph(self,ai,zfi,zmi,psii,ti,thi):        
-        #Draw some graph of Value and Policy Functions
-        V=graphs(self,ai,zfi,zmi,psii,ti,thi)        
-        return V
+    #def graph(self,ai,zfi,zmi,psii,ti,thi):        
+    #    #Draw some graph of Value and Policy Functions
+    #    V=graphs(self,ai,zfi,zmi,psii,ti,thi)        
+    #    return V
+    
+    def get_graph_values(self,fun='V',dec=False,iassets=slice(None),iexo=slice(None),itheta=slice(None),*,state,t):
+        Vin = self.V[t][state][fun] if not dec else self.decisions[t][state][fun]
+        
+        if fun == 'fls': Vin = self.setup.ls_levels[state][Vin]
+        
+        if fun == 'thetas':
+            Vin_old = Vin
+            Vin = self.setup.thetagrid_fine[Vin]
+            Vin[Vin_old==-1] = None
+        
+        
+        
+        has_theta = (Vin.ndim == 3)
+        
+        if type(iexo) is tuple:
+            Vin = self.x_reshape(Vin,t)
+            ind = (iassets,) + iexo
+        else:
+            ind = (iassets,iexo)
+        
+        agrid = self.setup.agrid_c if has_theta else self.setup.agrid_s
+        if has_theta:
+            exogrids = (self.setup.exogrid.zf_t[t],self.setup.exogrid.zm_t[t],self.setup.exogrid.psi_t[t])
+        else:
+            if state == 'Female, single' or state == 'Female and child':
+                exogrids = (self.setup.zf_t[t],)
+            else:
+                exogrids = (self.setup.zm_t[t],)
+        thetagrid = ((self.setup.thetagrid,) if not dec else (self.setup.thetagrid_fine,)) \
+                            if has_theta else tuple()        
+        grids = (agrid,) + exogrids + thetagrid
+        
+    
+        
+        if has_theta: ind = ind+(itheta,)
+        
+        grid_out = None
+        
+        for num, ii in enumerate(ind):
+            if ii == slice(None): grid_out = grids[num]
+        
+        return grid_out, Vin[ind]
+    
     
     def diagnostics(self):
-        from diagnostics import check_value_functions
-        check_value_functions(self)
+        #from diagnostics import check_value_functions
+        #check_value_functions(self)
+        
+        from graphs import v_graphs
+        v_graphs(self)
+        
         
       
         

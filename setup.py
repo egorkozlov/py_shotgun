@@ -71,6 +71,7 @@ class ModelSetup(object):
         
         p['disutil_marry_sm_fem_coef'] = 0.0
         p['disutil_marry_sm_mal_coef'] = 10.0
+        p['disutil_shotgun_coef'] = 2.0
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
         
@@ -187,9 +188,9 @@ class ModelSetup(object):
         
         p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
         p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
+        p['disutil_shotgun'] =  p['disutil_shotgun_coef']*p['sigma_psi_init']
         
-        
-        p['preg_az'] = 0.00
+        p['preg_az'] =  0.00
         p['preg_azt'] = 0.00
         
         #Get the probability of meeting, adjusting for year-period

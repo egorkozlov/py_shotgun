@@ -26,13 +26,12 @@ def calibration_params(xin=None,xfix=None):
               util_alp=(0.1,4.0,1.5),
               util_kap=(2.0,15.0,8.0),
               util_lam=(0.1,0.95,0.7),
-              util_xi=(1.1,4.0,1.5),
               preg_a0=(0.005,0.5,0.1),
               preg_at=(-0.1,0.1,-0.01),
               preg_at2=(-0.01,0.00,-0.01),
               util_qbar=(0.0,5.0,1.7),
-              couple_rts=(0.01,0.5,0.23),
-              disutil_marry_sm_mal_coef = (4.0,16.0,8.0)
+              disutil_marry_sm_mal_coef = (4.0,16.0,8.0),
+              disutil_shotgun_coef=(0.0,5.0,2.0)
                         )
              
     

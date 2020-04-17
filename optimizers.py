@@ -22,11 +22,14 @@ if system() != 'Darwin':
         g = cuda.device_array((2,5))
         del(g)
         ugpu = True
+        upar = True
     except:
         print('no gpu mode')
         ugpu = False
+        upar = False
 else:
     ugpu = False
+    upar = True
     
 def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,
                               use_gpu=ugpu,dtype=np.float32):
@@ -132,7 +135,7 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,
 
 
 
-@njit(parallel=True)
+@njit(parallel=upar)
 def v_couple_par(money,sgrid,EV,mgrid,u_on_mgrid,x_on_mgrid,beta,uadd,V_opt,i_opt,c_opt,x_opt,s_opt):
     # this is a looped version of the optimizer
     # the last two things are outputs

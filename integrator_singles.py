@@ -104,8 +104,8 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     no_kids_at_meet = setup.pars['no kids at meeting']
     
     
-    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else 0.0
-    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else 0.0
+    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
+    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
     
     
     p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T

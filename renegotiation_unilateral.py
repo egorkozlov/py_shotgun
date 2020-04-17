@@ -18,11 +18,14 @@ if system() != 'Darwin':
         g = cuda.device_array((2,5))
         del(g)
         ugpu = True
+        upar = True
     except:
         print('no gpu mode')
         ugpu = False
+        upar = False
 else:
     ugpu = False
+    upar = True
     
 
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
@@ -324,7 +327,7 @@ def v_no_ren(setup,V,haschild,canswitch,t):
 
 
 
-@njit(parallel=True)
+@njit(parallel=upar)
 def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, wntht, thtgrid):
     # this takes values with no interpolation and interpolates inside
     # this also makes a choice of mar / coh
