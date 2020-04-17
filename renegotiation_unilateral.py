@@ -31,7 +31,7 @@ else:
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
 from renegotiation_unilateral_gpu import v_ren_gpu_twoopt
 
-def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rescale=True):
+def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rebuild=True,rescale=True):
     # this returns value functions for couple that entered the period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     # 
@@ -170,7 +170,14 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         return vo
     
-    v_resc = v_rescale(v_out,itheta_out) if rescale else v_out
+    v_resc = v_rescale(v_out,itheta_out) if rescale else v_out.copy()
+    
+    if rebuild:
+        v_out = thtgrid[None,None,:]*vf_out + \
+            (setup.dtype(1)-thtgrid[None,None,:])*vm_out
+    
+    
+    
     
         
     def r(x): return x
