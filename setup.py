@@ -34,7 +34,7 @@ class ModelSetup(object):
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.04]*T
         p['n_psi_t']     = [12]*T
-        p['beta_t'] = [0.97]*T
+        p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
@@ -55,7 +55,7 @@ class ModelSetup(object):
         p['m_zf0'] = 1.0
         
         p['z_drift'] = -0.09
-        p['no kids at meeting'] = True
+        p['no kids at meeting'] = False
         p['high education'] = True # what trend to pick
         
         p['wret'] = 0.8
@@ -883,8 +883,8 @@ class ModelSetup(object):
         
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
-        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
-            self.pars['preg_at2']*(t**2) + \
+        p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
+            self.pars['preg_at2']*((t-9)**2) + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
         #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
@@ -919,7 +919,7 @@ class DivorceCosts(object):
     # it aims to be fully flexible
     def __init__(self, 
                  unilateral_divorce=True, # whether to allow for unilateral divorce
-                 assets_kept = 1.0, # how many assets of couple are splited (the rest disappears)
+                 assets_kept = 0.9, # how many assets of couple are splited (the rest disappears)
                  u_lost_m=0.0,u_lost_f=0.0, # pure utility losses b/c of divorce
                  money_lost_m=0.0,money_lost_f=0.0, # pure money (asset) losses b/c of divorce
                  money_lost_m_ez=0.0,money_lost_f_ez=0.0, # money losses proportional to exp(z) b/c of divorce
