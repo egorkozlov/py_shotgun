@@ -217,8 +217,9 @@ def compute_moments(self):
     else:
         pol = [0,0,0]
         
-    moments['share of kids in new marriages, b0'] = pol[1]
-    moments['share of kids in new marriages, b1'] = pol[0]
+    moments['share of kids in new marriages at 25'] = just_mark_t0[self.agreed[:,4],4].mean()   if np.any(self.agreed[:,4]) else 0.0
+    moments['share of kids in new marriages at 30'] = just_mark_t0[self.agreed[:,9],9].mean()   if np.any(self.agreed[:,9]) else 0.0
+    moments['share of kids in new marriages at 35'] = just_mark_t0[self.agreed[:,14],14].mean() if np.any(self.agreed[:,15]) else 0.0
     
     
     
