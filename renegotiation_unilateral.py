@@ -110,12 +110,18 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
          
     else:
         if canswitch:
-            if not ugpu:
+            vcc_v, vcc_vf, vcc_vm = \
+            [setup.vagrid_child_couple.apply_preserve_shape(x)
+                for x in [V['Couple and child'][y] for y in ['V','VF','VM']]]
+                
+            if not ugpu:                
+                
+                    
                 v_out, vf_out, vm_out, itheta_out, switch = \
                     v_ren_core_two_opts_with_int(
-                               np.stack([V['Couple, no children']['V'], V['Couple and child']['V']]),
-                               np.stack([V['Couple, no children']['VF'],V['Couple and child']['VF']]), 
-                               np.stack([V['Couple, no children']['VM'],V['Couple and child']['VM']]), 
+                               np.stack([V['Couple, no children']['V'],vcc_v]),
+                               np.stack([V['Couple, no children']['VF'],vcc_vf]), 
+                               np.stack([V['Couple, no children']['VM'],vcc_vm]), 
                                         vf_n, vm_n,
                                         itht, wntht, thtgrid)
                     
@@ -123,9 +129,9 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
             else:    
                 v_out, vf_out, vm_out, itheta_out, switch = \
                        v_ren_gpu_twoopt(
-                                       V['Couple, no children']['V'], V['Couple and child']['V'],
-                                       V['Couple, no children']['VF'],V['Couple and child']['VF'], 
-                                       V['Couple, no children']['VM'],V['Couple and child']['VM'], 
+                                       V['Couple, no children']['V'], vcc_v,
+                                       V['Couple, no children']['VF'],vcc_vf, 
+                                       V['Couple, no children']['VM'],vcc_vm, 
                                         vf_n, vm_n,
                                         itht, wntht, thtgrid)     
         else:

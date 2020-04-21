@@ -75,6 +75,8 @@ class ModelSetup(object):
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
         
+        p['child_a_cost'] = 0.0
+        
         
         '''
             Condition is h_male==1
@@ -401,8 +403,11 @@ class ModelSetup(object):
         self.thetagrid = np.linspace(self.thetamin,self.thetamax,self.ntheta,dtype=self.dtype)
         
         
+        self.child_a_cost_single = np.minimum(self.agrid_s,self.pars['child_a_cost'])
+        self.child_a_cost_couple = np.minimum(self.agrid_c,self.pars['child_a_cost'])
         
-        
+        self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
+        self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
         
         
         # construct finer grid for bargaining
@@ -493,7 +498,7 @@ class ModelSetup(object):
         
         
         
-    def _mar_mats_assets(self,npoints=4,female=True,abar=0.1):
+    def _mar_mats_assets(self,npoints=4,female=True,upp=False,abar=0.1):
         # for each grid point on single's grid it returns npoints positions
         # on (potential) couple's grid's and assets of potential partner 
         # (that can be off grid) and correpsonding probabilities. 
@@ -511,7 +516,9 @@ class ModelSetup(object):
         prob_a_mat = np.zeros((na,npoints),dtype=self.dtype)
         i_a_mat = np.zeros((na,npoints),dtype=np.int16)
         
+        if upp: assert female
         
+        aloss = 0.0 if not upp else self.pars['child_a_cost']
         
         for ia, a in enumerate(agrid_s):
             lagrid_t = np.zeros_like(agrid_c)
@@ -525,7 +532,7 @@ class ModelSetup(object):
                 s_a_partner*np.flip(np.arange(i_neg.sum())) 
             
             # TODO: this needs to be checked
-            p_a = int_prob(lagrid_t,mu=mu_a_partner,sig=s_a_partner,n_points=npoints)
+            p_a = int_prob(lagrid_t,mu=mu_a_partner-aloss,sig=s_a_partner,n_points=npoints)
             i_pa = (-p_a).argsort()[:npoints] # this is more robust then nonzero
             p_pa = p_a[i_pa]
             prob_a_mat[ia,:] = p_pa
@@ -534,8 +541,9 @@ class ModelSetup(object):
         return prob_a_mat, i_a_mat
             
     def mar_mats_assets(self,npoints=4,abar=0.1):
-        self.prob_a_mat_female, self.i_a_mat_female = self._mar_mats_assets(npoints=npoints,female=True,abar=abar)
+        self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp = self._mar_mats_assets(npoints=npoints,female=True,upp=False,abar=abar)
         self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
+        self.prob_a_mat_female_upp, self.i_a_mat_female_upp = self._mar_mats_assets(npoints=npoints,female=True,upp=True,abar=abar)
         
     
     def mar_mats_iexo(self,t,female=True,trim_lvl=0.001):
@@ -612,17 +620,19 @@ class ModelSetup(object):
         
         self.matches = dict()
         
-        for female in [True,False]:
-            desc = 'Female, single' if female else 'Male, single'
+        for female, upp in [(True,False),(True,True),(False,False)]:
+            desc = 'Female, single, upp' if (female and upp) else 'Female, single, no upp' if (female and not upp) else 'Male, single'
             
             
-            if female:
-                pmat_a, imat_a = self.prob_a_mat_female, self.i_a_mat_female
+            if female and upp:
+                pmat_a, imat_a = self.prob_a_mat_female_upp, self.i_a_mat_female_upp
+            elif female and not upp:
+                pmat_a, imat_a = self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp
             else:
                 pmat_a, imat_a = self.prob_a_mat_male, self.i_a_mat_male
             
             
-            pmats = self.part_mats[desc] 
+            pmats = self.part_mats['Female, single'] if female else self.part_mats['Male, single']
             
             
             match_matrix = list()

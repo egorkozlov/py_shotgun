@@ -124,15 +124,17 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     EV = 0.0
     ppreg = 0.0
     
-    if female:
-        i_assets_c, p_assets_c = setup.i_a_mat_female, setup.prob_a_mat_female
+    if (female and not unplanned_preg) or (female and single_mom):
+        i_assets_c, p_assets_c = setup.i_a_mat_female_noupp, setup.prob_a_mat_female_noupp
+        matches = setup.matches['Female, single, no upp'][t]
+    elif female and unplanned_preg:
+        i_assets_c, p_assets_c = setup.i_a_mat_female_upp, setup.prob_a_mat_female_upp
+        matches = setup.matches['Female, single, upp'][t]
     else:
         i_assets_c, p_assets_c = setup.i_a_mat_male, setup.prob_a_mat_male
+        matches = setup.matches['Male, single'][t]
         
     npart = i_assets_c.shape[1]
-    
-    
-    matches = setup.matches['Female, single'][t] if female else setup.matches['Male, single'][t]
     
     
     dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
