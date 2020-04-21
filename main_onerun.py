@@ -41,7 +41,8 @@ if __name__ == '__main__':
          'util_alp': 2.693149863108261,
          'util_kap': 12.286338934623597,
          'util_qbar': 0.6043845729601405,
-         'disutil_marry_sm_mal_coef': 14.727637231587778}
+         'disutil_marry_sm_mal_coef': 14.727637231587778,
+         'disutil_shotgun_coef':0.0}
 
 
 
