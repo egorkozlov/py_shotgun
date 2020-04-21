@@ -42,7 +42,6 @@ class ModelSetup(object):
         p['mu_partner_a_female'] = 0.00
         p['mu_partner_a_male'] = -0.00
         p['dump_factor_z'] = 0.85
-        
         p['sig_partner_z'] = 1.2
         p['mu_partner_z_male'] = -0.02
         p['mu_partner_z_female'] = 0.02
