@@ -104,9 +104,11 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     no_kids_at_meet = setup.pars['no kids at meeting']
     
     
-    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
-    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
+    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else 0.0
+    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else 0.0
     
+    uloss_fem_single = setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
+    uloss_mal_single = setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
     
     p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T
    
@@ -152,13 +154,17 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
                 # compare whether to give or not to give a birth
                 res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                          female=female,giveabirth=False,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
+                                         uloss_fem_single=uloss_fem_single,
+                                         uloss_mal_single=uloss_mal_single)
                 
                 if cangiveabirth and (not no_kids_at_meet):
                     # maybe cannot give a birth at all
                     res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                          female=female,giveabirth=True,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
+                                         uloss_fem_single=uloss_fem_single,
+                                         uloss_mal_single=uloss_mal_single)
                 else:            
                     res_m = res_c
             else:
@@ -167,7 +173,9 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
                 res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
                                     unplanned_pregnancy=True,
                                          female=female,giveabirth=True,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal)
+                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
+                                         uloss_fem_single=uloss_fem_single,
+                                         uloss_mal_single=uloss_mal_single)
                 res_c = res_m
                 
         else:

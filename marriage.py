@@ -15,7 +15,7 @@ from gridvec import VecOnGrid
 
 
 def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
-                uloss_fem,uloss_mal,
+                uloss_fem,uloss_mal,uloss_fem_single=0.0,uloss_mal_single=0.0,
                 unplanned_pregnancy=False,interpolate=True,return_all=False):
     # this returns value functions for couple that entered the last period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
@@ -42,7 +42,7 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
     gamma = setup.pars['m_bargaining_weight']   
     
     
-    VMval_single, VFval_single = V['Male, single']['V'], Vfem
+    VMval_single, VFval_single = V['Male, single']['V'] - uloss_mal_single, Vfem - uloss_fem_single
     VMval_postren, VFval_postren = V[coup]['VM'][icouple,...] - uloss_mal, V[coup]['VF'][icouple,...] - uloss_fem
     
     
