@@ -177,12 +177,12 @@ def compute_moments(self):
     
     
     #mkids_0_mar = (self.state[:,1:] == n_mark)[ ~is_mar[:,0:-1] & is_mar[:,1:]].mean()
-    moments['no kids 1 year after marriage']  = 1 - ( have_kid[:,2:20][ ~is_mar[:,0:18] & is_mar[:,2:20] & one_mar[:,2:20]] ).mean()
-    moments['no kids 2 years after marriage'] = 1 - ( have_kid[:,3:20][ ~is_mar[:,0:17] & is_mar[:,3:20] & one_mar[:,3:20]] ).mean()
-    moments['no kids 3 years after marriage'] = 1 - ( have_kid[:,4:20][ ~is_mar[:,0:16] & is_mar[:,4:20] & one_mar[:,4:20]] ).mean()
-    moments['no kids 4 years after marriage'] = 1 - ( have_kid[:,5:20][ ~is_mar[:,0:15] & is_mar[:,5:20] & one_mar[:,5:20]] ).mean()
-    moments['no kids 5 years after marriage'] = 1 - ( have_kid[:,6:20][ ~is_mar[:,0:14] & is_mar[:,6:20] & one_mar[:,6:20]] ).mean()
-    moments['no kids 6 years after marriage'] = 1 - ( have_kid[:,7:20][ ~is_mar[:,0:13] & is_mar[:,7:20] & one_mar[:,7:20]] ).mean()
+    #moments['no kids 1 year after marriage']  = 1 - ( have_kid[:,2:20][ ~is_mar[:,0:18] & is_mar[:,2:20] & one_mar[:,2:20]] ).mean()
+    #moments['no kids 2 years after marriage'] = 1 - ( have_kid[:,3:20][ ~is_mar[:,0:17] & is_mar[:,3:20] & one_mar[:,3:20]] ).mean()
+    #moments['no kids 3 years after marriage'] = 1 - ( have_kid[:,4:20][ ~is_mar[:,0:16] & is_mar[:,4:20] & one_mar[:,4:20]] ).mean()
+    #moments['no kids 4 years after marriage'] = 1 - ( have_kid[:,5:20][ ~is_mar[:,0:15] & is_mar[:,5:20] & one_mar[:,5:20]] ).mean()
+    #moments['no kids 5 years after marriage'] = 1 - ( have_kid[:,6:20][ ~is_mar[:,0:14] & is_mar[:,6:20] & one_mar[:,6:20]] ).mean()
+    #moments['no kids 6 years after marriage'] = 1 - ( have_kid[:,7:20][ ~is_mar[:,0:13] & is_mar[:,7:20] & one_mar[:,7:20]] ).mean()
     
     
     in_sample = (self.k_m) | (self.m_k)
