@@ -40,8 +40,9 @@ def compute_moments(self):
     share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
     mean_x = np.median(share_x)
     
+    ls_min = min(self.setup.ls_levels['Couple and child'])
     
-    ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
+    ls_fem_30 = (self.labor_supply[is_mark[:,9],9]>ls_min).mean()
     
     
     
@@ -52,7 +53,7 @@ def compute_moments(self):
     
     
     moments['mean x share'] = mean_x
-    moments['labor supply at 30 if kids'] = ls_fem_30
+    moments['in labor force at 30 if kids'] = ls_fem_30
     
     age_pick = ((age>=21) & (age<=40))
     
@@ -245,11 +246,11 @@ def compute_moments(self):
     #ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
     me_med = np.median(self.male_earnings[is_mark[:,9],9])
     pick_above = (self.male_earnings[:,9] >= me_med) & (is_mark[:,9])
-    ls_fem_30_abovemed = self.labor_supply[pick_above,9].mean()
+    ls_fem_30_abovemed = (self.labor_supply[pick_above,9]>ls_min).mean()
     pick_below = (self.male_earnings[:,9] <= me_med) & (is_mark[:,9])
-    ls_fem_30_below = self.labor_supply[pick_below,9].mean()
-    ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below
-    moments['labor supply at 30 if kids ratio'] = ls_fem_30_ratio
+    ls_fem_30_below = (self.labor_supply[pick_below,9]>ls_min).mean()
+    ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below if ls_fem_30_below > 0 else 1.0
+    moments['in labor force at 30 if kids ratio'] = ls_fem_30_ratio
     
     
     try:

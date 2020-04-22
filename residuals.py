@@ -100,12 +100,12 @@ def mdl_resid(x=None,targets=None,weights=w,
     agents = Agents( mdl_list, verbose=verbose)
     mom = agents.compute_moments()
     
-    #agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
-    #mom_men = agents_extra.compute_moments()
+    agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
+    mom_men = agents_extra.compute_moments()
     
-    #mom['men ever married at 30, ratio'] = mom_men['ever married at 30, ratio']    
-    #mom['men divorced at 30, ratio'] = mom_men['divorced at 30, ratio']    
-    #mom['men ever kids at 30, ratio'] = mom_men['ever kids at 30, ratio']
+    mom['men ever married at 30, ratio'] = mom_men['ever married at 30, ratio']    
+    mom['men divorced at 30, ratio'] = mom_men['divorced at 30, ratio']    
+    mom['men ever kids at 30, ratio'] = mom_men['ever kids at 30, ratio']
     
     
     
