@@ -251,7 +251,8 @@ def compute_moments(self):
     ls_fem_30_below = (self.labor_supply[pick_below,9]>ls_min).mean()
     ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below if ls_fem_30_below > 0 else 1.0
     moments['in labor force at 30 if kids ratio'] = ls_fem_30_ratio
-    
+    moments['in labor force at 30, k then m'] = (self.labor_supply[:,9]>ls_min)[self.k_m[:,9]].mean() if np.any(self.k_m[:,9]) else 0.0
+    moments['in labor force at 30, m then k'] = (self.labor_supply[:,9]>ls_min)[self.m_k[:,9]].mean() if np.any(self.m_k[:,9]) else 0.0
     
     try:
         moments['divorced at 30, ratio'] = moments['divorced at 30, above median']/moments['divorced at 30, below median']
@@ -278,7 +279,7 @@ def compute_moments(self):
     share_planned = self.planned_preg[(self.planned_preg) | (self.unplanned_preg)].mean()
     moments['share of planned pregnancies'] = share_planned
     share_rejected = self.disagreed.sum() / (self.disagreed | self.agreed).sum()
-    moments['share of rejected proposals'] = share_planned
+    moments['share of rejected proposals'] = share_rejected
     if self.verbose: print('Rejected: {}, planned preg: {}'.format(share_rejected,share_planned))
     
     
