@@ -17,18 +17,20 @@ def calibration_params(xin=None,xfix=None):
     # I am not sure if this should be ordered or not but let's do ordered
     # just in case...
     params = OrderedDict(
-              sigma_psi=(0.0,0.2,0.1),
-              sigma_psi_mult=(1.0,8.0,3.0),
-              pmeet_0=(0.0,1.0,0.4),
-              preg_a0=(0.005,0.5,0.1),
-              preg_at=(-0.2,0.2,0.01),
-              preg_at2=(-0.01,0.00,-0.01),
-              u_shift_mar=(0.0,2.0,1.5),
-              util_alp=(0.1,4.0,1.5),
-              util_kap=(0.2,5.0,2.0),
-              util_qbar=(0.0,6.0,1.7),
-              disutil_marry_sm_mal_coef = (0.0,10.0,8.0),
-              disutil_shotgun_coef=(0.0,5.0,2.0)
+              sigma_psi=(0.0,0.2,0.16),
+              sigma_psi_mult=(1.0,8.0,5.5),
+              pmeet_0=(0.0,1.0,0.41),
+              pmeet_t=(-0.5,0.5,0.0),
+              pmeet_t2=(-0.1,0.0,0.0),
+              preg_a0=(0.005,0.3,0.03),
+              preg_at=(-0.2,0.2,0.012),
+              preg_at2=(-0.03,0.00,0.00),
+              u_shift_mar=(0.0,2.0,1.75),
+              util_alp=(0.1,4.0,0.70),
+              util_kap=(0.2,5.0,0.71),
+              util_qbar=(0.0,6.0,0.1),
+              disutil_marry_sm_mal_coef = (0.0,10.0,5.5),
+              disutil_shotgun_coef=(0.0,4.0,1.58)
                         )
              
     

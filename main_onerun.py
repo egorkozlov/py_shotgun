@@ -53,7 +53,7 @@ if __name__ == '__main__':
     
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
+    out, mdl, agents, res = mdl_resid(x=None,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
                                       #save_to='mdl.pkl',
                                       verbose=True,draw=True)

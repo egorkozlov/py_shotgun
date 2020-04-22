@@ -40,9 +40,9 @@ def target_values(mode='high education'):
         
         targets['mean x share'] = (0.4,0.001)
         
-        #targets['k then m by age, b0'] = (0.1199747,0.0009933)
-        #targets['k then m by age, b1'] = (-0.0100934,0.000355)
-        #targets['k then m by age, b2'] = (0.0006642,0.0000398)
+        targets['k then m by age, b0'] = (0.1199747,0.0009933)
+        targets['k then m by age, b1'] = (-0.0100934,0.000355)
+        targets['k then m by age, b2'] = (0.0006642,0.0000398)
         
         #targets['share of kids in new marriages, b0'] = (0.058445,0.0010725)
         #targets['share of kids in new marriages, b1'] = (0.0031754,0.0002467)
