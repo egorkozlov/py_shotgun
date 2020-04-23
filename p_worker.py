@@ -195,4 +195,12 @@ while True:
         
         print('could not get output!')
         continue
-    
+    finally:
+        try:            
+            if x[0] == 'minimize':
+                print('I terminate after one optimization')
+                break
+        except:
+            print('could not terminate myself...')
+        
+        
