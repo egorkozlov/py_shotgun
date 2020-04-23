@@ -69,6 +69,10 @@ def compute_moments(self):
     moments['never married by age, b2'] = pol[0]
     
     
+    
+    
+    
+    
     reg_y = ever_kid[age_pick]
     reg_x = age_m30[age_pick]
     try:
@@ -354,6 +358,28 @@ def compute_moments(self):
     p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))
     linc_own = np.log(self.female_wage[:,2:][p_1yr] )
     linc_sp =  np.log(self.male_wage[:,2:][p_1yr])
+    
+    
+    c, o, m = self.marriage_stats()
+    
+    
+    n_childless = (~have_kid).sum(axis=0)
+    n_newkids = np.zeros_like(n_childless)
+    n_newkids[1:] = ((have_kid[:,1:]) & (~have_kid[:,:-1])).sum(axis=0)
+    
+    
+    
+    haz_m = m['Everyone']/c['Everyone']
+    haz_mk = (m['SM']+m['Single, pregnant'])/c['Everyone']
+    haz_nk = n_newkids / n_childless
+    
+    for t in range(1,15):
+        moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
+    for t in range(1,15):
+        moments['hazard of marriage with child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
+        
+    for t in range(1,15):
+        moments['hazard of new child at {}'.format(21+t)] = haz_nk[t] if not np.isnan(haz_nk[t]) else 0.0
     
     try:
         moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]

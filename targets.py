@@ -13,12 +13,12 @@ def target_values(mode='high education'):
         
     if mode=='high education':
         
-        targets['never married by age, b0'] = (0.3948181,    0.000777)
-        targets['never married by age, b1'] = (-0.0507542,  0.0000895)
-        targets['never married by age, b2'] = (0.0026662,   0.0000174)
+        #targets['never married by age, b0'] = (0.3948181,    0.000777)
+        #targets['never married by age, b1'] = (-0.0507542,  0.0000895)
+        #targets['never married by age, b2'] = (0.0026662,   0.0000174)
 
     
-        targets['ever kids by age, b0'] = (0.4100186,0.0007724)
+        #targets['ever kids by age, b0'] = (0.4100186,0.0007724)
         #targets['ever kids by age, b1'] = (0.0497961,0.0000801)
         #targets['ever kids by age, b2'] = (-0.0011349,0.0000177)
         
@@ -40,9 +40,9 @@ def target_values(mode='high education'):
         
         targets['mean x share'] = (0.4,0.001)
         
-        targets['k then m by age, b0'] = (0.1199747,0.0009933)
-        targets['k then m by age, b1'] = (-0.0100934,0.000355)
-        targets['k then m by age, b2'] = (0.0006642,0.0000398)
+        #targets['k then m by age, b0'] = (0.1199747,0.0009933)
+        #targets['k then m by age, b1'] = (-0.0100934,0.000355)
+        #targets['k then m by age, b2'] = (0.0006642,0.0000398)
         
         #targets['share of kids in new marriages, b0'] = (0.058445,0.0010725)
         #targets['share of kids in new marriages, b1'] = (0.0031754,0.0002467)
@@ -51,9 +51,9 @@ def target_values(mode='high education'):
         targets['men divorced at 30, ratio'] = (0.5981809,0.0493313)
         targets['men ever kids at 30, ratio'] = (0.9476518,0.0151745)
         
-        targets['share of kids in new marriages at 25'] = (0.0456158,0.00030936) 
-        targets['share of kids in new marriages at 30'] = (0.0571774,0.00037749)
-        targets['share of kids in new marriages at 35'] = (0.0867144,0.00078597)
+        #targets['share of kids in new marriages at 25'] = (0.0456158,0.00030936) 
+        #targets['share of kids in new marriages at 30'] = (0.0571774,0.00037749)
+        #targets['share of kids in new marriages at 35'] = (0.0867144,0.00078597)
         
         targets['divorced if k then m and one marriage'] = (0.1474027, (1/5)*0.00243)
         targets['divorced if m then k and one marriage'] = (0.0531433, (1/5)*0.0004851)
@@ -65,6 +65,54 @@ def target_values(mode='high education'):
         
         targets['in labor force at 30 if kids'] = (0.7394259,(1/5)*0.0035188)
         targets['in labor force at 30 if kids ratio'] = (0.8641976,0.0085405)
+        
+        
+        targets['hazard of marriage at 22'] = (0.0414921,0.0011577)
+        targets['hazard of marriage at 23'] = (0.0555908,0.0010842)
+        targets['hazard of marriage at 24'] = (0.0680466,0.0011492)
+        targets['hazard of marriage at 25'] = (0.0843476,0.0012718)
+        targets['hazard of marriage at 26'] = (0.1013612,.0014339)
+        targets['hazard of marriage at 27'] = (0.1140159,0.0015872)
+        targets['hazard of marriage at 28'] = (0.1189503,0.0017143)
+        targets['hazard of marriage at 29'] = (0.1275065,0.0019024)
+        targets['hazard of marriage at 30'] = (0.1265993,0.0019926)
+        targets['hazard of marriage at 31'] = (0.1189422,0.0020686)
+        targets['hazard of marriage at 32'] = (0.1137438,0.0021385)
+        targets['hazard of marriage at 33'] = (0.1141971,0.002287)
+        targets['hazard of marriage at 34'] = (0.09789	,0.0021931)
+        targets['hazard of marriage at 35'] = (0.0909237,0.0021694)
+        
+        targets['hazard of marriage with child at 22'] = (0.0020043,0.0002575)
+        targets['hazard of marriage with child at 23'] = (0.0037913,0.0002894)
+        targets['hazard of marriage with child at 24'] = (0.0050758,0.0003216)
+        targets['hazard of marriage with child at 25'] = (0.0078502,0.0003979)
+        targets['hazard of marriage with child at 26'] = (0.0099153,0.0004596)
+        targets['hazard of marriage with child at 27'] = (0.0128215,0.0005419)
+        targets['hazard of marriage with child at 28'] = (0.0150063,0.0006154)
+        targets['hazard of marriage with child at 29'] = (0.0201393,0.0007585)
+        targets['hazard of marriage with child at 30'] = (0.0222486,0.0008317)
+        targets['hazard of marriage with child at 31'] = (0.0235701,0.0009146)
+        targets['hazard of marriage with child at 32'] = (0.0272916,0.0010366)
+        targets['hazard of marriage with child at 33'] = (0.0330752,0.0012157)
+        targets['hazard of marriage with child at 34'] = (0.0321491,0.0012423)
+        targets['hazard of marriage with child at 35'] = (0.0314278,0.0012609)
+        
+        targets['hazard of new child at 22'] = (0.0069326,0.0004666)
+        targets['hazard of new child at 23'] = (0.0138225,0.0005367)
+        targets['hazard of new child at 24'] = (0.0188708,0.0005915)
+        targets['hazard of new child at 25'] = (0.0277794,0.0006976)
+        targets['hazard of new child at 26'] = (0.0386756,0.0008233)
+        targets['hazard of new child at 27'] = (0.0515395,0.0009507)
+        targets['hazard of new child at 28'] = (0.0652943,0.0010927)
+        targets['hazard of new child at 29'] = (0.0799002,0.0012581)
+        targets['hazard of new child at 30'] = (0.0876844,0.0013633)
+        targets['hazard of new child at 31'] = (0.1004221,0.0015608)
+        targets['hazard of new child at 32'] = (0.1016521,0.0016817)
+        targets['hazard of new child at 33'] = (0.1003621,0.0018118)
+        targets['hazard of new child at 34'] = (0.0947235,0.0018794)
+        targets['hazard of new child at 35'] = (0.0858545,0.0018973)
+
+        
     
         
     elif mode=='low education':
