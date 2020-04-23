@@ -12,6 +12,7 @@ from time import sleep
 from timeit import default_timer
 from numpy.random import random_sample as rs 
 from numpy.random import randint as ri 
+from numpy import isnan
 
 
 
@@ -97,9 +98,10 @@ while True:
     try:
         rnum = ri(1 + (num_in//2))
         fname = li_txt[rnum]
+        num = getnum(fname)
     except:
         print('error in random point picker')
-        fname = li_txt[0]
+        continue
     
     if num_in < 300:    
         # if the number is large then sorting takes too ling        
@@ -109,8 +111,8 @@ while True:
             fname = li_txt[0]
             num = getnum(fname)
         except:
-            num = 0
             print('something wrong with file named {}'.format(fname))
+            continue
     
     
     fname_full = 'Job/{}'.format(fname)
@@ -143,6 +145,7 @@ while True:
         
         try:
             f = fun(x)
+            if isnan(f): f = 1e8
         except KeyboardInterrupt:
             raise KeyboardInterrupt()
         except BaseException as e:
@@ -153,7 +156,7 @@ while True:
             else:
                 print(e)
                 
-            f = 1e6
+            f = 1e8
             
         print('Response is {}'.format(f))
             
