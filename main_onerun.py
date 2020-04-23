@@ -33,20 +33,21 @@ if __name__ == '__main__':
     
     
     
-    x = {'sigma_psi': 0.15708192700193488,
-         'sigma_psi_mult': 5.305288050025261,
-         'pmeet_0': 0.37323350562593977,
-         'pmeet_t': 0.021980702978686817,
-         'pmeet_t2': -0.0013690241411399573,
-         'preg_a0': 0.05073239657355087,
-         'preg_at': 0.0029740693848109845,
-         'preg_at2': -0.0006947723476003372,
-         'u_shift_mar': 1.6483875285794014,
-         'util_alp': 0.6790146096417299,
-         'util_kap': 0.7644279343790064,
-         'util_qbar': 0.08356166794865397,
-         'disutil_marry_sm_mal_coef': 4.779135319968562,
-         'disutil_shotgun_coef': 1.682061613383758}
+    x = {'sigma_psi': 0.29657734335571323,
+         'sigma_psi_mult': 3.729950449694295,
+         'pmeet_0': 0.4588845109118548,
+         'pmeet_t': 0.028520315381868666,
+         'pmeet_t2': -0.0027715221438747405,
+         'preg_a0': 0.10568137068532876,
+         'preg_at': -0.012412628483134985,
+         'preg_at2': -0.005036760005378196,
+         'u_shift_mar': 2.130767784054183,
+         'util_alp': 0.7388571167758351,
+         'util_kap': 0.7655243824821856,
+         'util_qbar': 1.4951823800236654,
+         'disutil_marry_sm_mal_coef': 9.998061340856006,
+         'disutil_shotgun_coef': 0.5298630898532276}
+
 
 
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=None,targets=tar,
+    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
                                       #save_to='mdl.pkl',
                                       verbose=True,draw=True)
