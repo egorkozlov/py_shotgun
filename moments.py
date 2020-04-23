@@ -201,11 +201,11 @@ def compute_moments(self):
     
     pick = age_pick & in_sample
     
-    if np.any(pick):
+    try:
         reg_y = self.k_m[pick]
         reg_x = age_m30[pick]
         pol = np.polyfit(reg_x,reg_y,2)
-    else:
+    except:
         pol = [0,0,0]
         
     moments['k then m by age, b0'] = pol[2]
@@ -215,11 +215,11 @@ def compute_moments(self):
     pick = self.agreed & one_mar & age_pick
     just_mark_t0 = self.agreed_unplanned
     
-    if np.any(pick):
+    try:
         reg_y = just_mark_t0[pick]
         reg_x = age_m30[pick]
         pol = np.polyfit(reg_x,reg_y,1)
-    else:
+    except:
         pol = [0,0,0]
         
     moments['share of kids in new marriages at 25'] = just_mark_t0[self.agreed[:,4],4].mean()   if np.any(self.agreed[:,4]) else 0.0
