@@ -99,12 +99,9 @@ def compute_moments(self):
     moments['ever kids by years after marriage, b2'] = pol[0]
     
     
-    moments['ever kids 1 year after marriage'] = ever_kid[pick & (self.yaftmar==1)].mean()
-    moments['ever kids 2 years after marriage'] = ever_kid[pick & (self.yaftmar==2)].mean()
-    moments['ever kids 3 years after marriage'] = ever_kid[pick & (self.yaftmar==3)].mean()
-    moments['ever kids 4 years after marriage'] = ever_kid[pick & (self.yaftmar==4)].mean()
-    moments['ever kids 5 years after marriage'] = ever_kid[pick & (self.yaftmar==5)].mean()
-    moments['ever kids 6 years after marriage'] = ever_kid[pick & (self.yaftmar==6)].mean()
+    for t in range(1,7):
+        moments['ever kids by years after marriage, {}'.format(t)] = ever_kid[pick & (self.yaftmar==t)].mean()
+    
     
     
     pick = yaftmar_pick & age_pick & one_mar
@@ -118,6 +115,12 @@ def compute_moments(self):
     moments['divorced by years after marriage, b0'] = pol[2]
     moments['divorced by years after marriage, b1'] = pol[1]
     moments['divorced by years after marriage, b2'] = pol[0]
+    
+    for t in range(1,7):
+        moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean()
+    
+    
+    
     
     
     
@@ -376,7 +379,7 @@ def compute_moments(self):
     for t in range(1,15):
         moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
     for t in range(1,15):
-        moments['hazard of marriage with child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
+        moments['hazard of marriage & having a child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
         
     for t in range(1,15):
         moments['hazard of new child at {}'.format(21+t)] = haz_nk[t] if not np.isnan(haz_nk[t]) else 0.0

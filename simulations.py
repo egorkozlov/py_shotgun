@@ -770,18 +770,18 @@ class Agents:
     def marriage_stats(self):
         
         
-        offer_single = np.zeros((self.T,),dtype=np.int16)
-        offer_preg = np.zeros((self.T,),dtype=np.int16)
-        offer_notpreg = np.zeros((self.T,),dtype=np.int16)
-        offer_sm = np.zeros((self.T,),dtype=np.int16)
+        offer_single = np.zeros((self.T,),dtype=np.int32)
+        offer_preg = np.zeros((self.T,),dtype=np.int32)
+        offer_notpreg = np.zeros((self.T,),dtype=np.int32)
+        offer_sm = np.zeros((self.T,),dtype=np.int32)
         
-        total_single = np.zeros((self.T,),dtype=np.int16)
-        total_sm = np.zeros((self.T,),dtype=np.int16)
+        total_single = np.zeros((self.T,),dtype=np.int32)
+        total_sm = np.zeros((self.T,),dtype=np.int32)
         
-        nmar_single = np.zeros((self.T,),dtype=np.int16)
-        nmar_preg = np.zeros((self.T,),dtype=np.int16)
-        nmar_notpreg = np.zeros((self.T,),dtype=np.int16)
-        nmar_sm = np.zeros((self.T,),dtype=np.int16)
+        nmar_single = np.zeros((self.T,),dtype=np.int32)
+        nmar_preg = np.zeros((self.T,),dtype=np.int32)
+        nmar_notpreg = np.zeros((self.T,),dtype=np.int32)
+        nmar_sm = np.zeros((self.T,),dtype=np.int32)
         
         
         

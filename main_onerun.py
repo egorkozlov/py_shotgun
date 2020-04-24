@@ -68,3 +68,6 @@ if __name__ == '__main__':
     #mdl[0].diagnostics()
                          
     print('Done. Residual in point x0 is {}'.format(out))
+    
+    from fit_plot import make_fit_plots
+    make_fit_plots(mdl[0].setup,agents.compute_moments(),target_values('high education'))
