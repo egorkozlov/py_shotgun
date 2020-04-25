@@ -34,12 +34,11 @@ def target_values(mode='high education'):
         targets['ever kids by years after marriage, 6'] = (.7739091,.0020495)
         
         
-        targets['divorced by years after marriage, 1'] = (.0074631,.0004086)
-        targets['divorced by years after marriage, 2'] = (.0194861,.0006415)
-        targets['divorced by years after marriage, 3'] = (.0340267,.0008401)
-        targets['divorced by years after marriage, 4'] = (.0529621,.0010397)
-        targets['divorced by years after marriage, 5'] = (.0680016,.0011695)
-        targets['divorced by years after marriage, 6'] = (.0802289,.0012859)
+        targets['divorced by years after marriage, 2'] =  (.0194861,.0006415)
+        targets['divorced by years after marriage, 4'] =  (.0529621,.0010397)
+        targets['divorced by years after marriage, 6'] =  (.0802289,.0012859)        
+        targets['divorced by years after marriage, 8'] =  (.1002189,.0014686)
+        targets['divorced by years after marriage, 10'] = (.1153659,.0016339)
         
         
         targets['divorced at 30 if one marriage'] = (0.0619966, 0.0005809)
@@ -90,7 +89,7 @@ def target_values(mode='high education'):
         targets['hazard of marriage at 31'] = (0.1189422,0.0020686)
         targets['hazard of marriage at 32'] = (0.1137438,0.0021385)
         targets['hazard of marriage at 33'] = (0.1141971,0.002287)
-        targets['hazard of marriage at 34'] = (0.09789	,0.0021931)
+        targets['hazard of marriage at 34'] = (0.09789,0.0021931)
         targets['hazard of marriage at 35'] = (0.0909237,0.0021694)
         
         targets['hazard of marriage & having a child at 22'] = (0.0020043,0.0002575)

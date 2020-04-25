@@ -116,7 +116,7 @@ def compute_moments(self):
     moments['divorced by years after marriage, b1'] = pol[1]
     moments['divorced by years after marriage, b2'] = pol[0]
     
-    for t in range(1,7):
+    for t in range(1,11):
         moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean()
     
     
