@@ -135,9 +135,6 @@ def compute_moments(self):
             still_mar[yam] = is_mar[thing].mean()
             just_div[yam] = self.just_divorced[thing].mean()
             haz_div[yam] = just_div[yam]/still_mar[yam]
-            
-    print(haz_div)
-        
     
     
 

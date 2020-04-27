@@ -22,7 +22,7 @@ else:
 
 from math import ceil
 
-def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, thtgrid):
+def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, sig):
     
                     
     na, ne, nt_coarse = v_y_ni.shape
@@ -125,6 +125,7 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             wttc = f1 - wttp
             
             
+            
             v_in_store[it]  = wttc*v_y_ni[ia,ie,ittc]  + wttp*v_y_ni[ia,ie,ittp]
             vf_in_store[it] = wttc*vf_y_ni[ia,ie,ittc] + wttp*vf_y_ni[ia,ie,ittp]
             vm_in_store[it] = wttc*vm_y_ni[ia,ie,ittc] + wttp*vm_y_ni[ia,ie,ittp]
@@ -203,7 +204,7 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             
             
 
-def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, 
+def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, sig, 
                           rescale = True):
     
     
@@ -221,12 +222,13 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     vf_out = cuda.device_array((na,ne,nt),dtype=cpu_type)
     itheta_out = cuda.device_array((na,ne,nt),dtype=np.int16)
     switch_out = cuda.device_array((na,ne,nt),dtype=np.bool_)
+    pswitch_out = cuda.device_array((na,ne,nt),dtype=cpu_type)
     
     
     thtgrid = cuda.to_device(thtgrid)
     
 
-    threadsperblock = (16, 64)
+    threadsperblock = (16, 32)
         
     b_a = ceil(na/threadsperblock[0])
     b_exo = ceil(ne/threadsperblock[1])
@@ -254,20 +256,22 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     
     
     cuda_ker_two_opt[blockspergrid, threadsperblock](v_y0, v_y1, vf_y0, vf_y1, vm_y0, vm_y1, vf_n, vm_n, 
-                                    itht, wntht, thtgrid,  
-                                    v_out, vm_out, vf_out, itheta_out, switch_out)
+                                    itht, wntht, thtgrid, sig,
+                                    v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out)
     
-    v_out, vm_out, vf_out, itheta_out, switch_out = (x.copy_to_host() 
-                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out))
+    v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out = (x.copy_to_host() 
+                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out))
     
-    return v_out, vf_out, vm_out, itheta_out, switch_out   
+    return v_out, vf_out, vm_out, itheta_out, switch_out, pswitch_out  
             
             
 
 
+from math import exp, log
+ofval = 14.0
 
 @cuda.jit   
-def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n, vm_n, itht, wntht, thtgrid, v_out, vm_out, vf_out, itheta_out, switch_out):
+def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n, vm_n, itht, wntht, thtgrid, sig, v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out):
     # this assumes block is for the same a and theta
     ia, ie  = cuda.grid(2)
     
@@ -280,6 +284,7 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     
     
     f1 = gpu_type(1.0)
+    correction = 0.0
     
     if ia < na and ie < ne:
         
@@ -321,17 +326,56 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
             vy_0 = wttc*v_y_ni0[ia,ie,ittc] + wttp*v_y_ni0[ia,ie,ittp]
             vy_1 = wttc*v_y_ni1[ia,ie,ittc] + wttp*v_y_ni1[ia,ie,ittp]
             
-            pick1 = (vy_1 > vy_0)       
+            vfy_0 = wttc*vf_y_ni0[ia,ie,ittc] + wttp*vf_y_ni0[ia,ie,ittp]
+            vfy_1 = wttc*vf_y_ni1[ia,ie,ittc] + wttp*vf_y_ni1[ia,ie,ittp]
+            
+            vmy_0 = wttc*vm_y_ni0[ia,ie,ittc] + wttp*vm_y_ni0[ia,ie,ittp]
+            vmy_1 = wttc*vm_y_ni1[ia,ie,ittc] + wttp*vm_y_ni1[ia,ie,ittp]
+            
+            
+            
+            v_diff_scaled = (vy_1 - vy_0)/sig
+            
+            overflow_up = True if v_diff_scaled >= ofval else False 
+            overflow_down = True if v_diff_scaled <= -ofval else False
+            
+            overflow = overflow_up or overflow_down
+            
+            
+            if not overflow:
+                emx = exp(-v_diff_scaled)
+                p1 = 1.0/(1.0+emx)
+                p0 = f1 - p1              
+                v_smax = vy_0 + sig*log(1+exp(v_diff_scaled)) - correction                
+                v_pure = v_smax - p1*vy_1 - p0*vy_0
+                vf_smax = v_pure + p1*vfy_1 + p0*vfy_0
+                vm_smax = v_pure + p1*vmy_1 + p0*vmy_0
+            elif overflow_up:
+                p1 = f1                
+                v_smax = vy_1 - correction
+                vf_smax = vfy_1 - correction
+                vm_smax = vmy_1 - correction
+            elif overflow_down:
+                p1 = 0.0                
+                v_smax = vy_0 - correction
+                vf_smax = vfy_0 - correction
+                vm_smax = vmy_0 - correction                
+            else:
+                assert False, 'this should not happen'
+                
+            
+            
+            pick1 = (vy_1 > vy_0) 
+            pswitch_out[ia,ie,it] = p1
             switch_out[ia,ie,it] = pick1
             
-            if pick1:
-                v_in_store[it]  = vy_1
-                vf_in_store[it] = wttc*vf_y_ni1[ia,ie,ittc] + wttp*vf_y_ni1[ia,ie,ittp]
-                vm_in_store[it] = wttc*vm_y_ni1[ia,ie,ittc] + wttp*vm_y_ni1[ia,ie,ittp]
-            else:
-                v_in_store[it]  = vy_0
-                vf_in_store[it] = wttc*vf_y_ni0[ia,ie,ittc] + wttp*vf_y_ni0[ia,ie,ittp]
-                vm_in_store[it] = wttc*vm_y_ni0[ia,ie,ittc] + wttp*vm_y_ni0[ia,ie,ittp]
+            
+            
+            v_in_store[it]  = v_smax
+            vf_in_store[it] = vf_smax
+            vm_in_store[it] = vm_smax
+            
+            
             
             
             if vf_in_store[it] >= vf_no and vm_in_store[it] >= vm_no:
