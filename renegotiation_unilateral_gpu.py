@@ -76,7 +76,7 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
 
 
 @cuda.jit   
-def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid, v_out, vm_out, vf_out, itheta_out, sig):
+def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid, v_out, vm_out, vf_out, itheta_out):
     # this assumes block is for the same a and theta
     ia, ie  = cuda.grid(2)
     
@@ -228,7 +228,7 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     thtgrid = cuda.to_device(thtgrid)
     
 
-    threadsperblock = (16, 64)
+    threadsperblock = (16, 32)
         
     b_a = ceil(na/threadsperblock[0])
     b_exo = ceil(ne/threadsperblock[1])
@@ -259,8 +259,8 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
                                     itht, wntht, thtgrid, sig,
                                     v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out)
     
-    v_out, vm_out, vf_out, itheta_out, switch_out = (x.copy_to_host() 
-                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out))
+    v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out = (x.copy_to_host() 
+                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out))
     
     return v_out, vf_out, vm_out, itheta_out, switch_out, pswitch_out  
             
