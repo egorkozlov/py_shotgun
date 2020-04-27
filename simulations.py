@@ -71,6 +71,7 @@ class Agents:
         self.shocks_outsm = np.random.random_sample((N,T))
         self.shocks_transition = np.random.random_sample((N,T)) 
         self.shocks_single_preg = np.random.random_sample((N,T))
+        self.shocks_planned_preg = np.random.random_sample((N,T))
         # no randomnes past this line please
         
         # initialize assets
@@ -631,7 +632,7 @@ class Agents:
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             self.ils_i[ind[i_ren],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_birth = decision['Give a birth'][isc,iall,thts]
+                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self.shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_ren]
                             
                             self.planned_preg[ind[i_ren],t] = i_birth1
@@ -659,7 +660,7 @@ class Agents:
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             self.ils_i[ind[i_sq],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_birth = decision['Give a birth'][isc,iall,thts]
+                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self.shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_sq]
                             self.m_k[ind[i_sq][i_birth1],t:] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
