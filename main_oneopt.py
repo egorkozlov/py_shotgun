@@ -33,22 +33,10 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
-    x = {'u_shift_mar': 1.1236372092858131,
-     'sigma_psi': 0.19039234194260712,
-     'sigma_psi_mult': 6.125171460954793,
-     'pmeet_0': 0.1602430213239973,
-     'pmeet_t': 0.054536185185160437,
-     'pmeet_t2': -0.0013660983035121872,
-     'util_alp': 1.063925000236826,
-     'util_kap': 7.096103099395396,
-     'preg_a0': 0.16472997866861458,
-     'preg_at': -0.05333624261834616,
-     'util_qbar': 1.786295966229198,
-     'disutil_marry_sm_mal_coef': 12.41904957062656}
 
     from calibration_params import calibration_params
     
-    lb, ub, x0, keys, translator = calibration_params(xin=x)
+    lb, ub, x0, keys, translator = calibration_params()
     
     
     weight = 0.9
@@ -65,7 +53,7 @@ if __name__ == '__main__':
     
     tar = target_values('high education')
     def q(pt):
-            print('computing at point {}'.format(translator(pt)))
+            #print('computing at point {}'.format(translator(pt)))
             try:
                 ans = mdl_resid(translator(pt),return_format=['scaled residuals'])
             except:
@@ -76,8 +64,12 @@ if __name__ == '__main__':
                 return ans
             
             
-    res=dfols.solve(q, x_init, rhobeg = 0.1, rhoend=1e-3, maxfun=120, bounds=(lb,ub),
-                    scaling_within_bounds=True, objfun_has_noise=True)
+    res=dfols.solve(q, x_init, rhobeg = 0.02, rhoend=1e-5, maxfun=120, bounds=(lb,ub),
+                    scaling_within_bounds=True, objfun_has_noise=False,
+                    npt = len(x_init)+5,
+                    user_params={'restarts.use_restarts':True,
+                                 'restarts.rhoend_scale':0.5,
+                                 'restarts.increase_npt':True})
     
     
     print(res)

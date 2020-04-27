@@ -40,8 +40,9 @@ def compute_moments(self):
     share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
     mean_x = np.median(share_x)
     
+    ls_min = min(self.setup.ls_levels['Couple and child'])
     
-    ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
+    ls_fem_30 = (self.labor_supply[is_mark[:,9],9]>ls_min).mean()
     
     
     
@@ -52,7 +53,7 @@ def compute_moments(self):
     
     
     moments['mean x share'] = mean_x
-    moments['labor supply at 30 if kids'] = ls_fem_30
+    moments['in labor force at 30 if kids'] = ls_fem_30
     
     age_pick = ((age>=21) & (age<=40))
     
@@ -66,6 +67,10 @@ def compute_moments(self):
     moments['never married by age, b0'] = pol[2]
     moments['never married by age, b1'] = pol[1]
     moments['never married by age, b2'] = pol[0]
+    
+    
+    
+    
     
     
     reg_y = ever_kid[age_pick]
@@ -94,12 +99,9 @@ def compute_moments(self):
     moments['ever kids by years after marriage, b2'] = pol[0]
     
     
-    moments['ever kids 1 year after marriage'] = ever_kid[pick & (self.yaftmar==1)].mean()
-    moments['ever kids 2 years after marriage'] = ever_kid[pick & (self.yaftmar==2)].mean()
-    moments['ever kids 3 years after marriage'] = ever_kid[pick & (self.yaftmar==3)].mean()
-    moments['ever kids 4 years after marriage'] = ever_kid[pick & (self.yaftmar==4)].mean()
-    moments['ever kids 5 years after marriage'] = ever_kid[pick & (self.yaftmar==5)].mean()
-    moments['ever kids 6 years after marriage'] = ever_kid[pick & (self.yaftmar==6)].mean()
+    for t in range(1,7):
+        moments['ever kids by years after marriage, {}'.format(t)] = ever_kid[pick & (self.yaftmar==t)].mean()
+    
     
     
     pick = yaftmar_pick & age_pick & one_mar
@@ -114,7 +116,31 @@ def compute_moments(self):
     moments['divorced by years after marriage, b1'] = pol[1]
     moments['divorced by years after marriage, b2'] = pol[0]
     
+    for t in range(1,11):
+        moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean()
     
+    
+    
+    
+    # divorce hazards
+    # simulating by years after marriage
+    pick = age_pick & one_mar
+    
+    still_mar = np.zeros((11,),dtype=np.float64)
+    just_div = np.zeros((11,),dtype=np.float64)
+    haz_div = np.zeros((11,),dtype=np.float64)
+    for yam in range(0,11):
+        thing = pick & (self.yaftmar==yam)
+        if np.any(thing):
+            still_mar[yam] = is_mar[thing].mean()
+            just_div[yam] = self.just_divorced[thing].mean()
+            haz_div[yam] = just_div[yam]/still_mar[yam]
+            
+    print(haz_div)
+        
+    
+    
+
     
     moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()
     
@@ -196,11 +222,11 @@ def compute_moments(self):
     
     pick = age_pick & in_sample
     
-    if np.any(pick):
+    try:
         reg_y = self.k_m[pick]
         reg_x = age_m30[pick]
         pol = np.polyfit(reg_x,reg_y,2)
-    else:
+    except:
         pol = [0,0,0]
         
     moments['k then m by age, b0'] = pol[2]
@@ -210,11 +236,11 @@ def compute_moments(self):
     pick = self.agreed & one_mar & age_pick
     just_mark_t0 = self.agreed_unplanned
     
-    if np.any(pick):
+    try:
         reg_y = just_mark_t0[pick]
         reg_x = age_m30[pick]
         pol = np.polyfit(reg_x,reg_y,1)
-    else:
+    except:
         pol = [0,0,0]
         
     moments['share of kids in new marriages at 25'] = just_mark_t0[self.agreed[:,4],4].mean()   if np.any(self.agreed[:,4]) else 0.0
@@ -245,12 +271,13 @@ def compute_moments(self):
     #ls_fem_30 = self.labor_supply[is_mark[:,9],9].mean()
     me_med = np.median(self.male_earnings[is_mark[:,9],9])
     pick_above = (self.male_earnings[:,9] >= me_med) & (is_mark[:,9])
-    ls_fem_30_abovemed = self.labor_supply[pick_above,9].mean()
+    ls_fem_30_abovemed = (self.labor_supply[pick_above,9]>ls_min).mean()
     pick_below = (self.male_earnings[:,9] <= me_med) & (is_mark[:,9])
-    ls_fem_30_below = self.labor_supply[pick_below,9].mean()
-    ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below
-    moments['labor supply at 30 if kids ratio'] = ls_fem_30_ratio
-    
+    ls_fem_30_below = (self.labor_supply[pick_below,9]>ls_min).mean()
+    ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below if ls_fem_30_below > 0 else 1.0
+    moments['in labor force at 30 if kids ratio'] = ls_fem_30_ratio
+    moments['in labor force at 30, k then m'] = (self.labor_supply[:,9]>ls_min)[self.k_m[:,9]].mean() if np.any(self.k_m[:,9]) else 0.0
+    moments['in labor force at 30, m then k'] = (self.labor_supply[:,9]>ls_min)[self.m_k[:,9]].mean() if np.any(self.m_k[:,9]) else 0.0
     
     try:
         moments['divorced at 30, ratio'] = moments['divorced at 30, above median']/moments['divorced at 30, below median']
@@ -277,7 +304,7 @@ def compute_moments(self):
     share_planned = self.planned_preg[(self.planned_preg) | (self.unplanned_preg)].mean()
     moments['share of planned pregnancies'] = share_planned
     share_rejected = self.disagreed.sum() / (self.disagreed | self.agreed).sum()
-    moments['share of rejected proposals'] = share_planned
+    moments['share of rejected proposals'] = share_rejected
     if self.verbose: print('Rejected: {}, planned preg: {}'.format(share_rejected,share_planned))
     
     
@@ -352,6 +379,28 @@ def compute_moments(self):
     p_1yr = (~is_mar[:,0:-2] & is_mar[:,2:] & one_mar[:,2:] & (self.male_wage[:,2:]>0))
     linc_own = np.log(self.female_wage[:,2:][p_1yr] )
     linc_sp =  np.log(self.male_wage[:,2:][p_1yr])
+    
+    
+    c, o, m = self.marriage_stats()
+    
+    
+    n_childless = (~have_kid).sum(axis=0)
+    n_newkids = np.zeros_like(n_childless)
+    n_newkids[1:] = ((have_kid[:,1:]) & (~have_kid[:,:-1])).sum(axis=0)
+    
+    
+    
+    haz_m = m['Everyone']/c['Everyone']
+    haz_mk = (m['SM']+m['Single, pregnant'])/c['Everyone']
+    haz_nk = n_newkids / n_childless
+    
+    for t in range(1,15):
+        moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
+    for t in range(1,15):
+        moments['hazard of marriage & having a child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
+        
+    for t in range(1,15):
+        moments['hazard of new child at {}'.format(21+t)] = haz_nk[t] if not np.isnan(haz_nk[t]) else 0.0
     
     try:
         moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]

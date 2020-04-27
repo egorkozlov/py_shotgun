@@ -195,3 +195,8 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
     dist = np.dot(np.dot(resid,W),resid)    
     
     return resid, resid_scaled, dist
+
+
+
+        
+    

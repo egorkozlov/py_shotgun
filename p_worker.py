@@ -10,7 +10,10 @@ from os import listdir, remove, getcwd, chdir, mkdir
 from shutil import copyfile
 from time import sleep
 from timeit import default_timer
-from numpy.random import random_sample as rs
+from numpy.random import random_sample as rs 
+from numpy.random import randint as ri 
+from numpy import isnan
+
 
 
 import gc
@@ -83,22 +86,33 @@ while True:
     li_txt = [f for f in listdir('Job') if f.endswith('.pkl') and f.startswith('in')]
         
     
+    num_in = len(li_txt)
     
-    if len(li_txt) == 0: continue
+    if num_in == 0: continue
 
+    
     
     getnum = lambda x : int(find_between(x,'in','.pkl'))
 
-    fname = li_txt[0]
     
     try:
-        # sort trying to get the file with the lowest number
-        li_txt.sort(key=getnum)
-        fname = li_txt[0]
+        rnum = ri(1 + (num_in//2))
+        fname = li_txt[rnum]
         num = getnum(fname)
     except:
-        num = 0
-        print('something wrong with file named {}'.format(fname))
+        print('error in random point picker')
+        continue
+    
+    if num_in < 300:    
+        # if the number is large then sorting takes too ling        
+        try:
+            # sort trying to get the file with the lowest number
+            li_txt.sort(key=getnum)
+            fname = li_txt[0]
+            num = getnum(fname)
+        except:
+            print('something wrong with file named {}'.format(fname))
+            continue
     
     
     fname_full = 'Job/{}'.format(fname)
@@ -131,6 +145,7 @@ while True:
         
         try:
             f = fun(x)
+            if isnan(f): f = 1e8
         except KeyboardInterrupt:
             raise KeyboardInterrupt()
         except BaseException as e:
@@ -141,7 +156,7 @@ while True:
             else:
                 print(e)
                 
-            f = 1e6
+            f = 1e8
             
         print('Response is {}'.format(f))
             
@@ -180,4 +195,12 @@ while True:
         
         print('could not get output!')
         continue
-    
+    finally:
+        try:            
+            if x[0] == 'minimize':
+                print('I terminate after one optimization')
+                break
+        except:
+            print('could not terminate myself...')
+        
+        

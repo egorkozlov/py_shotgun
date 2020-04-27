@@ -32,9 +32,9 @@ class ModelSetup(object):
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
-        p['R_t'] = [1.04]*T
-        p['n_psi_t']     = [12]*T
-        p['beta_t'] = [0.97]*T
+        p['R_t'] = [1.025]*T
+        p['n_psi_t']     = [11]*T
+        p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
@@ -73,6 +73,8 @@ class ModelSetup(object):
         p['disutil_shotgun_coef'] = 2.0
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
+        
+       
         
         p['child_a_cost'] = 0.0
         
@@ -119,7 +121,7 @@ class ModelSetup(object):
         p['util_kap'] = 0.5
         p['util_qbar'] = 0.0
         
-        
+        p['util_out_lf'] = 0.0
         p['preg_a0'] = 0.05
         p['preg_at'] = 0.01
         p['preg_at2'] = -0.001
@@ -199,7 +201,7 @@ class ModelSetup(object):
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
-        p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
+        p['pmeet_t'] = [np.clip(p['pmeet_0'] + (t-9)*p['pmeet_t'] + ((t-9)**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         #p['poutsm_t'] = [p['poutsm']]*T
         
         
@@ -214,12 +216,13 @@ class ModelSetup(object):
         
         # female labor supply
         
-        lmin = 0.25
-        lmax = 0.9
-        nl = 4
+        lmin = 0.2
+        lmax = 1.0
+        nl = 2
         
-        ls = np.array([0.25,0.5,0.75,0.9]) #np.linspace(lmin,lmax,nl,dtype=self.dtype)
-        ps = np.array([p['pls'],0.5*p['pls'],0.0,0.0])
+        ls = np.array([0.2,1.0]) #np.linspace(lmin,lmax,nl,dtype=self.dtype)
+        ps = np.array([p['pls'],0.0])
+        ls_ushift = np.array([p['util_out_lf'],0.0])
         
         
         self.ls_levels = dict()
@@ -228,6 +231,17 @@ class ModelSetup(object):
         self.ls_levels['Male, single'] = np.array([1.0],dtype=self.dtype)
         self.ls_levels['Couple and child'] = ls
         self.ls_levels['Female and child'] = ls
+        
+        self.ls_ushift = dict()
+        self.ls_ushift['Couple, no children'] = np.array([0.0],dtype=self.dtype)
+        self.ls_ushift['Female, single'] = np.array([0.0],dtype=self.dtype)
+        self.ls_ushift['Male, single'] = np.array([0.0],dtype=self.dtype)
+        self.ls_ushift['Couple and child'] = ls_ushift
+        self.ls_ushift['Female and child'] = ls_ushift
+        
+        
+        
+        
         
         
         #self.ls_utilities = np.array([p['uls'],0.0],dtype=self.dtype)
@@ -752,13 +766,15 @@ class ModelSetup(object):
     def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
         l = self.ls_levels['Couple and child'][il]
+        us = self.ls_ushift['Couple and child'][il]
         upub = self.u_pub(x,l) + ushift + psi
-        return self.u(kf*c) + upub, self.u(km*c) + upub
+        return self.u(kf*c) + upub + us, self.u(km*c) + upub
     
     def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
         l = self.ls_levels['Couple and child'][il]
-        return umult*self.u(c) + self.u_pub(x,l) + ushift + psi
+        us = theta*self.ls_ushift['Couple and child'][il] 
+        return umult*self.u(c) + self.u_pub(x,l) + us + ushift + psi
     
     def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
@@ -772,7 +788,8 @@ class ModelSetup(object):
     def u_single_k(self,c,x,il,ushift):
         umult = 1.0
         l = self.ls_levels['Female and child'][il]
-        return umult*self.u(c) + self.u_pub(x,l) + ushift
+        us = self.ls_ushift['Female and child'][il]
+        return umult*self.u(c) + self.u_pub(x,l) + us + ushift
     
     def u_precompute(self):
         
@@ -808,7 +825,9 @@ class ModelSetup(object):
                 ls = self.ls_levels['Couple and child'][il]
                 x, c, u, q = int_with_x(self.mgrid_c,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
                                         qlb=qbar,lbr=ls)
-                uout[:,itheta,il] = u
+                tht = self.thetagrid[itheta]
+                
+                uout[:,itheta,il] = u + tht*self.ls_ushift['Couple and child'][il]
                 xout[:,itheta,il] = x
                 
                 
@@ -830,7 +849,7 @@ class ModelSetup(object):
             ls = self.ls_levels['Female and child'][il]
             x, c, u, q = int_with_x(self.mgrid_s,A=A,alp=alp,sig=sig,xi=xi,lam=lam,kap=kap,
                                     qlb=qbar,lbr=ls)
-            uout_s[:,0,il] = u
+            uout_s[:,0,il] = u + self.ls_ushift['Female and child'][il]
             xout_s[:,0,il] = x
                
         self.u_precomputed['Female and child']['u'] = uout_s

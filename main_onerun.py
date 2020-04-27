@@ -30,19 +30,26 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
+    
+    
+    
+    x = {'sigma_psi': 0.3158003793955531,
+         'sigma_psi_mult': 4.947443937771622,
+         'pmeet_0': 0.4118969594789825,
+         'pmeet_t': 0.02597917916494849,
+         'pmeet_t2': -0.0014532220037343849,
+         'preg_a0': 0.08470713450911965,
+         'preg_at': -0.0021214797571710853,
+         'preg_at2': -0.0013603726333735015,
+         'u_shift_mar': 2.000120246942508,
+         'util_alp': 0.6122298960907041,
+         'util_kap': 0.7671589794930209,
+         'util_qbar': 1.7407912648838693,
+         'disutil_marry_sm_mal_coef': 11.898399107945592,
+         'disutil_shotgun_coef': 0.5124129679921092}
 
-    x = {'sigma_psi': 0.39334993551757474,
-         'sigma_psi_mult': 6.461534693482925,
-         'pmeet_0': 0.3988891928888862,
-         'preg_a0': 0.06072186009040158,
-         'preg_at': -0.044917971687432,
-         'preg_at2': -0.00997429561655438,
-         'u_shift_mar': 1.8866425125831014,
-         'util_alp': 3.6302729099123443,
-         'util_kap': 14.857375158019218,
-         'util_qbar': 4.994817208261213,
-         'disutil_marry_sm_mal_coef': 5.619415004495844,
-         'disutil_shotgun_coef': 0.672932495972583}
+
+
 
 
 
@@ -61,3 +68,6 @@ if __name__ == '__main__':
     #mdl[0].diagnostics()
                          
     print('Done. Residual in point x0 is {}'.format(out))
+    
+    from fit_plot import make_fit_plots
+    make_fit_plots(mdl[0].setup,agents.compute_moments(),target_values('high education'))

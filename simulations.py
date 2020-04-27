@@ -298,6 +298,9 @@ class Agents:
         
         
         
+        
+        
+        
         for ipol in range(self.npol):
             for ist,sname in enumerate(self.state_names):
                 is_state_any_pol = (self.state[:,t]==ist)
@@ -764,7 +767,63 @@ class Agents:
                                    format(state,max_savings[i_state]))
             
         
+    def marriage_stats(self):
         
+        
+        offer_single = np.zeros((self.T,),dtype=np.int32)
+        offer_preg = np.zeros((self.T,),dtype=np.int32)
+        offer_notpreg = np.zeros((self.T,),dtype=np.int32)
+        offer_sm = np.zeros((self.T,),dtype=np.int32)
+        
+        total_single = np.zeros((self.T,),dtype=np.int32)
+        total_sm = np.zeros((self.T,),dtype=np.int32)
+        
+        nmar_single = np.zeros((self.T,),dtype=np.int32)
+        nmar_preg = np.zeros((self.T,),dtype=np.int32)
+        nmar_notpreg = np.zeros((self.T,),dtype=np.int32)
+        nmar_sm = np.zeros((self.T,),dtype=np.int32)
+        
+        
+        
+        for t in range(self.T):
+            
+            pick = (self.state[:,t] == self.state_codes[self.single_state])
+            total_single[t] = np.sum(pick)
+            offer_single[t] = self.met_a_partner[:,t][pick].sum() if np.any(pick) else 0
+            offer_preg[t] = self.unplanned_preg[:,t][pick].sum() if np.any(pick) else 0
+            offer_notpreg[t] = offer_single[t] - offer_preg[t]
+            
+            nmar_single[t] = self.agreed[:,t][pick].sum() if np.any(pick) else 0
+            nmar_preg[t] = self.agreed_k[:,t][pick].sum() if np.any(pick) else 0
+            nmar_notpreg[t] = nmar_single[t] - nmar_preg[t]
+            
+            
+            
+            
+            
+            pick = (self.state[:,t] == self.state_codes['Female and child'])
+            total_sm[t] = np.sum(pick)
+            offer_sm[t] = self.met_a_partner[:,t][pick].sum() if np.any(pick) else 0
+            nmar_sm[t] = self.agreed[:,t][pick].sum() if np.any(pick) else 0
+            
+            
+            
+        total_all = total_single + total_sm
+        offer_all = offer_single + offer_sm
+        nmar_all = nmar_single + nmar_sm
+        
+        counts = {'Everyone':total_all,'Single':total_single,'SM':total_sm}
+        
+        offers = {'Everyone':offer_all,'Single':offer_single,'SM':offer_sm,
+                 'Single, pregnant':offer_preg,
+                 'Single, not pregnant':offer_notpreg}
+        
+        marriages = {'Everyone':nmar_all,'Single':nmar_single,'SM':nmar_sm,
+                 'Single, pregnant':nmar_preg,
+                 'Single, not pregnant':nmar_notpreg,'With kids':nmar_sm+nmar_preg}
+            
+        return counts, offers, marriages
+            
         
             
     def compute_moments(self):
