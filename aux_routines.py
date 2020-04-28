@@ -9,6 +9,36 @@ from platform import system
 
 
 
+
+
+
+def prob_polyfit(*p_then_t,max_power=2):
+    # this is fed of pairs (p_i,t_i) and then fits  polynomial
+    # p = a_0 + a_1*t + a_2*t**2 (for max_power=2)
+    # returns (a0,a1,a2)
+    
+    A = []
+    c = []
+    for p, t in p_then_t:
+        a = [t**i for i in range(max_power+1)]
+        A.append(a)
+        c.append(p)
+        
+    A = np.array(A)
+    c = np.array(c)
+    
+    try:
+        x = np.linalg.lstsq(A,c,rcond=None)[0]
+    except:
+        print('least squares problem...')
+        x = np.array([p_then_t[0][0],0,0])
+    
+    return x
+
+def poly_to_val(alist,tlist,offset=9):
+    return np.array([sum([ai*((ti-offset)**pwr) for pwr,ai in enumerate(alist)]) for ti in tlist])
+
+
 def num_to_nparray(*things_in):
     # makes everything numpy array even if passed as number
     
@@ -47,6 +77,7 @@ def first_true(mask, axis=None, invalid_val=-1):
 def last_true(mask, axis=None, invalid_val=-1):
     val = mask.shape[axis] - np.flip(mask, axis=axis).argmax(axis=axis) - 1
     return np.where(mask.any(axis=axis), val, invalid_val)
+
 
 
 

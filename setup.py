@@ -11,6 +11,7 @@ from mc_tools import combine_matrices_two_lists, int_prob,cut_matrix
 from scipy.stats import norm
 from collections import namedtuple
 from gridvec import VecOnGrid
+from aux_routines import prob_polyfit
 
 from scipy import sparse
 
@@ -46,9 +47,10 @@ class ModelSetup(object):
         p['mu_partner_z_male'] = -0.02
         p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5
-        p['pmeet_0'] = 0.5
-        p['pmeet_t'] = 0.0
-        p['pmeet_t2'] = 0.0
+        
+        p['pmeet_21'] = 0.1
+        p['pmeet_28'] = 0.2
+        p['pmeet_35'] = 0.1
         
         p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
@@ -124,9 +126,13 @@ class ModelSetup(object):
         p['util_qbar'] = 0.0
         
         p['util_out_lf'] = 0.0
-        p['preg_a0'] = 0.05
-        p['preg_at'] = 0.01
-        p['preg_at2'] = -0.001
+        
+        
+        
+        
+        p['preg_21'] = 0.01
+        p['preg_28'] = 0.5
+        p['preg_35'] = 0.3
         
         
         for key, value in kwargs.items():
@@ -207,6 +213,18 @@ class ModelSetup(object):
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
         p['pmeet_t'] = [np.clip(p['pmeet_0'] + (t-9)*p['pmeet_t'] + ((t-9)**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         #p['poutsm_t'] = [p['poutsm']]*T
+        
+        
+        
+        p['pmeet_0'],  p['pmeet_t'], p['pmeet_t2'] = prob_polyfit(
+                    (p['pmeet_21'],0),(p['pmeet_28'],7),(p['pmeet_35'],14),
+                                                                   max_power=2)
+        
+        p['preg_a0'],  p['preg_at'], p['preg_at2'] = prob_polyfit(
+                    (p['preg_21'],0),(p['preg_28'],7),(p['preg_35'],14),
+                                                                   max_power=2)
+        
+        
         
         
         self.pars = p
@@ -1021,3 +1039,4 @@ def build_s_grid(agrid,n_between,da_min,da_max):
         sgrid = sgrid[1:]
         
     return sgrid
+
