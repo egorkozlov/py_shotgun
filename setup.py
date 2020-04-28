@@ -211,7 +211,6 @@ class ModelSetup(object):
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
-        p['pmeet_t'] = [np.clip(p['pmeet_0'] + (t-9)*p['pmeet_t'] + ((t-9)**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         #p['poutsm_t'] = [p['poutsm']]*T
         
         
@@ -224,6 +223,8 @@ class ModelSetup(object):
                     (p['preg_21'],0),(p['preg_28'],7),(p['preg_35'],14),
                                                                    max_power=2)
         
+        
+        p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         
         
         
@@ -933,8 +934,8 @@ class ModelSetup(object):
         
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
-        p = self.pars['preg_a0'] + self.pars['preg_at']*(t-9) + \
-            self.pars['preg_at2']*((t-9)**2) + \
+        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+            self.pars['preg_at2']*(t**2) + \
             self.pars['preg_az']*z + self.pars['preg_azt']*t*z
         #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
         #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
