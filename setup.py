@@ -42,8 +42,8 @@ class ModelSetup(object):
         p['sig_partner_a'] = 0.1
         p['mu_partner_a_female'] = 0.00
         p['mu_partner_a_male'] = -0.00
-        p['dump_factor_z'] = 0.85
-        p['sig_partner_z'] = 1.2
+        p['dump_factor_z'] = 0.75
+        p['sig_partner_z'] = 0.25
         p['mu_partner_z_male'] = -0.02
         p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5
@@ -52,7 +52,7 @@ class ModelSetup(object):
         p['pmeet_28'] = 0.2
         p['pmeet_35'] = 0.1
         
-        p['m_zf'] = 1.0
+        p['m_zf'] = 0.9
         p['m_zf0'] = 1.0
         
         p['z_drift'] = -0.09

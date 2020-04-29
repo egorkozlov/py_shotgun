@@ -332,10 +332,13 @@ def compute_moments(self):
     
     
     def std_pos(x):
-        return np.std(x[x>0])
+        return np.std(np.log(x[x>0]))
     
-    sd_f_24 = std_pos(self.female_earnings[:,3])
-    sd_f_30 = std_pos(self.female_earnings[:,9])
+    
+    pick_24 = (self.labor_supply[:,3]>ls_min)
+    sd_f_24 = std_pos(self.female_earnings[pick_24,3]) if np.any(pick_24) else 0.0
+    pick_30 = (self.labor_supply[:,9]>ls_min)
+    sd_f_30 = std_pos(self.female_earnings[pick_30,9]) if np.any(pick_30) else 0.0
     
     sd_m_24 = std_pos(self.male_earnings[:,3])
     sd_m_30 = std_pos(self.male_earnings[:,9])
@@ -344,6 +347,9 @@ def compute_moments(self):
     moments['std earnings at 30, female'] = sd_f_30
     moments['std earnings at 24, male'] = sd_m_24
     moments['std earnings at 30, male'] = sd_m_30
+    
+    
+    
     
     if self.verbose:
         print('std of earnings is {} at 24 and {} at 30 for males'.format(sd_m_24,sd_m_30))
