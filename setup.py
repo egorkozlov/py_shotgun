@@ -531,7 +531,7 @@ class ModelSetup(object):
         
         self.u_precompute()
         self.unplanned_pregnancy_probability()
-        
+        self.compute_taxes()
         
         
     def _mar_mats_assets(self,npoints=4,female=True,upp=False,abar=0.1):
@@ -948,8 +948,22 @@ class ModelSetup(object):
             pf = self._unplanned_pregnancy_probability_fun(t,zf)
             self.upp_precomputed.append(pf)
             
+            
+            
+    def _tax_fun(self,lam,tau,avg_inc):
+        def tax(income):
+            return 1 - lam*((income/avg_inc)**(-tau))
+        return tax
+    
+    def compute_taxes(self):
+        self.taxes = dict()
+        self.taxes['Female, single'] = self._tax_fun(0.882,0.036,1.1086085)
+        self.taxes['Male, single'] = self._tax_fun(0.882,0.036,1.2123768)
+        self.taxes['Female and child'] = self._tax_fun(0.926,0.042,1.5605029) # use one child
+        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,2.3169997)
+        self.taxes['Couple and child'] = self._tax_fun(0.925,0.070,2.3169997)
         
-                
+        
     
 
 #from numba import jit

@@ -40,6 +40,9 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     key = 'Couple and child' if haschild else 'Couple, no children'
     
+    
+    taxfun = setup.taxes[key] if t < setup.pars['Tret'] else lambda x : 0.0*x
+    
     ls = setup.ls_levels[key]
     uu, ux = setup.u_precomputed[key]['u'],setup.u_precomputed[key]['x']
     upart, ucouple = (setup.u_part_k, setup.u_couple_k) if haschild else (setup.u_part_nk, setup.u_couple_nk)
@@ -108,7 +111,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         
         V_pure_i, c_opt_i, x_opt_i, s_opt_i, i_opt_i, il_opt_i, V_all_l_i = \
            v_optimize_couple(money_t,sgrid,EV_t,setup.mgrid_c,uu,ux,
-                                 ls,beta,ushift,dtype=dtype)
+                                 ls,beta,ushift,taxfun=taxfun,dtype=dtype)
            
         V_ret_i = V_pure_i + psi[None,istart:ifinish,None]
         

@@ -31,7 +31,7 @@ else:
     ugpu = False
     upar = True
     
-def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,
+def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun=lambda x : 0.0*x,
                               use_gpu=ugpu,dtype=np.float32):
     
     # This optimizer avoids creating big arrays and uses parallel-CPU on 
@@ -84,8 +84,11 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,
         EV_here = EV_by_l[...,i]
         util = utilint[...,i]
         xvals = xint[...,i]
+        tax_paid = (taxfun(wf*lval + wm).reshape((1,nexo))).astype(dtype,copy=False)
+        money_left_bt = (money - (1-lval)*wf.reshape((1,nexo))).astype(dtype,copy=False)
+        mmin = money_left_bt.min()
+        money_left = np.maximum(money_left_bt - tax_paid,mmin).astype(dtype,copy=False)
         
-        money_left = (money - (1-lval)*wf.reshape((1,nexo))).astype(dtype,copy=False)
         
         if not use_gpu:
             

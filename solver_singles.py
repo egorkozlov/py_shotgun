@@ -33,6 +33,8 @@ def v_iter_single(setup,t,EV,female,ushift):
     
     sname = 'Female, single' if female else 'Male, single'
     
+    taxfun = setup.taxes[sname] if t < setup.pars['Tret'] else lambda x : 0.0*x
+    
     uu = setup.u_precomputed[sname]['u']
     ux = setup.u_precomputed[sname]['x']
     ls = setup.ls_levels[sname]
@@ -40,7 +42,7 @@ def v_iter_single(setup,t,EV,female,ushift):
     
     V, c, x, s, i_opt, ils, V_all_l = \
         v_optimize_couple(money_t,sgrid_s,(setup.vsgrid_s,EV[...,None,None]),setup.mgrid_s,uu,ux,
-                              ls,beta,ushift,dtype=dtype)
+                              ls,beta,ushift,dtype=dtype,taxfun=taxfun)
     
     
     assert np.all(x<1e-5) # no x and no labor supply
@@ -71,7 +73,7 @@ def v_iter_single_mom(setup,t,EV,ushift):
     ls = setup.ls_levels['Female and child']
     
     
-    
+    taxfun = setup.taxes['Female and child']
     dtype = setup.dtype
         
     
@@ -95,7 +97,7 @@ def v_iter_single_mom(setup,t,EV,ushift):
     
     V, c, x, s, i_opt, ils, V_all_l = \
         v_optimize_couple(money_t,sgrid_s,EV_t,setup.mgrid_s,uu,ux,
-                              ls,beta,ushift,dtype=dtype)
+                              ls,beta,ushift,taxfun=taxfun,dtype=dtype)
     
     
     # remove the virtual axis
