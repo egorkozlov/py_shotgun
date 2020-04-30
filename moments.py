@@ -99,7 +99,7 @@ def compute_moments(self):
     moments['ever kids by years after marriage, b2'] = pol[0]
     
     
-    for t in range(1,7):
+    for t in range(1,11):
         moments['ever kids by years after marriage, {}'.format(t)] = ever_kid[pick & (self.yaftmar==t)].mean()
     
     
