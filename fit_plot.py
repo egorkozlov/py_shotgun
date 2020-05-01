@@ -12,9 +12,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def make_fit_plots(setup,moments,targets):
-    plot_estimates(setup)
+def make_fit_plots(agents,targets):
+    setup = agents.setup
+    moments = agents.compute_moments()
+    #plot_estimates(setup)
     plot_hazards(moments,targets,setup)
+    plot_cumulative(moments,targets,setup)
     
 
 
@@ -46,7 +49,7 @@ def plot_hazards(moments,targets,setup,ci=False):
     
     tval = np.arange(22,36)  
     
-    for name in ['hazard of marriage','hazard of marriage & having a child','hazard of new child']:
+    for name in ['hazard of marriage','hazard of new child']:
         haz_model = np.zeros_like(tval,dtype=np.float64)
         haz_data = np.zeros_like(tval,dtype=np.float64)
         haz_data_lci = np.zeros_like(tval,dtype=np.float64)
@@ -80,7 +83,30 @@ def plot_hazards(moments,targets,setup,ci=False):
         plt.title(name) 
         plt.xlabel('age')
         plt.ylabel('hazard (%)')
-        if name != 'hazard of marriage & having a child':
-            ax.set_aspect(0.5)
-        else:
-            ax.set_aspect(1.2)
+        
+
+def plot_cumulative(moments,targets,setup):
+    # graph 1: hazard of any marriage
+    
+    
+    tval = np.arange(22,36)  
+    
+    for name in ['k then m in population','m then k in population','k then m in sample']:
+        prob_model = np.zeros_like(tval,dtype=np.float64)
+        prob_data  = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        
+        for i,t in enumerate(tval):
+            prob_model[i] = moments['{} at {}'.format(name,t)]
+            prob_data[i] = targets['{} at {}'.format(name,t)][0]
+            
+        
+        fig, ax = plt.subplots()
+        plt.plot(tval,prob_model*100,label='Model')
+        plt.plot(tval,prob_data*100,label='Data')
+        plt.legend()
+        plt.title(name) 
+        plt.xlabel('age')
+        plt.ylabel('share in total population (%)')
+        

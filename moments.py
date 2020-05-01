@@ -27,8 +27,13 @@ def compute_moments(self):
     ever_km  = (np.cumsum(self.k_m,axis=1)>0)
     
     
+    
+    
     nmar_cum = np.cumsum(self.agreed,axis=1)
     one_mar = (nmar_cum == 1)
+    
+    obs_k_m = self.k_m & one_mar
+    obs_m_k = self.m_k & one_mar
     
     have_kid = (self.state == n_mark) | (self.state == n_singlek)
     num_mar = np.cumsum( self.agreed, axis = 1 )
@@ -199,36 +204,33 @@ def compute_moments(self):
     moments['no kids at 35 if married'] = 1-ever_kid[is_mar[:,14],14].mean() if np.any(is_mar[:,14]) else 0.0
     
     
-    #mkids_0_mar = (self.state[:,1:] == n_mark)[ ~is_mar[:,0:-1] & is_mar[:,1:]].mean()
-    #moments['no kids 1 year after marriage']  = 1 - ( have_kid[:,2:20][ ~is_mar[:,0:18] & is_mar[:,2:20] & one_mar[:,2:20]] ).mean()
-    #moments['no kids 2 years after marriage'] = 1 - ( have_kid[:,3:20][ ~is_mar[:,0:17] & is_mar[:,3:20] & one_mar[:,3:20]] ).mean()
-    #moments['no kids 3 years after marriage'] = 1 - ( have_kid[:,4:20][ ~is_mar[:,0:16] & is_mar[:,4:20] & one_mar[:,4:20]] ).mean()
-    #moments['no kids 4 years after marriage'] = 1 - ( have_kid[:,5:20][ ~is_mar[:,0:15] & is_mar[:,5:20] & one_mar[:,5:20]] ).mean()
-    #moments['no kids 5 years after marriage'] = 1 - ( have_kid[:,6:20][ ~is_mar[:,0:14] & is_mar[:,6:20] & one_mar[:,6:20]] ).mean()
-    #moments['no kids 6 years after marriage'] = 1 - ( have_kid[:,7:20][ ~is_mar[:,0:13] & is_mar[:,7:20] & one_mar[:,7:20]] ).mean()
+    in_sample = obs_k_m | obs_m_k
     
     
-    in_sample = (self.k_m) | (self.m_k)
+    for i in range(1,15):
+        moments['k then m in sample at {}'.format(21+i)] = obs_k_m[in_sample[:,i],i].mean()
     
     
-    moments['k then m at 25'] = self.k_m[in_sample[:,4],4].mean()
-    moments['k then m at 30'] = self.k_m[in_sample[:,9],9].mean()
-    moments['k then m at 35'] = self.k_m[in_sample[:,14],14].mean()
+    for i in range(1,15):
+        moments['k then m in population at {}'.format(21+i)] = obs_k_m[:,i].mean()
     
+    for i in range(1,15):
+        moments['m then k in population at {}'.format(21+i)] = obs_m_k[:,i].mean()
+   
     
     
     pick = age_pick & in_sample
     
     try:
-        reg_y = self.k_m[pick]
+        reg_y = obs_k_m[pick]
         reg_x = age_m30[pick]
         pol = np.polyfit(reg_x,reg_y,2)
     except:
         pol = [0,0,0]
         
-    moments['k then m by age, b0'] = pol[2]
-    moments['k then m by age, b1'] = pol[1]
-    moments['k then m by age, b2'] = pol[0]
+    moments['k then m by age in sample, b0'] = pol[2]
+    moments['k then m by age in sample, b1'] = pol[1]
+    moments['k then m by age in sample, b2'] = pol[0]
     
     pick = self.agreed & one_mar & age_pick
     just_mark_t0 = self.agreed_unplanned
@@ -273,8 +275,8 @@ def compute_moments(self):
     ls_fem_30_below = (self.labor_supply[pick_below,9]>ls_min).mean()
     ls_fem_30_ratio = ls_fem_30_abovemed/ls_fem_30_below if ls_fem_30_below > 0 else 1.0
     moments['in labor force at 30 if kids ratio'] = ls_fem_30_ratio
-    moments['in labor force at 30, k then m'] = (self.labor_supply[:,9]>ls_min)[self.k_m[:,9]].mean() if np.any(self.k_m[:,9]) else 0.0
-    moments['in labor force at 30, m then k'] = (self.labor_supply[:,9]>ls_min)[self.m_k[:,9]].mean() if np.any(self.m_k[:,9]) else 0.0
+    moments['in labor force at 30, k then m'] = (self.labor_supply[:,9]>ls_min)[obs_k_m[:,9]].mean() if np.any(self.k_m[:,9]) else 0.0
+    moments['in labor force at 30, m then k'] = (self.labor_supply[:,9]>ls_min)[obs_m_k[:,9]].mean() if np.any(self.m_k[:,9]) else 0.0
     
     try:
         moments['divorced at 30, ratio'] = moments['divorced at 30, above median']/moments['divorced at 30, below median']
@@ -311,8 +313,8 @@ def compute_moments(self):
     moments['divorced if km (all)'] = divorced_km
     moments['divorced if mk (all)'] = divorced_mk
     
-    divorced_km_1m = div_now[:,:20][self.k_m[:,:20] & one_mar[:,:20]].mean()
-    divorced_mk_1m = div_now[:,:20][self.m_k[:,:20] & one_mar[:,:20]].mean()    
+    divorced_km_1m = div_now[:,:20][obs_k_m[:,:20] & one_mar[:,:20]].mean()
+    divorced_mk_1m = div_now[:,:20][obs_m_k[:,:20] & one_mar[:,:20]].mean()    
     if self.verbose: print('One mar: divorced k_m = {}, divorced m_k = {}'.format(divorced_km_1m,divorced_mk_1m))
     moments['divorced if k then m and one marriage'] = divorced_km_1m
     moments['divorced if m then k and one marriage'] = divorced_mk_1m

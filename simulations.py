@@ -109,6 +109,7 @@ class Agents:
         self.k_m = np.zeros((N,T),dtype=np.bool)
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
+        self.nmar = np.zeros((N,T),dtype=np.int8)
         
         self.ub_hit_single = False
         self.ub_hit_couple = False
@@ -401,6 +402,7 @@ class Agents:
                     vmeet = self.shocks_single_meet[ind,t]
                     i_nomeet =  np.array( vmeet > pmeet )
                     
+                    
                     self.met_a_partner[ind,t] = ~i_nomeet
                     self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet)
                     
@@ -437,11 +439,14 @@ class Agents:
                     
                     assert np.all(~i_nomeet[i_agree])
                     
+                    i_firstmar = (self.nmar[ind,t]==0)
                     
                     nmar, ncoh, ndis, nnom = np.sum(i_agree_mar),np.sum(i_agree_coh),np.sum(i_disagree_and_meet),np.sum(i_nomeet)
                     ntot = sum((nmar, ncoh, ndis, nnom))
                     
                     if self.verbose: print('for sname = {}: {} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(sname,nmar,ncoh,ndis,nnom,ntot))
+                    
+                    
                     
                     if np.any(i_agree_mar):
                         
@@ -465,8 +470,8 @@ class Agents:
                         self.ils_i[ind[i_agree_mar],t+1] = \
                             fls_policy[self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1],self.itheta[ind[i_agree_mar],t+1]]
                         
-                        self.yaftmar[ind[i_agree_mar],t+1] = 0
-                        
+                        self.yaftmar[ind[i_agree_mar],t+1] = 0                        
+                        self.nmar[ind[i_agree_mar],t+1] += 1
                         
                     if np.any(i_agree_coh):
                         
@@ -485,7 +490,8 @@ class Agents:
                         self.ils_i[ind[i_agree_coh],t+1] = \
                             fls_policy[self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1],self.itheta[ind[i_agree_coh],t+1]]
                         
-                        self.yaftmar[ind[i_agree_coh],t+1] = 0
+                        self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
+                        self.nmar[ind[i_agree_mar],t+1] += 1
                         
                         
                     if np.any(i_disagree_or_nomeet):
