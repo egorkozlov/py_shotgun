@@ -394,7 +394,7 @@ def compute_moments(self):
     
     
     haz_m = m['Everyone']/c['Everyone']
-    haz_mk = (m['SM']+m['Single, pregnant'])/c['Everyone']
+    haz_mk = (m['Single, pregnant'])/c['Single']
     haz_nk = n_newkids / n_childless
     
     for t in range(1,15):

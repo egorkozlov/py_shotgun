@@ -55,20 +55,59 @@ def target_values(mode='high education'):
         targets['hazard of marriage at 34'] = (0.09789,0.0021931)
         targets['hazard of marriage at 35'] = (0.0909237,0.0021694)
         
-        targets['hazard of marriage & having a child at 22'] = (0.0020043,0.0002575)
-        targets['hazard of marriage & having a child at 23'] = (0.0037913,0.0002894)
-        targets['hazard of marriage & having a child at 24'] = (0.0050758,0.0003216)
-        targets['hazard of marriage & having a child at 25'] = (0.0078502,0.0003979)
-        targets['hazard of marriage & having a child at 26'] = (0.0099153,0.0004596)
-        targets['hazard of marriage & having a child at 27'] = (0.0128215,0.0005419)
-        targets['hazard of marriage & having a child at 28'] = (0.0150063,0.0006154)
-        targets['hazard of marriage & having a child at 29'] = (0.0201393,0.0007585)
-        targets['hazard of marriage & having a child at 30'] = (0.0222486,0.0008317)
-        targets['hazard of marriage & having a child at 31'] = (0.0235701,0.0009146)
-        targets['hazard of marriage & having a child at 32'] = (0.0272916,0.0010366)
-        targets['hazard of marriage & having a child at 33'] = (0.0330752,0.0012157)
-        targets['hazard of marriage & having a child at 34'] = (0.0321491,0.0012423)
-        targets['hazard of marriage & having a child at 35'] = (0.0314278,0.0012609)
+        
+        
+        '''
+        targets['hazard of marriage & having a child at 22'] = (.0006303,.0001446)
+        targets['hazard of marriage & having a child at 23'] = (.0015481,.0001853)
+        targets['hazard of marriage & having a child at 24'] = (.002005,.0002028)
+        targets['hazard of marriage & having a child at 25'] = (.0028903,.0002427)
+        targets['hazard of marriage & having a child at 26'] = (.0032498,.0002653)
+        targets['hazard of marriage & having a child at 27'] = (.0037572,.000297)
+        targets['hazard of marriage & having a child at 28'] = (.004184,.0003306)
+        targets['hazard of marriage & having a child at 29'] = (.0055574,.0004085)
+        targets['hazard of marriage & having a child at 30'] = (.0048407,.0004016)
+        targets['hazard of marriage & having a child at 31'] = (.005135,.0004482)
+        targets['hazard of marriage & having a child at 32'] = (.0051018,.0004756)
+        targets['hazard of marriage & having a child at 33'] = (.0072451,.0006166)
+        targets['hazard of marriage & having a child at 34'] = (.0062195,.0005979)
+        targets['hazard of marriage & having a child at 35'] = (.005723,.0006062)
+        '''
+        '''
+             22   .0019362   .0002534 |
+          |  23   .0037141   .0002868 |
+          |  24    .004908    .000317 |
+          |  25   .0071436    .000381 |
+          |---------------------------|
+          |  26   .0091454   .0004444 |
+          |  27   .0115743   .0005206 |
+          |  28   .0131014   .0005844 |
+          |  29   .0164959   .0007035 |
+          |  30   .0186264   .0007878 |
+          |---------------------------|
+          |  31    .018586   .0008528 |
+          |  32   .0208803   .0009628 |
+          |  33    .024789   .0011412 |
+          |  34   .0217023   .0011176 |
+          |  35   .0205185   .0011483 
+        '''
+
+
+        targets['hazard of marriage & having a child at 22'] = (.0006303,.0001446/1.5)
+        targets['hazard of marriage & having a child at 23'] = (.0015481,.0001853/1.5)
+        targets['hazard of marriage & having a child at 24'] = (.002005,.0002028/1.5)
+        targets['hazard of marriage & having a child at 25'] = (.0028903,.0002427/1.5)
+        targets['hazard of marriage & having a child at 26'] = (.0032498,.0002653/1.5)
+        targets['hazard of marriage & having a child at 27'] = (.0037572,.000297/1.5)
+        targets['hazard of marriage & having a child at 28'] = (.004184,.0003306/1.5)
+        targets['hazard of marriage & having a child at 29'] = (.0055574,.0004085/1.5)
+        targets['hazard of marriage & having a child at 30'] = (.0048407,.0004016/1.5)
+        targets['hazard of marriage & having a child at 31'] = (.005135,.0004482/1.5)
+        targets['hazard of marriage & having a child at 32'] = (.0051018,.0004756/1.5)
+        targets['hazard of marriage & having a child at 33'] = (.0072451,.0006166/1.5)
+        targets['hazard of marriage & having a child at 34'] = (.0062195,.0005979/1.5)
+        targets['hazard of marriage & having a child at 35'] = (.005723,.0006062/1.5)
+        
         
         targets['hazard of new child at 22'] = (0.0069326,0.0004666)
         targets['hazard of new child at 23'] = (0.0138225,0.0005367)
