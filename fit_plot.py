@@ -110,3 +110,5 @@ def plot_cumulative(moments,targets,setup):
         plt.xlabel('age')
         plt.ylabel('share (%)')
         
+        
+        

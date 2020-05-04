@@ -12,10 +12,11 @@ from gridvec import VecOnGrid
 
 class Agents:
     
-    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,verbose=True,nosim=False):
+    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,verbose=True,nosim=False,
+                 fix_seed=True):
             
             
-        np.random.seed(18)
+        if fix_seed: np.random.seed(18)
   
         # take the stuff from the model and arguments
         # note that this does not induce any copying just creates links
@@ -48,11 +49,11 @@ class Agents:
         self.single_state = 'Female, single' if female else 'Male, single'
         
         # all the randomness is here
-        self.shocks_single_iexo = np.random.random_sample((N,T))
-        self.shocks_single_meet = np.random.random_sample((N,T))
-        self.shocks_couple_iexo = np.random.random_sample((N,T))
-        self.shocks_single_a = np.random.random_sample((N,T))
-        self.shocks_couple_a = np.random.random_sample((N,T))
+        self._shocks_single_iexo = np.random.random_sample((N,T))
+        self._shocks_single_meet = np.random.random_sample((N,T))
+        self._shocks_couple_iexo = np.random.random_sample((N,T))
+        self._shocks_single_a = np.random.random_sample((N,T))
+        self._shocks_couple_a = np.random.random_sample((N,T))
         
         
         
@@ -62,16 +63,16 @@ class Agents:
         else:
             inc_prob = int_prob(self.setup.exogrid.zm_t[0], sig = self.setup.pars['sig_zm_0'])
             
-        shocks_init = np.random.random_sample((N,))        
-        i_inc = np.sum((shocks_init[:,None] > np.cumsum(inc_prob)[None,:]), axis=1)
+        _shocks_init = np.random.random_sample((N,))        
+        i_inc = np.sum((_shocks_init[:,None] > np.cumsum(inc_prob)[None,:]), axis=1)
         iexoinit = i_inc # initial state
         
         
         
-        self.shocks_outsm = np.random.random_sample((N,T))
-        self.shocks_transition = np.random.random_sample((N,T)) 
-        self.shocks_single_preg = np.random.random_sample((N,T))
-        self.shocks_planned_preg = np.random.random_sample((N,T))
+        self._shocks_outsm = np.random.random_sample((N,T))
+        self._shocks_transition = np.random.random_sample((N,T)) 
+        self._shocks_single_preg = np.random.random_sample((N,T))
+        self._shocks_planned_preg = np.random.random_sample((N,T))
         # no randomnes past this line please
         
         # initialize assets
@@ -106,6 +107,7 @@ class Agents:
         self.just_divorced = np.zeros((N,T),dtype=np.bool)
         self.just_divorced_nk = np.zeros((N,T),dtype=np.bool)
         self.just_divorced_k = np.zeros((N,T),dtype=np.bool)
+        self.new_child = np.zeros((N,T),dtype=np.bool)
         self.k_m = np.zeros((N,T),dtype=np.bool)
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
@@ -154,16 +156,17 @@ class Agents:
         zeros = np.zeros((N,),dtype=np.int8)
         mat_init = pswitchlist[0]
         
-        self.policy_ind[:,0] = mc_simulate(zeros,mat_init,shocks=self.shocks_transition[:,0]) # everyone starts with 0
+        self.policy_ind[:,0] = mc_simulate(zeros,mat_init,shocks=self._shocks_transition[:,0]) # everyone starts with 0
         if self.npol > 1:
             for t in range(T-1):    
                 mat = pswitchlist[t+1]
-                self.policy_ind[:,t+1] = mc_simulate(self.policy_ind[:,t],mat,shocks=self.shocks_transition[:,t+1])
+                self.policy_ind[:,t+1] = mc_simulate(self.policy_ind[:,t],mat,shocks=self._shocks_transition[:,t+1])
         else:
             self.policy_ind[:] = 0
             
         if not nosim: self.simulate()
         self.compute_aux()
+        counts, offers, marriages = self.marriage_stats()
         
         if self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.ub_hit_couple: print('Assets upped bound is reached for couples')
@@ -216,7 +219,7 @@ class Agents:
                     
                     
                     anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t]]
-                    self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_s,anext).roll(shocks=self.shocks_single_a[ind,t])
+                    self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_s,anext).roll(shocks=self._shocks_single_a[ind,t])
                     self.s[ind,t] = anext
                     self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t]]
                     self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t]]
@@ -234,7 +237,7 @@ class Agents:
                     self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
                     self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
                     
-                    self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self.shocks_couple_a[ind,t])
+                    self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self._shocks_couple_a[ind,t])
                     if np.any(self.iassets[ind,t+1]==self.setup.na-1): self.couple=True
                     
                 assert np.all(anext >= 0)
@@ -283,14 +286,14 @@ class Agents:
                         
                         mat = self.Mlist[ipol].setup.exo_mats[sname][ils][t]
                         
-                        shks = self.shocks_couple_iexo[ind[this_ls],t]
+                        shks = self._shocks_couple_iexo[ind[this_ls],t]
                         
                         iexo_next_this_ls = mc_simulate(iexo_now[this_ls],mat,shocks=shks)
                         self.iexo[ind[this_ls],t+1] = iexo_next_this_ls
                         
                 else:
                     mat = self.Mlist[ipol].setup.exo_mats[sname][t]
-                    shks = self.shocks_single_iexo[ind,t]                    
+                    shks = self._shocks_single_iexo[ind,t]                    
                     iexo_next = mc_simulate(iexo_now,mat,shocks=shks) # import + add shocks     
                     self.iexo[ind,t+1] = iexo_next
             
@@ -365,7 +368,7 @@ class Agents:
                     
                     
                     
-                    v = self.shocks_single_iexo[ind,t] #np.random.random_sample(ind.size) # draw uniform dist
+                    v = self._shocks_single_iexo[ind,t] #np.random.random_sample(ind.size) # draw uniform dist
                     
                     i_pmat = (v[:,None] > pmat_cum).sum(axis=1)  # index of the position in pmat
                     
@@ -378,7 +381,7 @@ class Agents:
                         
                     # potential assets position of couple
                     
-                    vpreg = self.shocks_single_preg[ind,t]
+                    vpreg = self._shocks_single_preg[ind,t]
                     i_preg = (vpreg < p_preg)
                     
                     
@@ -399,7 +402,7 @@ class Agents:
                     # compute for everyone
                     
                     
-                    vmeet = self.shocks_single_meet[ind,t]
+                    vmeet = self._shocks_single_meet[ind,t]
                     i_nomeet =  np.array( vmeet > pmeet )
                     
                     
@@ -425,6 +428,7 @@ class Agents:
                         become_single = (i_disagree_or_nomeet) & ~(become_sm)   
                     else:
                         become_sm = (i_disagree_or_nomeet) & (i_preg)
+                        assert np.all(i_preg)
                         become_single = np.zeros_like(become_sm,dtype=np.bool)
                     assert np.all(i_disagree_or_nomeet == ((become_sm) | (become_single)))
                     
@@ -471,7 +475,7 @@ class Agents:
                             fls_policy[self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1],self.itheta[ind[i_agree_mar],t+1]]
                         
                         self.yaftmar[ind[i_agree_mar],t+1] = 0                        
-                        self.nmar[ind[i_agree_mar],t+1] += 1
+                        self.nmar[ind[i_agree_mar],t+1:] += 1
                         
                     if np.any(i_agree_coh):
                         
@@ -491,7 +495,7 @@ class Agents:
                             fls_policy[self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1],self.itheta[ind[i_agree_coh],t+1]]
                         
                         self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
-                        self.nmar[ind[i_agree_mar],t+1] += 1
+                        self.nmar[ind[i_agree_coh],t+1:] += 1
                         
                         
                     if np.any(i_disagree_or_nomeet):
@@ -599,7 +603,7 @@ class Agents:
                         else:
                             self.just_divorced_nk[ind,t] = i_div
                         
-                        shks = self.shocks_couple_a[ind[i_div],t]
+                        shks = self._shocks_couple_a[ind[i_div],t]
                         
                         # FIXME: it should be agrid_s here
                         if self.female:
@@ -638,7 +642,7 @@ class Agents:
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             self.ils_i[ind[i_ren],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self.shocks_planned_preg[ind,t])
+                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_ren]
                             
                             self.planned_preg[ind[i_ren],t] = i_birth1
@@ -666,7 +670,7 @@ class Agents:
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             self.ils_i[ind[i_sq],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
                         else:
-                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self.shocks_planned_preg[ind,t])
+                            i_birth = (decision['Probability of a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_sq]
                             self.m_k[ind[i_sq][i_birth1],t:] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
@@ -710,6 +714,8 @@ class Agents:
         
         self.labor_supply[couple_k] = self.setup.ls_levels['Couple and child'][self.ils_i[couple_k]]
         self.labor_supply[single_k] = self.setup.ls_levels['Female and child'][self.ils_i[single_k]]
+        
+        
         
         
         assert np.all(self.x>=0)
