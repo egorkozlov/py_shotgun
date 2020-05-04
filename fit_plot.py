@@ -108,5 +108,5 @@ def plot_cumulative(moments,targets,setup):
         plt.legend()
         plt.title(name) 
         plt.xlabel('age')
-        plt.ylabel('share in total population (%)')
+        plt.ylabel('share (%)')
         

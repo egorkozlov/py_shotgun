@@ -32,35 +32,35 @@ if __name__ == '__main__':
     
     
     '''
-    x = {'sigma_psi': 0.4203961804901682,
-         'sigma_psi_mult': 4.774783102380805,
-         'pmeet_21': 0.1150734338507825,
-         'pmeet_28': 0.3658702881000681,
-         'pmeet_35': 0.49328894668466444,
-         'preg_21': 0.026909130608297693,
-         'preg_28': 0.03678288557173975,
-         'preg_35': -0.010004147713862654,
-         'u_shift_mar': 2.037465051515264,
-         'util_alp': 0.7158378198840009,
-         'util_kap': 0.826411106925244,
-         'util_qbar': 0.7521355119903652,
-         'disutil_marry_sm_mal_coef': 14.595453417926215,
-         'disutil_shotgun_coef': 0.33579823302000383}
+    x = {'sigma_psi': 0.4042887868032187,
+         'sigma_psi_mult': 5.159831214740526,
+         'pmeet_21': 0.09462288438881994,
+         'pmeet_28': 0.3497836550541352,
+         'pmeet_35': 0.45958239075216556,
+         'preg_21': 0.020184941653201283,
+         'preg_28': 0.040679132216882644,
+         'preg_35': -0.00613815415792901,
+         'u_shift_mar': 1.9391514168600832,
+         'util_alp': 0.6740601543545901,
+         'util_kap': 0.8245547047683262,
+         'util_qbar': 0.494312244622116,
+         'disutil_marry_sm_mal_coef': 14.575313199536971,
+         'disutil_shotgun_coef': 0.5747914283838933}
     '''
-    x = {'sigma_psi': 0.37621958,
-         'sigma_psi_mult': 5.09055414,
-         'pmeet_21': 0.11759438,
-         'pmeet_28': 0.36227985,
-         'pmeet_35': 0.47577083,
-         'preg_21': 0.04601108,
-         'preg_28': 0.03504144,
-         'preg_35': 0.0610367,
-         'u_shift_mar': 1.94371434,
-         'util_alp': 0.68140333,
-         'util_kap': 0.82638585,
-         'util_qbar': 0.67972182,
-         'disutil_marry_sm_mal_coef': 13.89400622,
-         'disutil_shotgun_coef': 0.49459884}
+    x = {'sigma_psi': 0.3992869835377583,
+         'sigma_psi_mult': 5.072185498196008,
+         'pmeet_21': 0.0859842703527165,
+         'pmeet_28': 0.3700582376952367,
+         'pmeet_35': 0.47137306696712405,
+         'preg_21': 0.02232032891602287,
+         'preg_28': 0.04157025892605673,
+         'preg_35': 0.028035339707370655,
+         'u_shift_mar': 1.836551924933839,
+         'util_alp': 0.6271358861497329,
+         'util_kap': 0.8341827838900215,
+         'util_qbar': 0.0,
+         'disutil_marry_sm_mal_coef': 15.500831380402422,
+         'disutil_shotgun_coef': 0.6284153641357494}
 
 
     
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     
     out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
-                                      #save_to='mdl.pkl',
+                                      #load_from='mdl.pkl',
                                       verbose=True,draw=True)
     
     mdl[0].time_statistics()
