@@ -100,11 +100,9 @@ def mdl_resid(x=None,targets=None,weights=w,
     np.random.seed(18)
     agents = Agents( mdl_list, verbose=verbose, fix_seed=False)
     if not cs_moments:
-        agents_list = [agents] + [Agents( mdl_list, verbose=False, fix_seed=False) for _ in range(moments_repeat-1)]
-        moments_list = [a.compute_moments() for a in agents_list]
+        moments_list = [agents.compute_moments()] + [Agents( mdl_list, verbose=False, fix_seed=False).compute_moments() for _ in range(moments_repeat-1)]
     else:
-        cs_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False) for _ in range(moments_repeat)]
-        moments_list = [cs.compute_moments() for cs in cs_list]
+        moments_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False).compute_moments() for _ in range(moments_repeat)]
     
     
     mom = {key : np.mean([m[key] for m in moments_list]) for key in moments_list[0].keys()}
