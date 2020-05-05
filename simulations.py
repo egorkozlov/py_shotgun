@@ -462,8 +462,8 @@ class Agents:
                         self.agreed_k[ind[i_agree_mar],t] = True
                         self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]*(sname!='Female and child')
                         
-                        self.k_m[ind[i_agree_mar],t:] = True
-                        self.k_m_true[ind[i_agree_mar],t:] = i_preg[i_agree_mar][:,None]
+                        self.k_m[ind[i_agree_mar],(t+1):] = True
+                        self.k_m_true[ind[i_agree_mar],(t+1):] = i_preg[i_agree_mar][:,None]
                         
                         
                         # FLS decision
@@ -647,7 +647,7 @@ class Agents:
                             
                             self.planned_preg[ind[i_ren],t] = i_birth1
                             
-                            self.m_k[ind[i_ren][i_birth1],t:] = True
+                            self.m_k[ind[i_ren][i_birth1],(t+1):] = True
                             
                             
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
@@ -672,7 +672,7 @@ class Agents:
                         else:
                             i_birth = (decision['Probability of a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_sq]
-                            self.m_k[ind[i_sq][i_birth1],t:] = True                            
+                            self.m_k[ind[i_sq][i_birth1],(t+1):] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
                             

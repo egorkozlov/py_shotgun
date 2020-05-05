@@ -70,11 +70,12 @@ if __name__ == '__main__':
     out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
                                       load_from='mdl.pkl',
-                                      verbose=True,draw=True)
+                                      verbose=True,draw=True,cs_moments=False)
     
     mdl[0].time_statistics()
     #mdl[0].diagnostics()
                          
+    
     print('Done. Residual in point x0 is {}'.format(out))
     
     
@@ -102,8 +103,8 @@ if __name__ == '__main__':
 
     
     
-    #from fit_plot import make_fit_plots
-    #make_fit_plots(agents,target_values('high education'))
+    from fit_plot import make_fit_plots
+    make_fit_plots(agents,target_values('high education'))
     
     from crosssection import CrossSection
     from simulations import Agents
@@ -114,7 +115,7 @@ if __name__ == '__main__':
     np.random.seed(13)
     for _ in range(n_repeat):
         cs = CrossSection(mdl,age_distribution=flist,fix_seed=False,verbose=False,N_total=30000)
-        mom_list_cs = mom_list_cs + [cs.compute_cs_moments().copy()]
+        mom_list_cs = mom_list_cs + [cs.compute_moments().copy()]
         del(cs)
         
         pl = Agents(mdl,N=15000,T=22,verbose=False,fix_seed=False)

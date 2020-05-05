@@ -22,7 +22,7 @@ w = {'divorced if k then m and one marriage':1.0,
 def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
-              rel_diff=True):
+              rel_diff=False,cs_moments=False,times_moments=1):
     
     
     
@@ -31,6 +31,7 @@ def mdl_resid(x=None,targets=None,weights=w,
     from model import Model
     from setup import DivorceCosts
     from simulations import Agents
+    from crosssection import CrossSection
     from calibration_params import calibration_params
 
 
@@ -96,9 +97,13 @@ def mdl_resid(x=None,targets=None,weights=w,
             print('warning: too much stuff is save_to')
         dill.dump(mdl,open(save_to[0],'wb+'))            
             
-     
+    
     agents = Agents( mdl_list, verbose=verbose)
-    mom = agents.compute_moments()
+    if not cs_moments:
+        mom = agents.compute_moments()
+    else:
+        cs = CrossSection(mdl_list,N_total=30000)
+        mom = cs.compute_moments()
     
     #agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
     #mom_men = agents_extra.compute_moments()

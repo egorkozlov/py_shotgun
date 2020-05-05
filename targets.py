@@ -74,7 +74,7 @@ def target_values(mode='high education'):
         targets['hazard of marriage & having a child at 35'] = (.005723,.0006062)
         '''
 
-        targets['k then m in population at 22'] = (.0031368,.0003093)
+        #targets['k then m in population at 22'] = (.0031368,.0003093)
         targets['k then m in population at 23'] = (.0054749,.0003343)
         targets['k then m in population at 24'] = (.0079265,.0003768)
         targets['k then m in population at 25'] = (.0123658,.0004524)
@@ -89,7 +89,7 @@ def target_values(mode='high education'):
         targets['k then m in population at 34'] = (.0467038,.0008199)
         targets['k then m in population at 35'] = (.0516670,.0008606)
         
-        targets['m then k in population at 22'] = (.0058368,.0004213)
+        #targets['m then k in population at 22'] = (.0058368,.0004213)
         targets['m then k in population at 23'] = (.0147950,.000547)
         targets['m then k in population at 24'] = (.0275320,.0006952)
         targets['m then k in population at 25'] = (.0470913,.0008672)
@@ -105,7 +105,7 @@ def target_values(mode='high education'):
         targets['m then k in population at 35'] = (.4553771,.0019361)
         
         
-        targets['k then m in sample at 22'] = (.3495573,.0264092)
+        #targets['k then m in sample at 22'] = (.3495573,.0264092)
         targets['k then m in sample at 23'] = (.2700996,.0134549)
         targets['k then m in sample at 24'] = (.2235426,.008985)
         targets['k then m in sample at 25'] = (.2079784,.0063642)
@@ -123,7 +123,7 @@ def target_values(mode='high education'):
         
         
         
-        targets['hazard of new child at 22'] = (0.0069326,0.0004666)
+        #targets['hazard of new child at 22'] = (0.0069326,0.0004666)
         targets['hazard of new child at 23'] = (0.0138225,0.0005367)
         targets['hazard of new child at 24'] = (0.0188708,0.0005915)
         targets['hazard of new child at 25'] = (0.0277794,0.0006976)

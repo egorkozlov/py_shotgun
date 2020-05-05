@@ -8,9 +8,10 @@ Created on Mon May  4 12:13:18 2020
 
 import numpy as np
 from simulations import Agents
+from age_dist import get_age_distribution
 
 class CrossSection:
-    def __init__(self,Mlist,*,age_distribution,N_total=15000,verbose=False,
+    def __init__(self,Mlist,age_distribution=None,N_total=15000,verbose=False,
                                      fix_seed=True,verbose_sim=False,**kwargs):
         # age distribution is an array of frequencies. N_total independent 
         # agents are simulated according to this distribution
@@ -22,13 +23,11 @@ class CrossSection:
         self.verbose_sim = verbose_sim
         
     
+        age_dist_normalized = get_age_distribution(age_distribution) # can be None
         
-        age_distribution = np.array(age_distribution)
+        self.age_dist = age_dist_normalized
+        age_dist_cumulative = np.cumsum(age_dist_normalized)
         
-        age_dist_normailzed = age_distribution/age_distribution.sum()
-        age_dist_cumulative = np.cumsum(age_dist_normailzed)
-        
-        self.age_dist = age_dist_normailzed
         
         a_pick = (np.random.random_sample(N_total)[:,None] > age_dist_cumulative[None,:])
         assert not np.any(a_pick[:,-1])
@@ -36,7 +35,7 @@ class CrossSection:
         t_pick = np.sort(t_pick)
         self.t = t_pick
         
-        self.Tmax = age_distribution.size
+        self.Tmax = age_dist_normalized.size
         self.tlist = np.arange(self.Tmax)
         self.num_t = np.array([np.sum(t_pick==t) for t in self.tlist])
         
@@ -97,7 +96,7 @@ class CrossSection:
         return c, o, m
             
             
-    def compute_cs_moments(self):
+    def compute_moments(self):
         moments = dict()
         
         n_mark = self.state_codes['Couple and child']
@@ -146,7 +145,7 @@ class CrossSection:
             
         for t in range(1,16):
             pick = (age==(21+t))
-            moments['hazard of new child at {}'.format(21+t)] = n_newkids[t-1]/n_childless[t-1]  if np.any(childless_this_period[pick]) else 0.0
+            moments['hazard of new child at {}'.format(21+t)] = n_newkids[t]/n_childless[t]  if np.any(childless_this_period[pick]) else 0.0
             
             
         k_m_observed = self.k_m & one_mar
