@@ -67,40 +67,18 @@ if __name__ == '__main__':
 
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
+    out, mdl, agents, res = mdl_resid(x=None,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
-                                      load_from='mdl.pkl',
-                                      verbose=True,draw=True,cs_moments=False)
+                                      save_to='mdl.pkl',
+                                      verbose=True,draw=True,cs_moments=False,
+                                      moments_repeat=2)
     
     mdl[0].time_statistics()
-    #mdl[0].diagnostics()
                          
     
     print('Done. Residual in point x0 is {}'.format(out))
     
     
-    # age frequencies
-    flist = [  847361,
-              3631473,
-              5347413,
-              5936839,
-              6803464,
-              6742099,
-              6927052,
-              6926038,
-              6845848,
-              7243977,
-              6927451,
-              6881834,
-              6715119,
-              6617213,
-              6771984,
-              6490318,
-              6414025,
-              6401949,
-              6327301,
-              6693319]
-
     
     
     from fit_plot import make_fit_plots
@@ -114,7 +92,7 @@ if __name__ == '__main__':
     import numpy as np
     np.random.seed(13)
     for _ in range(n_repeat):
-        cs = CrossSection(mdl,age_distribution=flist,fix_seed=False,verbose=False,N_total=30000)
+        cs = CrossSection(mdl,fix_seed=False,verbose=False,N_total=30000)
         mom_list_cs = mom_list_cs + [cs.compute_moments().copy()]
         del(cs)
         
