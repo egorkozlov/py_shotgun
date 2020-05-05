@@ -43,7 +43,7 @@ def compute_moments(self):
     #mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
     
     share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
-    mean_x = np.median(share_x)
+    mean_x = np.mean(share_x)
     
     ls_min = min(self.setup.ls_levels['Couple and child'])
     
@@ -397,7 +397,9 @@ def compute_moments(self):
     
     haz_m = m['Everyone']/c['Everyone']
     haz_mk = (m['Single, pregnant'])/c['Single']
-    haz_nk = n_newkids / n_childless
+    haz_nk = n_newkids / n_childless # FIXME: this hazard is mistimed
+    # the bottom should be of the previous period and not of the 
+    # current period.
     
     for t in range(1,15):
         moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0

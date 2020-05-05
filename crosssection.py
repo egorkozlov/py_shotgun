@@ -136,8 +136,8 @@ class CrossSection:
             n_newkids[t] = (self.planned_preg | self.unplanned_preg)[age==(21+t)].sum()
         
         n_childless = np.zeros(self.Tmax)
-        for t in range(1,n_newkids.size):
-            n_childless[t] = (~have_kid)[age==(21+t-1)].sum()
+        for t in range(n_newkids.size):
+            n_childless[t] = (~have_kid)[age==(21+t)].sum()
             
         print(n_newkids,n_childless)
     
@@ -146,7 +146,7 @@ class CrossSection:
             
         for t in range(1,16):
             pick = (age==(21+t))
-            moments['hazard of new child at {}'.format(21+t)] = newkids_next_period[pick].sum()/childless_this_period[pick].sum() if np.any(childless_this_period[pick]) else 0.0
+            moments['hazard of new child at {}'.format(21+t)] = n_newkids[t-1]/n_childless[t-1]  if np.any(childless_this_period[pick]) else 0.0
             
             
         k_m_observed = self.k_m & one_mar

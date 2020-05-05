@@ -407,7 +407,7 @@ class Agents:
                     
                     
                     self.met_a_partner[ind,t] = ~i_nomeet
-                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet)
+                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet) & ~(sname=='Female and child')
                     
                     i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat]*(~i_preg) \
                                     + matches['Pregnant']['Decision'][ia,iznow,i_pmat]*(i_preg)
