@@ -16,6 +16,7 @@ def calibration_params(xin=None,xfix=None):
     # format is name: (lb,ub,xinit)
     # I am not sure if this should be ordered or not but let's do ordered
     # just in case...
+    '''
     params = OrderedDict(
               sigma_psi=(0.0,0.5,0.16),
               sigma_psi_mult=(2.0,8.0,5.4),
@@ -28,11 +29,27 @@ def calibration_params(xin=None,xfix=None):
               u_shift_mar=(0.0,3.0,1.67),
               util_alp=(0.1,4.0,0.645),
               util_kap=(0.2,4.0,0.799),
-              util_qbar=(0.0,6.0,0.053),
               disutil_marry_sm_mal_coef = (0.0,15.0,5.03),
               disutil_shotgun_coef=(0.0,4.0,1.65)
                         )
-             
+    '''
+    
+    params = OrderedDict(
+              sigma_psi=(0.3,0.5,0.4),
+              sigma_psi_mult=(3.0,7.0,5.1),
+              pmeet_21=(0.0,1.0,0.09),
+              pmeet_28=(0.0,1.0,0.37),
+              pmeet_35=(0.0,1.0,0.47),
+              preg_21=(-0.1,0.3,0.02),
+              preg_28=(0.0,0.3,0.04),
+              preg_35=(-0.1,0.3,0.03),
+              u_shift_mar=(1.2,2.8,1.83),
+              util_alp=(0.1,1.0,0.627),
+              util_kap=(0.2,1.2,0.834),
+              disutil_marry_sm_mal_coef = (5.0,20.0,15.5),
+              disutil_shotgun_coef=(0.0,3.0,0.63)
+                        )
+    
     
     # update params is some dict with values was supplied
     if xin is not None:

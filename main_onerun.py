@@ -69,13 +69,69 @@ if __name__ == '__main__':
     
     out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
-                                      #load_from='mdl.pkl',
-                                      verbose=True,draw=True)
+                                      load_from='mdl.pkl',
+                                      verbose=True,draw=True,cs_moments=False)
     
     mdl[0].time_statistics()
     #mdl[0].diagnostics()
                          
+    
     print('Done. Residual in point x0 is {}'.format(out))
+    
+    
+    # age frequencies
+    flist = [  847361,
+              3631473,
+              5347413,
+              5936839,
+              6803464,
+              6742099,
+              6927052,
+              6926038,
+              6845848,
+              7243977,
+              6927451,
+              6881834,
+              6715119,
+              6617213,
+              6771984,
+              6490318,
+              6414025,
+              6401949,
+              6327301,
+              6693319]
+
+    
     
     from fit_plot import make_fit_plots
     make_fit_plots(agents,target_values('high education'))
+    
+    from crosssection import CrossSection
+    from simulations import Agents
+    mom_list_cs = []
+    mom_list_pl = []
+    n_repeat = 3
+    import numpy as np
+    np.random.seed(13)
+    for _ in range(n_repeat):
+        cs = CrossSection(mdl,age_distribution=flist,fix_seed=False,verbose=False,N_total=30000)
+        mom_list_cs = mom_list_cs + [cs.compute_moments().copy()]
+        del(cs)
+        
+        pl = Agents(mdl,N=15000,T=22,verbose=False,fix_seed=False)
+        mom_list_pl = mom_list_pl + [pl.compute_moments().copy()]
+        del(pl)
+        
+        
+    moments_cs = dict()
+    moments_pl = dict()
+    keys = mom_list_cs[0].keys()
+    keys_pl = mom_list_pl[0].keys()
+    
+    for key in keys:
+        if key not in keys_pl: continue
+        moments_cs[key] = np.sum([m[key] for m in mom_list_cs])/n_repeat
+        moments_pl[key] = np.sum([m[key] for m in mom_list_pl])/n_repeat
+    
+    moments_comp = {key: (moments_cs[key],moments_pl[key]) for key in moments_cs}
+    

@@ -47,7 +47,7 @@ def plot_hazards(moments,targets,setup,ci=False):
     # graph 1: hazard of any marriage
     
     
-    tval = np.arange(22,36)  
+    tval = np.arange(23,36)  
     
     for name in ['hazard of marriage','hazard of new child']:
         haz_model = np.zeros_like(tval,dtype=np.float64)
@@ -89,7 +89,7 @@ def plot_cumulative(moments,targets,setup):
     # graph 1: hazard of any marriage
     
     
-    tval = np.arange(22,36)  
+    tval = np.arange(23,36)  
     
     for name in ['k then m in population','m then k in population','k then m in sample']:
         prob_model = np.zeros_like(tval,dtype=np.float64)
@@ -109,4 +109,6 @@ def plot_cumulative(moments,targets,setup):
         plt.title(name) 
         plt.xlabel('age')
         plt.ylabel('share (%)')
+        
+        
         
