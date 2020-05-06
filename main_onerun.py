@@ -47,27 +47,27 @@ if __name__ == '__main__':
          'disutil_marry_sm_mal_coef': 14.575313199536971,
          'disutil_shotgun_coef': 0.5747914283838933}
     '''
-    x = {'sigma_psi': 0.3992869835377583,
-         'sigma_psi_mult': 5.072185498196008,
-         'pmeet_21': 0.0859842703527165,
-         'pmeet_28': 0.3700582376952367,
-         'pmeet_35': 0.47137306696712405,
-         'preg_21': 0.02232032891602287,
-         'preg_28': 0.04157025892605673,
-         'preg_35': 0.028035339707370655,
-         'u_shift_mar': 1.836551924933839,
-         'util_alp': 0.6271358861497329,
-         'util_kap': 0.8341827838900215,
-         'util_qbar': 0.0,
-         'disutil_marry_sm_mal_coef': 15.500831380402422,
-         'disutil_shotgun_coef': 0.6284153641357494}
+    x = {'sigma_psi': 0.5814121121665838,
+         'sigma_psi_mult': 5.166848399191245,
+         'pmeet_21': 0.16381625559794244,
+         'pmeet_28': 0.3691365690289941,
+         'pmeet_35': 0.3879313316537848,
+         'preg_21': 0.02794620197864167,
+         'preg_28': 0.030777480850298217,
+         'preg_35': 0.009246598699316738,
+         'u_shift_mar': 1.8014493130394245,
+         'util_alp': 0.6057866999755354,
+         'util_kap': 0.8433330370075438,
+         'disutil_marry_sm_mal_coef': 11.010141916862054,
+         'disutil_shotgun_coef': 0.8316044174306312}
+
 
 
     
 
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=None,targets=tar,
+    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals'],
                                       save_to='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,

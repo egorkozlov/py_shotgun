@@ -133,7 +133,10 @@ def target_values(mode='high education'):
         targets['more than one mar at 40']       = (.1190139,.0012735)
         targets['in labor force at 30 if kids'] = (.739675,.0028066*(1/4))
         
-
+        targets['relative income at 30 if childless'] = (1.141977,.0144169*(1/5))
+        targets['men, relative income just married / single at 30'] = (1.197164,.0206279*(1/5))
+        targets['men, relative income with kids / no kids at 30'] = (0.9478894,.011772*(1/5))
+        
         
         
     elif mode=='low education':

@@ -40,10 +40,10 @@ class ModelSetup(object):
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
         p['sig_partner_a'] = 0.1
-        p['mu_partner_a_female'] = 0.00
-        p['mu_partner_a_male'] = -0.00
-        p['dump_factor_z'] = 0.75
-        p['sig_partner_z'] = 0.25
+        p['mu_partner_a_female'] = 0.04
+        p['mu_partner_a_male'] = -0.04
+        p['dump_factor_z'] = 0.24
+        p['sig_partner_z'] = 0.55
         p['mu_partner_z_male'] = -0.02
         p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5

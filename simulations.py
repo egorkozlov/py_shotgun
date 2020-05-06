@@ -842,7 +842,10 @@ class Agents:
     def compute_moments(self):
         import moments
         return moments.compute_moments(self)
-            
+    
+    def aux_moments(self):
+        import moments
+        return moments.aux_moments(self)
             
             
         

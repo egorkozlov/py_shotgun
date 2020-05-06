@@ -257,7 +257,7 @@ def compute_moments(self):
     moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
     
     
-    pick_top = is_mar[:,9] & ~is_mark[:,9]
+    pick_top = is_mar[:,9] & ~is_mark[:,9] & ~is_mar[:,8]
     pick_bottom = ~ever_mar[:,9] & ~have_kid[:,9]
     
     inc = self.female_earnings if self.female else self.male_earnings
@@ -454,3 +454,24 @@ def compute_moments(self):
     
     return moments
 
+
+
+def aux_moments(self):
+    mom = dict()
+    
+    n_mark = self.state_codes['Couple and child']
+    n_marnk = self.state_codes['Couple, no children']
+    n_singlek = self.state_codes['Female and child']
+    
+    
+    is_mar = (self.state == n_mark) | (self.state == n_marnk)
+    have_kid = (self.state == n_mark) | (self.state == n_singlek)
+    
+    
+    pick_up = is_mar[:,9] & ~is_mar[:,8]
+    pick_down = ~is_mar[:,9]
+    mom['men, relative income just married / single at 30'] = np.mean(self.male_earnings[pick_up,9])/np.mean(self.male_earnings[pick_down,9]) if (np.any(pick_up) and np.any(pick_down)) else 0.0
+    pick_up = have_kid[:,9] & is_mar[:,9]
+    pick_down = ~have_kid[:,9] & is_mar[:,9]
+    mom['men, relative income with kids / no kids at 30'] = np.mean(self.male_earnings[pick_up,9])/np.mean(self.male_earnings[pick_down,9]) if (np.any(pick_up) and np.any(pick_down)) else 0.0
+    return mom
