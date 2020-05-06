@@ -22,7 +22,7 @@ w = {'divorced if k then m and one marriage':1.0,
 def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
-              rel_diff=True):
+              rel_diff=False,cs_moments=False,moments_repeat=1):
     
     
     
@@ -31,6 +31,7 @@ def mdl_resid(x=None,targets=None,weights=w,
     from model import Model
     from setup import DivorceCosts
     from simulations import Agents
+    from crosssection import CrossSection
     from calibration_params import calibration_params
 
 
@@ -96,9 +97,15 @@ def mdl_resid(x=None,targets=None,weights=w,
             print('warning: too much stuff is save_to')
         dill.dump(mdl,open(save_to[0],'wb+'))            
             
-     
-    agents = Agents( mdl_list, verbose=verbose)
-    mom = agents.compute_moments()
+    np.random.seed(18)
+    agents = Agents( mdl_list, verbose=verbose, fix_seed=False)
+    if not cs_moments:
+        moments_list = [agents.compute_moments()] + [Agents( mdl_list, verbose=False, fix_seed=False).compute_moments() for _ in range(moments_repeat-1)]
+    else:
+        moments_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False).compute_moments() for _ in range(moments_repeat)]
+    
+    
+    mom = {key : np.mean([m[key] for m in moments_list]) for key in moments_list[0].keys()}
     
     #agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
     #mom_men = agents_extra.compute_moments()
@@ -148,6 +155,8 @@ def mdl_resid(x=None,targets=None,weights=w,
         
     if 'agents' not in return_format:
         del(agents)
+        
+    
         
     
     if len(out) == 1: out = out[0]

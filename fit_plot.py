@@ -47,7 +47,7 @@ def plot_hazards(moments,targets,setup,ci=False):
     # graph 1: hazard of any marriage
     
     
-    tval = np.arange(22,36)  
+    tval = np.arange(23,36)  
     
     names = ['hazard of marriage','hazard of new child']
     captions = ["hazard of marriage:\n (% new marriages at [age]) / (% single at [age-1])",
@@ -94,7 +94,7 @@ def plot_cumulative(moments,targets,setup):
     
     import matplotlib.gridspec as gridspec
     
-    tval = np.arange(22,36)  
+    tval = np.arange(23,36)  
     
     names = ['k then m in population','m then k in population','k then m in sample']
     captions = ["Kids First",

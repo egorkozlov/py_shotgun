@@ -28,12 +28,16 @@ def compute_moments(self):
     
     
     
+    nmar_cum = np.zeros_like(self.agreed,dtype=np.uint8)
+    nmar_cum[:,1:] = np.cumsum(self.agreed[:,:-1],axis=1)
     
-    nmar_cum = np.cumsum(self.agreed,axis=1)
+    assert np.all(nmar_cum == self.nmar)
+    
     one_mar = (nmar_cum == 1)
     
     obs_k_m = self.k_m & one_mar
     obs_m_k = self.m_k & one_mar
+    
     
     have_kid = (self.state == n_mark) | (self.state == n_singlek)
     num_mar = np.cumsum( self.agreed, axis = 1 )
@@ -43,7 +47,7 @@ def compute_moments(self):
     #mean_x = share_x[:,0:20][is_mark[:,0:20]].mean()
     
     share_x = self.x[:,:20][is_mark[:,:20]] / self.couple_earnings[:,:20][is_mark[:,:20]]
-    mean_x = np.median(share_x)
+    mean_x = np.mean(share_x)
     
     ls_min = min(self.setup.ls_levels['Couple and child'])
     
@@ -316,11 +320,30 @@ def compute_moments(self):
     moments['divorced if km (all)'] = divorced_km
     moments['divorced if mk (all)'] = divorced_mk
     
+    
+    
+    
     divorced_km_1m = div_now[:,:20][obs_k_m[:,:20] & one_mar[:,:20]].mean()
     divorced_mk_1m = div_now[:,:20][obs_m_k[:,:20] & one_mar[:,:20]].mean()    
     if self.verbose: print('One mar: divorced k_m = {}, divorced m_k = {}'.format(divorced_km_1m,divorced_mk_1m))
-    moments['divorced if k then m and one marriage'] = divorced_km_1m
-    moments['divorced if m then k and one marriage'] = divorced_mk_1m
+    
+    
+    moments['divorced if k then m and one marriage, panel'] = divorced_km_1m
+    moments['divorced if m then k and one marriage, panel'] = divorced_mk_1m
+    
+    from age_dist import get_age_distribution
+    age_dist = get_age_distribution()
+    age_dist_cumulative = np.cumsum(age_dist)
+    
+    N = div_now.shape[0]
+    t_pick = (np.random.random_sample(N)[:,None] > age_dist_cumulative[None,:]).sum(axis=1)
+    divorced_km_1m_cs = div_now[np.arange(N),t_pick][obs_k_m[np.arange(N),t_pick]].mean()
+    divorced_mk_1m_cs = div_now[np.arange(N),t_pick][obs_m_k[np.arange(N),t_pick]].mean()
+    
+    moments['divorced if k then m and one marriage'] = divorced_km_1m_cs
+    moments['divorced if m then k and one marriage'] = divorced_mk_1m_cs
+    
+    
     
     e_divorced_upp  = ever_div[ever_upp[:,20],20].mean()
     e_divorced_nupp = ever_div[~ever_upp[:,20],20].mean()    
@@ -394,13 +417,13 @@ def compute_moments(self):
     
     n_childless = (~have_kid).sum(axis=0)
     n_newkids = np.zeros_like(n_childless)
-    n_newkids[1:] = ((have_kid[:,1:]) & (~have_kid[:,:-1])).sum(axis=0)
+    n_newkids[:-1] = ((have_kid[:,1:]) & (~have_kid[:,:-1])).sum(axis=0)
     
     
     
     haz_m = m['Everyone']/c['Everyone']
     haz_mk = (m['Single, pregnant'])/c['Single']
-    haz_nk = n_newkids / n_childless
+    haz_nk = n_newkids / n_childless 
     
     for t in range(1,15):
         moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
