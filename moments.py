@@ -128,7 +128,11 @@ def compute_moments(self):
     for t in range(1,11):
         moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean()
     
+    for t in range(1,11):
+        moments['divorced by years after marriage if kids first, {}'.format(t)]      = div_now[pick & (self.yaftmar==t) & obs_k_m==1].mean()
     
+    for t in range(1,11):
+        moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean()
     
     
     # divorce hazards
@@ -257,7 +261,7 @@ def compute_moments(self):
     moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
     
     
-    pick_top = is_mar[:,9] & ~is_mark[:,9]
+    pick_top = is_mar[:,9] & ~is_mark[:,9] & ~is_mar[:,8]
     pick_bottom = ~ever_mar[:,9] & ~have_kid[:,9]
     
     inc = self.female_earnings if self.female else self.male_earnings
@@ -454,3 +458,24 @@ def compute_moments(self):
     
     return moments
 
+
+
+def aux_moments(self):
+    mom = dict()
+    
+    n_mark = self.state_codes['Couple and child']
+    n_marnk = self.state_codes['Couple, no children']
+    n_singlek = self.state_codes['Female and child']
+    
+    
+    is_mar = (self.state == n_mark) | (self.state == n_marnk)
+    have_kid = (self.state == n_mark) | (self.state == n_singlek)
+    
+    for it in range(3,15):
+        pick_up = is_mar[:,it] & ~is_mar[:,it-1]
+        pick_down = ~is_mar[:,it]
+        mom['men, relative income just married / single at {}'.format(21+it)] = np.mean(self.male_earnings[pick_up,9])/np.mean(self.male_earnings[pick_down,9]) if (np.any(pick_up) and np.any(pick_down)) else 0.0
+        pick_up = have_kid[:,it] & is_mar[:,it]
+        pick_down = ~have_kid[:,it] & is_mar[:,it]
+        mom['men, relative income with kids / no kids at {}'.format(21+it)] = np.mean(self.male_earnings[pick_up,9])/np.mean(self.male_earnings[pick_down,9]) if (np.any(pick_up) and np.any(pick_down)) else 0.0
+    return mom

@@ -10,16 +10,20 @@ Created on Fri Apr 24 15:32:21 2020
 
 import matplotlib.pyplot as plt
 
+
 import numpy as np
 
 
-def make_fit_plots(agents,targets):
+def make_fit_plots(agents,targets,moments_aux=None):
     setup = agents.setup
     moments = agents.compute_moments()
     #plot_estimates(setup)
     plot_hazards(moments,targets,setup)
     plot_cumulative(moments,targets,setup)
     plot_by_years_after_marriage(moments,targets,setup)
+    plot_kfmf(moments,targets,setup)
+    if moments_aux is not None: plot_men(moments_aux,targets)
+    
 
 
 def plot_estimates(setup):
@@ -197,5 +201,87 @@ def plot_by_years_after_marriage(moments,targets,setup):
         ax.grid(True)
         ax.set_xticks(yval)
         plt.savefig('{}.pdf'.format(name))
+        
+        
+
+def plot_kfmf(moments,targets,setup):
+    # graph 1: hazard of any marriage
+    
+    
+    yval = np.arange(1,11) 
+    
+    names = ['divorced by years after marriage if kids first','divorced by years after marriage if marriage first']
+    captions = ['KF','MF']
+    mrkrs = ['x','o']
+    
+    
+    fig, ax = plt.subplots()
+    
+    for name, cap, mrkr in zip(names,captions,mrkrs):
+        prob_model = np.zeros_like(yval,dtype=np.float64)
+        prob_data  = np.zeros_like(yval,dtype=np.float64)
+        
+        for i,t in enumerate(yval):
+            try:
+                prob_model[i] = moments['{}, {}'.format(name,t)]
+            except:
+                prob_model[i] = None
+                print('{}, {} not found in moments'.format(name,t))
+            try:
+                prob_data[i] = targets['{}, {}'.format(name,t)][0]
+            except:
+                prob_data[i] = None
+                print('{}, {} not found in targets'.format(name,t))
+        
+        
+        i_data = ~np.isnan(prob_data)
+        i_model = ~np.isnan(prob_model)
+        plt.plot(yval[i_model],prob_model[i_model]*100,'{}-k'.format(mrkr),label='{}: model'.format(cap))
+        plt.plot(yval[i_data],prob_data[i_data]*100,'{}--k'.format(mrkr),label='{}: data'.format(cap))
+        #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
+    plt.legend()
+    plt.title('Divorced by years after marriage by groups') 
+    plt.xlabel('years after marriage')
+    plt.ylabel('share (%)')
+    ax.grid(True)
+    ax.set_xticks(yval)
+    plt.savefig('div_kfmf.pdf')
+        
+        
+def plot_men(moments,targets):
+    
+    tval = np.arange(24,36)  
+    
+    
+    names = ['men, relative income just married / single','men, relative income with kids / no kids']
+    captions = ['men, relative income just married / single','married men, relative income with kids / no kids']
+    fnames = ['men_mar_ratio','men_kids_ratio']
+    
+    for name, cap, fname in zip(names,captions,fnames):
+        haz_model = np.zeros_like(tval,dtype=np.float64)
+        haz_data = np.zeros_like(tval,dtype=np.float64)
+        haz_data_lci = np.zeros_like(tval,dtype=np.float64)
+        haz_data_uci = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        
+        for i,t in enumerate(tval):
+            haz_model[i] = moments['{} at {}'.format(name,t)]
+            haz_data[i] = targets['{} at {}'.format(name,t)][0]
+            haz_data_lci[i] = haz_data[i] - 1.96*targets['{} at {}'.format(name,t)][1]
+            haz_data_uci[i] = haz_data[i] + 1.96*targets['{} at {}'.format(name,t)][1]
+            
+        
+        fig, ax = plt.subplots()
+        plt.plot(tval,haz_model*100,'o-k',label='Model')
+        plt.plot(tval,haz_data*100,'o--k',label='Data')
+        ax.grid(True)
+        xticks = tval#[i for i in range(24,36)]
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title(cap) 
+        plt.xlabel('age')
+        plt.ylabel('ratio (%)')
+        plt.savefig('{}.pdf'.format(fname))
         
     

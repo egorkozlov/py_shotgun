@@ -99,6 +99,7 @@ def mdl_resid(x=None,targets=None,weights=w,
             
     np.random.seed(18)
     agents = Agents( mdl_list, verbose=verbose, fix_seed=False)
+    
     if not cs_moments:
         moments_list = [agents.compute_moments()] + [Agents( mdl_list, verbose=False, fix_seed=False).compute_moments() for _ in range(moments_repeat-1)]
     else:
@@ -107,14 +108,10 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     mom = {key : np.mean([m[key] for m in moments_list]) for key in moments_list[0].keys()}
     
-    #agents_extra = Agents( mdl_list, N=5000, T=30, female=False, verbose=False)
+    
+    mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
     #mom_men = agents_extra.compute_moments()
-    
-    #mom['men ever married at 30, ratio'] = mom_men['ever married at 30, ratio']    
-    #mom['men divorced at 30, ratio'] = mom_men['divorced at 30, ratio']    
-    #mom['men ever kids at 30, ratio'] = mom_men['ever kids at 30, ratio']
-    
-    
+    mom.update(mom_join)
     
     if targets is None:
         from targets import target_values
@@ -140,7 +137,8 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     
     out_dict = {'distance':dist,'all residuals':resid_all,
-                'scaled residuals':resid_sc,'models':mdl_list,'agents':agents}
+                'scaled residuals':resid_sc,'models':mdl_list,'agents':agents,
+                'moments':mom}
     
     
     out = [out_dict[key] for key in return_format]

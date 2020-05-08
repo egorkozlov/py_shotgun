@@ -84,9 +84,9 @@ if __name__ == '__main__':
 
     tar = target_values('high education')
     
-    out, mdl, agents, res = mdl_resid(x=x,targets=tar,
-                                      return_format=['distance','models','agents','scaled residuals'],
-                                      load_from='mdl.pkl',
+    out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
+                                      return_format=['distance','models','agents','scaled residuals','moments'],
+                                      #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_repeat=2)
     
@@ -96,11 +96,10 @@ if __name__ == '__main__':
     print('Done. Residual in point x0 is {}'.format(out))
     
     
-    
-    
-    
+    #from simulations import Agents
+    #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
     from fit_plot import make_fit_plots
-    make_fit_plots(agents,target_values('high education'))
+    make_fit_plots(agents,target_values('high education'))#,moments_aux=moments_aux)
     
     
     '''
