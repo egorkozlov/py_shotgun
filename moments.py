@@ -257,6 +257,9 @@ def compute_moments(self):
     moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
     
     
+    pick_top = is_mar[:,9] & ~is_mark[:,9]
+    pick_bottom = ~ever_mar[:,9] & ~have_kid[:,9]
+    
     inc = self.female_earnings if self.female else self.male_earnings
     inc_30 = inc[:,9]
     pick = (inc_30 >= np.median(inc_30))
@@ -434,6 +437,9 @@ def compute_moments(self):
         moments['spouse log coef 1 year after'] = np.polyfit(linc_sp,linc_own,1)[0]
     except:
         moments['spouse log coef 1 year after'] = 0.0
+    
+    moments['relative income at 30 if childless'] = np.mean(self.female_earnings[pick_top,9])/np.mean(self.female_earnings[pick_bottom,9])
+    
     
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))

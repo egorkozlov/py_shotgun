@@ -188,7 +188,7 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
         resid[i] = (mom - targ0)/targ0 if relative_here else (mom-targ0)
         
         if report:
-            print('{} is {:01.2g} (target {:01.2g})'.format(name,mom,targ0))
+            print('{} is {:02.3g} (target {:02.3g})'.format(name,mom,targ0))
         
         try:
             W[i,i] = weights[name]
