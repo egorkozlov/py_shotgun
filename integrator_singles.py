@@ -110,8 +110,6 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     uloss_fem_single = setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
     uloss_mal_single = setup.pars['disutil_shotgun'] if unplanned_preg else 0.0
     
-    p_mat = setup.part_mats['Female, single'][t].T if female else setup.part_mats['Male, single'][t].T
-   
         
     V_next = np.ones((ns,nexo))*(-1e20)
     
@@ -119,23 +117,28 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     p_preg_all = np.broadcast_to(setup.upp_precomputed[t][izf][None,:],(ns,nexo))
     # this is a probability of unplanned pregnancy for each possible match
     # including those that have zero probability
-    inds = np.where( np.any(p_mat>0,axis=1 ) )[0]
     
     
     
     EV = 0.0
     ppreg = 0.0
     
-    if (female and not unplanned_preg) or (female and single_mom):
-        i_assets_c, p_assets_c = setup.i_a_mat_female_noupp, setup.prob_a_mat_female_noupp
-        matches = setup.matches['Female, single, no upp'][t]
+    # this is a shallow copy: it does not actually copy big matrices
+    if (female and not unplanned_preg):# or (female and single_mom):
+        matches = setup.matches['Female meets male, no upp'][t].copy()
     elif female and unplanned_preg:
-        i_assets_c, p_assets_c = setup.i_a_mat_female_upp, setup.prob_a_mat_female_upp
-        matches = setup.matches['Female, single, upp'][t]
+        matches = setup.matches['Female meets male, upp'][t].copy()
+    elif female and single_mom:
+        matches = setup.matches['Single mother meets male'][t].copy()
     else:
-        i_assets_c, p_assets_c = setup.i_a_mat_male, setup.prob_a_mat_male
-        matches = setup.matches['Male, single'][t]
+        matches = setup.matches['Male meets female, no upp'][t].copy()
+    
         
+        
+    p_mat = matches['iexo_matrix'].T # !!! transpose here 
+    i_assets_c, p_assets_c = matches['i_a_mat'], matches['p_a_mat']
+    inds = np.where( np.any(p_mat>0,axis=1 ) )[0]
+    
     npart = i_assets_c.shape[1]
     
     
@@ -215,7 +218,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         EV += (p_assets_c[:,i][:,None])*np.dot(V_next,p_mat)
         ppreg += (p_assets_c[:,i][:,None])*np.dot(p_preg_all,p_mat)
 
-    mout = matches.copy()
+    mout = matches#.copy() # this is here for reason. otherwise things get inserted into
     mout['Decision'] = dec
     mout['Child immediately'] = morc
     mout['theta'] = tht
