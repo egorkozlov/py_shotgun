@@ -168,9 +168,9 @@ class ModelSetup(object):
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [0.0818515 + 0.0664369*(min(t,30)-5)  
-                                             -.0032096*((min(t,30)-5)**2) 
-                                             + 0.0000529*((min(t,30)-5)**3)
+                                        [0.0818515 + 0.0664369*(min(t+2,30)-5)  
+                                             -.0032096*((min(t+2,30)-5)**2) 
+                                             + 0.0000529*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -186,9 +186,9 @@ class ModelSetup(object):
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [-0.2424105 + 0.037659*(min(t,30)-5)  
-                                             -0.0015337*((min(t,30)-5)**2) 
-                                             + 0.000026*((min(t,30)-5)**3)
+                                        [-0.2424105 + 0.037659*(min(t+2,30)-5)  
+                                             -0.0015337*((min(t+2,30)-5)**2) 
+                                             + 0.000026*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -208,7 +208,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = p['taste_shock_mult']*p['sigma_psi']
+        p['taste_shock'] = p['taste_shock_mult']*0.1#p['sigma_psi']
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
@@ -571,7 +571,7 @@ class ModelSetup(object):
         #self.prob_a_mat_female_upp, self.i_a_mat_female_upp = self._mar_mats_assets(npoints=npoints,female=True,upp=True,abar=abar)
         
     
-    def _mar_mats_iexo(self,t,female=True,trim_lvl=0.001):
+    def _mar_mats_iexo(self,t,female=True,upp=False,trim_lvl=0.001):
         # TODO: check timing
         # this returns transition matrix for single agents into possible couples
         # rows are single's states
@@ -585,6 +585,7 @@ class ModelSetup(object):
         mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
+        mu_psi = 0.0 if not upp else -self.pars['disutil_shotgun']
         
         if female:
             nz_single = setup.exogrid.zf_t[t].shape[0]
@@ -607,7 +608,7 @@ class ModelSetup(object):
         df = setup.pars['dump_factor_z']
         
         for iz in range(n_zown):
-            p_psi = int_prob(psi_couple,mu=0,sig=sigma_psi_init)
+            p_psi = int_prob(psi_couple,mu=mu_psi,sig=sigma_psi_init)
             if female:
                 p_zm  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zf  = zmat_own[iz,:]
@@ -683,7 +684,7 @@ class ModelSetup(object):
             
             
             for t in range(self.pars['T']-1):
-                pmat_iexo = self._mar_mats_iexo(t,female=female)
+                pmat_iexo = self._mar_mats_iexo(t,female=female,upp=upp)
                 # nz X nexo
                 # note that here we do not use transpose
                 

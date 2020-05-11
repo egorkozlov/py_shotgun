@@ -126,14 +126,13 @@ def compute_moments(self):
     moments['divorced by years after marriage, b2'] = pol[0]
     
     for t in range(1,11):
-        moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean()
+        moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean() if np.any(pick & (self.yaftmar==t)) else 0.0
     
     for t in range(1,11):
-        moments['divorced by years after marriage if kids first, {}'.format(t)]      = div_now[pick & (self.yaftmar==t) & obs_k_m==1].mean()
+        moments['divorced by years after marriage if kids first, {}'.format(t)]      = div_now[pick & (self.yaftmar==t) & obs_k_m==1].mean() if np.any(pick & (self.yaftmar==t) & obs_k_m==1) else 0.0
     
     for t in range(1,11):
-        moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean()
-    
+        moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean() if np.any(pick & (self.yaftmar==t) & obs_m_k==1) else 0.0
     
     # divorce hazards
     # simulating by years after marriage
@@ -185,10 +184,10 @@ def compute_moments(self):
     
     
     
-    moments['divorced right now at 25'] = div_now[ever_mar[:,4],4].mean()
-    moments['divorced right now at 30'] = div_now[ever_mar[:,9],9].mean()
-    moments['divorced right now at 35'] = div_now[ever_mar[:,14],14].mean()
-    moments['divorced right now at 40'] = div_now[ever_mar[:,19],19].mean()
+    moments['divorced right now at 25'] = div_now[ever_mar[:,4],4].mean() if np.any(ever_mar[:,4]) else 0.0
+    moments['divorced right now at 30'] = div_now[ever_mar[:,9],9].mean() if np.any(ever_mar[:,9]) else 0.0
+    moments['divorced right now at 35'] = div_now[ever_mar[:,14],14].mean() if np.any(ever_mar[:,14]) else 0.0
+    moments['divorced right now at 40'] = div_now[ever_mar[:,19],19].mean() if np.any(ever_mar[:,19]) else 0.0
     
     
     
