@@ -12,6 +12,7 @@ from scipy.stats import norm
 from collections import namedtuple
 from gridvec import VecOnGrid
 from aux_routines import prob_polyfit
+from itertools import product
 
 from scipy import sparse
 
@@ -167,9 +168,9 @@ class ModelSetup(object):
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [0.0818515 + 0.0664369*(min(t,30)-5)  
-                                             -.0032096*((min(t,30)-5)**2) 
-                                             + 0.0000529*((min(t,30)-5)**3)
+                                        [0.0818515 + 0.0664369*(min(t+2,30)-5)  
+                                             -.0032096*((min(t+2,30)-5)**2) 
+                                             + 0.0000529*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -185,9 +186,9 @@ class ModelSetup(object):
                                         )
             
             p['m_wage_trend'] = np.array(
-                                        [-0.2424105 + 0.037659*(min(t,30)-5)  
-                                             -0.0015337*((min(t,30)-5)**2) 
-                                             + 0.000026*((min(t,30)-5)**3)
+                                        [-0.2424105 + 0.037659*(min(t+2,30)-5)  
+                                             -0.0015337*((min(t+2,30)-5)**2) 
+                                             + 0.000026*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
         
@@ -207,7 +208,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = p['taste_shock_mult']*p['sigma_psi']
+        p['taste_shock'] = p['taste_shock_mult']*0.1#p['sigma_psi']
         
         p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
@@ -489,20 +490,8 @@ class ModelSetup(object):
         
         
         # this pre-computes transition matrices for meeting a partner
-        zf_t_partmat = [self.mar_mats_iexo(t,female=True) if t < p['T'] - 1 else None 
-                            for t in range(p['T'])]
-        zm_t_partmat = [self.mar_mats_iexo(t,female=False) if t < p['T'] - 1 else None 
-                            for t in range(p['T'])]
-        
-        self.part_mats = {'Female, single':zf_t_partmat,
-                          'Male, single':  zm_t_partmat,
-                          'Female and cild':  None,
-                          'Couple and child': None,
-                          'Couple, no children': None} # last is added for consistency
-        
-        self.mar_mats_assets()
-        
-        self.mar_mats_combine()
+       
+        self.build_matches()
         
         
         # building m grid
@@ -552,7 +541,7 @@ class ModelSetup(object):
         prob_a_mat = np.zeros((na,npoints),dtype=self.dtype)
         i_a_mat = np.zeros((na,npoints),dtype=np.int16)
         
-        if upp: assert female
+        #if upp: assert female
         
         aloss = 0.0 if not upp else self.pars['child_a_cost']
         
@@ -576,13 +565,13 @@ class ModelSetup(object):
         
         return prob_a_mat, i_a_mat
             
-    def mar_mats_assets(self,npoints=4,abar=0.1):
-        self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp = self._mar_mats_assets(npoints=npoints,female=True,upp=False,abar=abar)
-        self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
-        self.prob_a_mat_female_upp, self.i_a_mat_female_upp = self._mar_mats_assets(npoints=npoints,female=True,upp=True,abar=abar)
+    #def mar_mats_assets(self,npoints=4,abar=0.1):
+        #self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp = self._mar_mats_assets(npoints=npoints,female=True,upp=False,abar=abar)
+        #self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
+        #self.prob_a_mat_female_upp, self.i_a_mat_female_upp = self._mar_mats_assets(npoints=npoints,female=True,upp=True,abar=abar)
         
     
-    def mar_mats_iexo(self,t,female=True,trim_lvl=0.001):
+    def _mar_mats_iexo(self,t,female=True,upp=False,trim_lvl=0.001):
         # TODO: check timing
         # this returns transition matrix for single agents into possible couples
         # rows are single's states
@@ -596,6 +585,7 @@ class ModelSetup(object):
         mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
+        mu_psi = 0.0 if not upp else -self.pars['disutil_shotgun']
         
         if female:
             nz_single = setup.exogrid.zf_t[t].shape[0]
@@ -618,7 +608,7 @@ class ModelSetup(object):
         df = setup.pars['dump_factor_z']
         
         for iz in range(n_zown):
-            p_psi = int_prob(psi_couple,mu=0,sig=sigma_psi_init)
+            p_psi = int_prob(psi_couple,mu=mu_psi,sig=sigma_psi_init)
             if female:
                 p_zm  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
                 p_zf  = zmat_own[iz,:]
@@ -648,7 +638,7 @@ class ModelSetup(object):
         return p_mat.T
     
     
-    def mar_mats_combine(self):
+    def build_matches(self):
         # for time moment and each position in grid for singles (ia,iz)
         # it computes probability distribution over potential matches
         # this is relevant for testing and simulations
@@ -656,27 +646,49 @@ class ModelSetup(object):
         
         self.matches = dict()
         
-        for female, upp in [(True,False),(True,True),(False,False)]:
-            desc = 'Female, single, upp' if (female and upp) else 'Female, single, no upp' if (female and not upp) else 'Male, single'
+        
+        names = ['Female meets male, no upp','Male meets female, no upp',
+                  'Female meets male, upp','Male meets female, upp',
+                  'Single mother meets male','Male meets single mother']
+        
+        isfemale = [True,False,True,False,True,False]
+        isupp = [False,False,True,True,False,False]
+        issm = [False,False,False,False,True,True]
+        
+        
+        
+        # assets matrices are to be cached
+        
+        prob_a_mat_fem_noupp, i_a_mat_fem_noupp = self._mar_mats_assets(female=True,upp=False)
+        prob_a_mat_fem_upp, i_a_mat_fem_upp = self._mar_mats_assets(female=True,upp=True)
+        prob_a_mat_mal_noupp, i_a_mat_mal_noupp = self._mar_mats_assets(female=False,upp=False)
+        prob_a_mat_mal_upp, i_a_mat_mal_upp = self._mar_mats_assets(female=False,upp=True)
+        # assume single mothers get the same thing as singles
+        
+        p_a_mats = [prob_a_mat_fem_noupp,prob_a_mat_mal_noupp,
+                    prob_a_mat_fem_upp,prob_a_mat_mal_upp,
+                    prob_a_mat_fem_noupp,prob_a_mat_mal_noupp]
+        
+        i_a_mats = [i_a_mat_fem_noupp,i_a_mat_mal_noupp,
+                    i_a_mat_fem_upp,i_a_mat_mal_upp,
+                    i_a_mat_fem_noupp,i_a_mat_mal_noupp]
+        
+        
+        for name, female, upp, sm, p_a, i_a in zip(names,isfemale,isupp,
+                                                   issm,p_a_mats,i_a_mats):
             
             
-            if female and upp:
-                pmat_a, imat_a = self.prob_a_mat_female_upp, self.i_a_mat_female_upp
-            elif female and not upp:
-                pmat_a, imat_a = self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp
-            else:
-                pmat_a, imat_a = self.prob_a_mat_male, self.i_a_mat_male
             
-            
-            pmats = self.part_mats['Female, single'] if female else self.part_mats['Male, single']
-            
-            
+           
             match_matrix = list()
             
             
             for t in range(self.pars['T']-1):
-                pmat_iexo = pmats[t] # nz X nexo
+                pmat_iexo = self._mar_mats_iexo(t,female=female,upp=upp)
+                # nz X nexo
                 # note that here we do not use transpose
+                
+                
                 
                 nz = pmat_iexo.shape[0]
                 
@@ -684,7 +696,7 @@ class ModelSetup(object):
                 inds_fem = self.all_indices(t,inds)[1]
                 
                 npos_iexo = inds.size
-                npos_a = pmat_a.shape[1]
+                npos_a = p_a.shape[1]
                 npos = npos_iexo*npos_a
                 pmatch = np.zeros((self.na,nz,npos),dtype=self.dtype)
                 iamatch = np.zeros((self.na,nz,npos),dtype=np.int32)
@@ -703,9 +715,9 @@ class ModelSetup(object):
                     for ia in range(npos_a):
                         
                         pmatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            (pmat_a[:,ia][:,None])*(probs[None,:])
+                            (p_a[:,ia][:,None])*(probs[None,:])
                         iamatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            imat_a[:,ia][:,None]
+                            i_a[:,ia][:,None]
                         iexomatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
                             inds[None,:]
                         ifemmatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
@@ -715,9 +727,10 @@ class ModelSetup(object):
                         
                 assert np.allclose(np.sum(pmatch,axis=2),1.0)
                 match_matrix.append({'p':pmatch,'ia':iamatch,'iexo':iexomatch,'iconv':i_conv,
-                                         'ifem':ifemmatch})
+                                         'ifem':ifemmatch,'iexo_matrix':pmat_iexo,
+                                         'p_a_mat':p_a,'i_a_mat':i_a})
                     
-            self.matches[desc] = match_matrix
+            self.matches[name] = match_matrix
          
         
     

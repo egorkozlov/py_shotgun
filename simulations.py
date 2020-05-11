@@ -353,7 +353,7 @@ class Agents:
                     # TODO: fix the seed
                     iznow = self.iexo[ind,t]
                     
-                    pmat = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical
+                    pmat = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical !!!
                     
                     pmat_cum = pmat.cumsum(axis=1)
                     

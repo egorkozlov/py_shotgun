@@ -13,16 +13,16 @@ def target_values(mode='high education'):
         
     if mode=='high education':
         
-        targets['ever kids by years after marriage, 1'] = (.1901175,.0018521)
-        targets['ever kids by years after marriage, 2'] = (.3416996,.0022054)
+        #targets['ever kids by years after marriage, 1'] = (.1901175,.0018521)
+        #targets['ever kids by years after marriage, 2'] = (.3416996,.0022054)
         targets['ever kids by years after marriage, 3'] = (.4902692,.0023415)
         targets['ever kids by years after marriage, 4'] = (.6114712,.0023096)
         targets['ever kids by years after marriage, 5'] = (.7039068,.0021802)
         targets['ever kids by years after marriage, 6'] = (.7730147,.0020489)
         targets['ever kids by years after marriage, 7'] = (.8182496,.0019268)
         targets['ever kids by years after marriage, 8'] = (.8568491,.00179)
-        targets['ever kids by years after marriage, 9'] = (.8809587,.001696)
-        targets['ever kids by years after marriage, 10']= (.8978599,.0016307)
+        #targets['ever kids by years after marriage, 9'] = (.8809587,.001696)
+        #targets['ever kids by years after marriage, 10']= (.8978599,.0016307)
         
         
         targets['divorced by years after marriage, 1']  =  (.0084912,.0004315)
@@ -39,7 +39,7 @@ def target_values(mode='high education'):
         
         
         
-        targets['hazard of marriage at 22'] = (.0506949,.001038)
+        #targets['hazard of marriage at 22'] = (.0506949,.001038)
         targets['hazard of marriage at 23'] = (.0624283,.0011034)
         targets['hazard of marriage at 24'] = (.0787830,.0012318)
         targets['hazard of marriage at 25'] = (.0945611,.0013867)
@@ -137,6 +137,8 @@ def target_values(mode='high education'):
         #targets['men, relative income just married / single at 30'] = (1.197164,.0206279*(1/5))
         #targets['men, relative income with kids / no kids at 30'] = (0.9478894,.011772*(1/5))
         
+        
+        
         targets['men, relative income with kids / no kids at 24'] = (1.005178,.0293669)
         targets['men, relative income with kids / no kids at 25'] = (.9937299,.018525)
         targets['men, relative income with kids / no kids at 26'] = (.9629551,.0138367)
@@ -164,6 +166,7 @@ def target_values(mode='high education'):
         targets['men, relative income just married / single at 33'] = (1.285158,.029411)
         targets['men, relative income just married / single at 34'] = (1.260427,.0308268)
         targets['men, relative income just married / single at 35'] = (1.222406,.0344223)
+        
         
         
         targets['divorced by years after marriage if kids first, 1'] = (.0113142,.0020309)

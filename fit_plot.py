@@ -23,6 +23,7 @@ def make_fit_plots(agents,targets,moments_aux=None):
     plot_by_years_after_marriage(moments,targets,setup)
     plot_kfmf(moments,targets,setup)
     if moments_aux is not None: plot_men(moments_aux,targets)
+    plot_kfmf_ref(moments,targets,setup)
     
 
 
@@ -233,7 +234,8 @@ def plot_kfmf(moments,targets,setup):
                 prob_data[i] = None
                 print('{}, {} not found in targets'.format(name,t))
         
-        
+        print((cap,prob_model))
+            
         i_data = ~np.isnan(prob_data)
         i_model = ~np.isnan(prob_model)
         plt.plot(yval[i_model],prob_model[i_model]*100,'{}-k'.format(mrkr),label='{}: model'.format(cap))
@@ -246,8 +248,48 @@ def plot_kfmf(moments,targets,setup):
     ax.grid(True)
     ax.set_xticks(yval)
     plt.savefig('div_kfmf.pdf')
-        
-        
+    
+    # ref_kf = [0.08114558, 0.10186335, 0.11817027, 0.11984021, 0.11823362, 0.11746032, 0.13162393, 0.15057915, 0.14123007, 0.14550265]
+    # ref_mf = [0.        , 0.01083856, 0.02031424, 0.02864134, 0.03768433, 0.04414536, 0.05390435, 0.05976757, 0.0625543 , 0.06301748]
+    
+def plot_kfmf_ref(moments,targets,setup):
+    yval = np.arange(1,11) 
+    ref_kf = np.array([0.08114558, 0.10186335, 0.11817027, 0.11984021, 0.11823362, 0.11746032, 0.13162393, 0.15057915, 0.14123007, 0.14550265])
+    ref_mf = np.array([0.        , 0.01083856, 0.02031424, 0.02864134, 0.03768433, 0.04414536, 0.05390435, 0.05976757, 0.0625543 , 0.06301748])
+    
+    here_kf = np.zeros_like(yval,dtype=np.float64)
+    here_mf = np.zeros_like(yval,dtype=np.float64)
+    
+    names = ['divorced by years after marriage if kids first','divorced by years after marriage if marriage first']
+    conts = [here_kf,here_mf]
+    
+    
+    
+    
+    for name, cont in zip(names,conts):
+        for i,t in enumerate(yval):
+            try:
+                cont[i] = moments['{}, {}'.format(name,t)]
+            except:
+                cont[i] = None
+                print('{}, {} not found in moments'.format(name,t))
+    
+    
+    fig, ax = plt.subplots()
+    plt.plot(yval,ref_kf*100,'x-k',label='KF: baseline')
+    plt.plot(yval,here_kf*100,'o-b',label='KF: $\phi_s = 0$')
+    plt.plot(yval,ref_mf*100,'x--k',label='MF: baseline')
+    plt.plot(yval,here_mf*100,'o--b',label=r'MF: $\phi_s = 0$')
+    plt.legend()
+    plt.title('Divorced by years after marriage: social stigma matters') 
+    plt.xlabel('years after marriage')
+    plt.ylabel('share (%)')
+    ax.grid(True)
+    ax.set_xticks(yval)
+    plt.savefig('div_kfmf_ref.pdf')
+    
+    
+    
 def plot_men(moments,targets):
     
     tval = np.arange(24,36)  
