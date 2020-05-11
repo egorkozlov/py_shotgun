@@ -353,29 +353,40 @@ class Agents:
                     # TODO: fix the seed
                     iznow = self.iexo[ind,t]
                     
-                    pmat = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical !!!
+                    pmat_np = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical !!!
+                    pmat_p = matches['Pregnant']['p'][ia,iznow,:]
+                    pmat_cum_np = pmat_np.cumsum(axis=1)
+                    pmat_cum_p = pmat_p.cumsum(axis=1)
                     
-                    pmat_cum = pmat.cumsum(axis=1)
+                
+                    assert np.all(pmat_cum_np < 1 + 1e-5) 
+                    assert np.all(pmat_cum_np[:,-1] > 1 - 1e-5)
                     
-                    assert np.all(pmat_cum < 1 + 1e-5) 
-                    assert np.all(pmat_cum[:,-1] > 1 - 1e-5)
-                    assert np.all(pmat_cum >= 0.0)
+                    assert np.all(pmat_cum_p < 1 + 1e-5) 
+                    assert np.all(pmat_cum_p[:,-1] > 1 - 1e-5)
+                    assert np.all(pmat_cum_p >= 0.0)
                     # there is a rare numerical issue when adding lots of floats
                     # gives imprecise result > 1
                     
-                    pmat_cum[:,-1] = 1+1e-5 
+                    pmat_cum_np[:,-1] = 1+1e-5 
+                    pmat_cum_p[:,-1] = 1+1e-5 
                     
                     
                     
                     
                     v = self._shocks_single_iexo[ind,t] #np.random.random_sample(ind.size) # draw uniform dist
                     
-                    i_pmat = (v[:,None] > pmat_cum).sum(axis=1)  # index of the position in pmat
+                    i_pmat_np = (v[:,None] > pmat_cum_np).sum(axis=1)  # index of the position in pmat
+                    i_pmat_p = (v[:,None] > pmat_cum_p).sum(axis=1)  # index of the position in pmat
                     
                     
                     # these things are the same for pregnant and not pregnant
                     
-                    p_preg = matches['Pregnant']['Probability Unplanned'][ia,iznow,i_pmat]
+                    p_preg = matches['Pregnant']['Probability Unplanned'][ia,iznow,i_pmat_p]
+                    # TODO: to make it possible to depend on z we need to rework this
+                    # !!! NOTE: this builds on assumption that distributions of z are
+                    # no different with and without unplanned pregnancy
+                    # non-constant in z upp probabilities are not guaranteed to work now...
                     # these are individual-specific pregnancy probabilities
                     # for those who are not fertile this is forced to be zero
                         
@@ -384,16 +395,16 @@ class Agents:
                     vpreg = self._shocks_single_preg[ind,t]
                     i_preg = (vpreg < p_preg)
                     
+                    #i_pmat = i_pmat_p*(i_preg) + i_pmat_np*(~i_preg)
                     
-                    
-                    ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat]*(~i_preg) \
-                                + matches['Pregnant']['iexo'][ia,iznow,i_pmat]*(i_preg)
+                    ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat_np]*(~i_preg) \
+                                + matches['Pregnant']['iexo'][ia,iznow,i_pmat_p]*(i_preg)
                                 
-                    ia_out = matches['Not pregnant']['ia'][ia,iznow,i_pmat]*(~i_preg) \
-                                + matches['Pregnant']['ia'][ia,iznow,i_pmat]*(i_preg)
+                    ia_out = matches['Not pregnant']['ia'][ia,iznow,i_pmat_np]*(~i_preg) \
+                                + matches['Pregnant']['ia'][ia,iznow,i_pmat_p]*(i_preg)
                                 
-                    it_out = matches['Not pregnant']['theta'][ia,iznow,i_pmat]*(~i_preg) + \
-                                + matches['Pregnant']['theta'][ia,iznow,i_pmat]*(i_preg)
+                    it_out = matches['Not pregnant']['theta'][ia,iznow,i_pmat_np]*(~i_preg) + \
+                                + matches['Pregnant']['theta'][ia,iznow,i_pmat_p]*(i_preg)
                     
                     
                     iall, izf, izm, ipsi = self.Mlist[ipol].setup.all_indices(t,ic_out)
@@ -409,11 +420,11 @@ class Agents:
                     self.met_a_partner[ind,t] = ~i_nomeet
                     self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet) & ~(sname=='Female and child')
                     
-                    i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat]*(~i_preg) \
-                                    + matches['Pregnant']['Decision'][ia,iznow,i_pmat]*(i_preg)
+                    i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Decision'][ia,iznow,i_pmat_p]*(i_preg)
                                     
-                    i_m_preferred = matches['Not pregnant']['Child immediately'][ia,iznow,i_pmat]*(~i_preg) \
-                                    + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat]*(i_preg)
+                    i_m_preferred = matches['Not pregnant']['Child immediately'][ia,iznow,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat_p]*(i_preg)
                     
                     i_disagree = (~i_pot_agree)
                     
