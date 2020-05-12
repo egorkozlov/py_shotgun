@@ -46,6 +46,7 @@ if __name__ == '__main__':
          'disutil_shotgun_coef': 0.8316044174306312,
          'taste_shock_mult':1.0}
     '''
+    '''
     x = {'sigma_psi': 0.4902891581150292,
          'sigma_psi_mult': 5.702606626187299,
          'pmeet_21': 0.15015478921321068,
@@ -61,6 +62,22 @@ if __name__ == '__main__':
          'disutil_marry_sm_mal_coef': 8.404348024770918,
          'disutil_shotgun_coef': 0.8347214347081617,
          'taste_shock_mult': 4.930701825497131}
+    '''
+    x = {'sigma_psi': 0.26138747738791257,
+         'sigma_psi_mult': 5.179254639435019,
+         'pmeet_21': 0.17986335029641237,
+         'pmeet_28': 0.32408751651872386,
+         'pmeet_35': 0.36426615699680626,
+         'preg_21': 0.06251572908756534,
+         'preg_28': 0.031170308112898497,
+         'preg_35': 0.10674870611243295,
+         'u_shift_mar': 1.2732222822605368,
+         'util_alp': 0.35015283870308955,
+         'util_kap': 0.9462115202985493,
+         'util_qbar': 0.8449866159744631,
+         'disutil_marry_sm_mal_coef': 8.321891582811833,
+         'disutil_shotgun_coef': 0.23939689770978267,
+         'taste_shock_mult': 4.7870173423387525}
 
 
     
@@ -69,7 +86,7 @@ if __name__ == '__main__':
     
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #load_from='mdl.pkl',
+                                      #save_to='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_repeat=2)
     

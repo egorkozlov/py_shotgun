@@ -49,6 +49,7 @@ class ModelSetup(object):
         p['mu_partner_z_female'] = 0.02
         p['m_bargaining_weight'] = 0.5
         
+        
         p['pmeet_21'] = 0.1
         p['pmeet_28'] = 0.2
         p['pmeet_35'] = 0.1
@@ -82,7 +83,7 @@ class ModelSetup(object):
        
         
         p['child_a_cost'] = 0.0
-        
+        p['child_support_share'] = 0.0
         
         '''
             Condition is h_male==1
@@ -401,6 +402,7 @@ class ModelSetup(object):
             self.exogrid = Exogrid_nt(**exogrid)
             self.pars['nexo_t'] = [v.shape[0] for v in all_t]
             
+            self.compute_child_support_transitions(child_support_share=p['child_support_share'])
             #assert False
             
             
@@ -975,11 +977,68 @@ class ModelSetup(object):
     
     def compute_taxes(self):
         self.taxes = dict()
-        self.taxes['Female, single'] = self._tax_fun(0.882,0.036,1.1086085)
-        self.taxes['Male, single'] = self._tax_fun(0.882,0.036,1.2123768)
-        self.taxes['Female and child'] = self._tax_fun(0.926,0.042,1.5605029) # use one child
+        self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,1.1086085)
+        self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,1.2123768)
+        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,1.5605029) # use one child
         self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,2.3169997)
-        self.taxes['Couple and child'] = self._tax_fun(0.925,0.070,2.3169997)
+        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,2.3169997)
+        
+    def compute_child_support_transitions(self,*,child_support_share):
+        from interp_np import interp
+        # this computes sets of transition matrices when in married couple
+        # that breaks male gives away part of his income to wife. In this 
+        # setup that means that productivity of male decreases and 
+        # productivity of female increases.
+        
+        # structure: for each t there are indices of zf, probabilities of
+        # zf, indices of zm, probabilities of zm
+        
+        p = self.pars
+        transitions = list()
+        
+        for t in range(p['T']):
+            trans_t = dict()
+            
+            
+            
+            
+            trend_f = p['f_wage_trend'][t]
+            trend_m = p['m_wage_trend'][t]
+            zf_all = self.exogrid.zf_t[t]
+            zm_all = self.exogrid.zm_t[t]
+            
+            if zf_all.size > 1 and zm_all.size>1:
+                
+                income_fem = np.exp(trend_f + zf_all)
+                income_mal = np.exp(trend_m + zm_all)
+                
+                
+                child_support = child_support_share*income_mal
+                income_fem_adj = income_fem[:,None] + child_support[None,:]
+                income_mal_adj = income_mal - child_support
+                
+                z_fem_adj = np.log(income_fem_adj) - trend_f
+                z_mal_adj = np.log(income_mal_adj) - trend_m
+                
+                #von_fem = VecOnGrid(zf_all,z_fem_adj)
+                trans_t['i_this_fem'], trans_t['w_this_fem'] = \
+                    interp(zf_all,z_fem_adj,return_wnext=False,trim=True)
+                    
+                
+                #von_mal = VecOnGrid(zm_all,z_mal_adj)
+                trans_t['i_this_mal'], trans_t['w_this_mal'] = \
+                    interp(zm_all,z_mal_adj,return_wnext=False,trim=True)
+                    
+            else:
+                fill = np.array([-1],dtype=np.int16), np.array([0.0],dtype=self.dtype)
+                trans_t['i_this_fem'], trans_t['w_this_fem'] = fill
+                trans_t['i_this_mal'], trans_t['w_this_mal'] = fill
+                
+            
+            transitions.append(trans_t)
+        
+        self.child_support_transitions = transitions
+        
         
         
     
@@ -1006,6 +1065,7 @@ class DivorceCosts(object):
                  u_lost_m=0.0,u_lost_f=0.0, # pure utility losses b/c of divorce
                  money_lost_m=0.0,money_lost_f=0.0, # pure money (asset) losses b/c of divorce
                  money_lost_m_ez=0.0,money_lost_f_ez=0.0, # money losses proportional to exp(z) b/c of divorce
+                 z_change_f=0.0,z_change_m=0.0,
                  eq_split=1.0 #The more of less equal way assets are split within divorce
                  ): # 
         
@@ -1017,6 +1077,8 @@ class DivorceCosts(object):
         self.money_lost_f = money_lost_f
         self.money_lost_m_ez = money_lost_m_ez
         self.money_lost_f_ez = money_lost_f_ez
+        self.z_change_f = z_change_f
+        self.z_change_m = z_change_m
         self.eq_split = eq_split
         
     def shares_if_split(self,income_share_f):

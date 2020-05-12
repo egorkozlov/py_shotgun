@@ -56,6 +56,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     zfgrid = setup.exo_grids['Female, single'][t+1]
     zmgrid = setup.exo_grids['Male, single'][t+1]
     
+    
     share=(np.exp(zfgrid[izf]) / ( np.exp(zmgrid[izm]) + np.exp(zfgrid[izf]) ) )
     relat=np.ones(share.shape)*0.5
     income_share_f=(1.0*share+0.0*relat).squeeze()
@@ -66,11 +67,47 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     
     sc = setup.agrid_c
     
-    # values of divorce
-    vf_n, vm_n = v_div_byshare(
-        setup, dc, t, sc, share_f, share_m,
-        V['Male, single']['V'], V_fem,
-        izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
+    
+    
+    vf_n_old, vm_n_old = v_div_byshare(
+            setup, dc, t, sc, share_f, share_m,
+            V['Male, single']['V'], V_fem,
+            izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
+    
+    if haschild:# and (setup.pars['child_support_share'] > 1e-5):
+        
+        # adjustment for possible child support
+        
+        izf_cs = setup.child_support_transitions[t+1]['i_this_fem'][izf,izm]
+        izm_cs = setup.child_support_transitions[t+1]['i_this_mal'][izm]
+        
+        wzf_cs = setup.child_support_transitions[t+1]['w_this_fem'][izf,izm]
+        wzm_cs = setup.child_support_transitions[t+1]['w_this_mal'][izm]
+        
+        
+        vf_n_0, vm_n_0 = v_div_byshare(
+            setup, dc, t, sc, share_f, share_m,
+            V['Male, single']['V'], V_fem,
+            izf_cs, izm_cs, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
+        
+        vf_n_1, vm_n_1 = v_div_byshare(
+            setup, dc, t, sc, share_f, share_m,
+            V['Male, single']['V'], V_fem,
+            izf_cs+1, izm_cs+1, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
+        
+        
+        vf_n = vf_n_0*wzf_cs[None,:] + vf_n_1*(1-wzf_cs[None,:])
+        vm_n = vm_n_0*wzm_cs[None,:] + vm_n_1*(1-wzm_cs[None,:])
+        
+        if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vf_n_old,vf_n)
+        if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vm_n_old,vm_n)
+    
+    else:
+        # values of divorce
+        vf_n, vm_n = v_div_byshare(
+            setup, dc, t, sc, share_f, share_m,
+            V['Male, single']['V'], V_fem,
+            izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
     
     assert vf_n.dtype == vm_n.dtype
     
