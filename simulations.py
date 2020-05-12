@@ -382,11 +382,21 @@ class Agents:
                     
                     # these things are the same for pregnant and not pregnant
                     
-                    p_preg = matches['Pregnant']['Probability Unplanned'][ia,iznow,i_pmat_p]
-                    # TODO: to make it possible to depend on z we need to rework this
-                    # !!! NOTE: this builds on assumption that distributions of z are
-                    # no different with and without unplanned pregnancy
-                    # non-constant in z upp probabilities are not guaranteed to work now...
+                    
+                    if self.female:
+                        fert = self.setup.pars['is fertile'][t]
+                    else:
+                        fert = self.setup.pars['is fertile'][t-2] if t>=2 else False
+                    
+                    if sname == 'Female, single':
+                        p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                    elif sname == 'Male, single':
+                        p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                    elif sname == 'Female and child':
+                        p_preg = np.ones_like(ind,dtype=np.float64)
+                    else:
+                        assert False
+                    
                     # these are individual-specific pregnancy probabilities
                     # for those who are not fertile this is forced to be zero
                         

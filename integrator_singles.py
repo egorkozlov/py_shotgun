@@ -19,16 +19,27 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     skip_mar = (pmeet < 1e-5)
     
     
-    cangiveabirth = setup.pars['is fertile'][t]
+    if female:
+        cangiveabirth = setup.pars['is fertile'][t]
+    else:
+        cangiveabirth = setup.pars['is fertile'][t-2] if t>=2 else False
     
     
-    EV_meet_np, dec_np, _ = ev_single_meet(setup,V,sown,female,t,
+    EV_meet_np, dec_np = ev_single_meet(setup,V,sown,female,t,
                                   skip_mar=skip_mar,trim_lvl=trim_lvl,
                                       unplanned_preg=False)
     
     
+    
+    
+    
     if cangiveabirth:
-        EV_meet_p, dec_p, ppreg = ev_single_meet(setup,V,sown,female,t,
+        
+        ppreg0 = setup.upp_precomputed_fem[t] if female else setup.upp_precomputed_mal[t]
+        
+        ppreg = ppreg0[None,:]
+        
+        EV_meet_p, dec_p = ev_single_meet(setup,V,sown,female,t,
                                       skip_mar=skip_mar,trim_lvl=trim_lvl,
                                           unplanned_preg=True)
         
@@ -65,7 +76,7 @@ def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
     
     skip_mar = (pmeet < 1e-5)
 
-    EV_meet, dec, ppreg = ev_single_meet(setup,V,sown,female,t,
+    EV_meet, dec = ev_single_meet(setup,V,sown,female,t,
                                   skip_mar=skip_mar,trim_lvl=trim_lvl,
                                       unplanned_preg=True,single_mom=True)
         
@@ -99,7 +110,10 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     # single_mom emulates unplanned pregnancy but add utility punishments
     
     nexo = setup.pars['nexo_t'][t]
-    cangiveabirth = setup.pars['is fertile'][t]
+    if female:
+        cangiveabirth = setup.pars['is fertile'][t]
+    else:
+        cangiveabirth = setup.pars['is fertile'][t-2] if t>=2 else False
     ns = sown.size
     no_kids_at_meet = setup.pars['no kids at meeting']
     
@@ -115,15 +129,8 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         
     V_next = np.ones((ns,nexo))*(-1e20)
     
-    izf = setup.all_indices(t)[1]
-    p_preg_all = np.broadcast_to(setup.upp_precomputed[t][izf][None,:],(ns,nexo))
-    # this is a probability of unplanned pregnancy for each possible match
-    # including those that have zero probability
-    
-    
     
     EV = 0.0
-    ppreg = 0.0
     
     # this is a shallow copy: it does not actually copy big matrices
     if (female and not unplanned_preg):# or (female and single_mom):
@@ -146,7 +153,6 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     
     dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
     morc = np.zeros(matches['iexo'].shape,dtype=np.bool)
-    punp = np.zeros(matches['iexo'].shape,dtype=setup.dtype) # save probabilites of unplanned pregnancies
     tht = -1*np.ones(matches['iexo'].shape,dtype=np.int32)
     iconv = matches['iconv']
     
@@ -211,19 +217,13 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
         else:
             morc[:,:,iconv[:,i]] = True
         
-        
-        ppreg_res = cangiveabirth*p_preg_all[:,inds] # if not fertile force zeros
-        punp[:,:,iconv[:,i]] = ppreg_res[:,None,:] if not single_mom else 1.0
-            
         V_next[:,inds] = vout
         
         EV += (p_assets_c[:,i][:,None])*np.dot(V_next,p_mat)
-        ppreg += (p_assets_c[:,i][:,None])*np.dot(p_preg_all,p_mat)
 
     mout = matches#.copy() # this is here for reason. otherwise things get inserted into
     mout['Decision'] = dec
     mout['Child immediately'] = morc
     mout['theta'] = tht
-    mout['Probability Unplanned'] = punp
     
-    return EV, mout, ppreg
+    return EV, mout

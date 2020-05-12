@@ -955,12 +955,17 @@ class ModelSetup(object):
         return np.clip(p,0.0,1.0)
     
     def unplanned_pregnancy_probability(self):
-        self.upp_precomputed = list()
+        self.upp_precomputed_fem = list()
         for t in range(self.pars['T']):
             zf = self.exogrid.zf_t[t]
             pf = self._unplanned_pregnancy_probability_fun(t,zf)
-            self.upp_precomputed.append(pf)
+            self.upp_precomputed_fem.append(pf)
             
+        self.upp_precomputed_mal = list()
+        for t in range(self.pars['T']):
+            zm = self.exogrid.zm_t[t]
+            pm = self._unplanned_pregnancy_probability_fun(t,zm)
+            self.upp_precomputed_mal.append(pm)    
             
             
     def _tax_fun(self,lam,tau,avg_inc):

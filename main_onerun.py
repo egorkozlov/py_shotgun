@@ -30,7 +30,7 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
-
+    '''
     x = {'sigma_psi': 0.5814121121665838,
          'sigma_psi_mult': 5.166848399191245,
          'pmeet_21': 0.16381625559794244,
@@ -45,13 +45,29 @@ if __name__ == '__main__':
          'disutil_marry_sm_mal_coef': 11.010141916862054,
          'disutil_shotgun_coef': 0.8316044174306312,
          'taste_shock_mult':1.0}
+    '''
+    x = {'sigma_psi': 0.4902891581150292,
+         'sigma_psi_mult': 5.702606626187299,
+         'pmeet_21': 0.15015478921321068,
+         'pmeet_28': 0.3710088343850946,
+         'pmeet_35': 0.44012274619061426,
+         'preg_21': 0.10903649039754515,
+         'preg_28': 0.030979962029004545,
+         'preg_35': 0.029828705099284203,
+         'u_shift_mar': 1.2,
+         'util_alp': 0.1462819544897464,
+         'util_kap': 1.100359301455061,
+         'util_qbar': 0.9546130214227615,
+         'disutil_marry_sm_mal_coef': 8.404348024770918,
+         'disutil_shotgun_coef': 0.8347214347081617,
+         'taste_shock_mult': 4.930701825497131}
 
 
     
 
     tar = target_values('high education')
     
-    out, mdl, agents, res, mom = mdl_resid(x=None,targets=tar,
+    out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
