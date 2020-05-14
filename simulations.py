@@ -73,6 +73,10 @@ class Agents:
         self._shocks_transition = np.random.random_sample((N,T)) 
         self._shocks_single_preg = np.random.random_sample((N,T))
         self._shocks_planned_preg = np.random.random_sample((N,T))
+        
+        self._shocks_child_support_fem = np.random.random_sample((N,T))
+        self._shocks_child_support_mal = np.random.random_sample((N,T))
+
         # no randomnes past this line please
         
         # initialize assets
@@ -564,6 +568,34 @@ class Agents:
                     isc = self.iassets[ind,t+1]
                     iall, izf, izm, ipsi = self.Mlist[ipol].setup.all_indices(t+1,self.iexo[ind,t+1])
                     
+                    if sname == "Couple and child":
+
+                        transitions = self.setup.child_support_transitions[t+1]
+                        izf_div_0 = transitions['i_this_fem'][izf,izm]
+                        izf_div_1 = izf_div_0 + 1
+                        wzf_div_0 = transitions['w_this_fem'][izf,izm]
+                        pick_zf_0 = (self._shocks_child_support_fem[ind,t] < wzf_div_0)                        
+                        izf_div = izf_div_0*(pick_zf_0) + izf_div_1*(~pick_zf_0)
+                        
+                        izm_div_0 = transitions['i_this_mal'][izm]
+                        izm_div_1 = izm_div_0 + 1
+                        wzm_div_0 = transitions['w_this_mal'][izm]
+                        pick_zm_0 = (self._shocks_child_support_mal[ind,t] < wzm_div_0)                        
+                        izm_div = izm_div_0*(pick_zm_0) + izm_div_1*(~pick_zm_0)
+                        
+                        if self.setup.pars['child_support_share'] < 1e-5:
+                            assert np.all(izf_div==izf)
+                            assert np.all(izm_div==izm)
+                        
+                        
+                        
+                    elif sname == "Couple, no children":
+                        izf_div = izf
+                        izm_div = izm
+                    else:
+                        assert False
+                    
+                    
                     itht = self.itheta[ind,t+1] 
                     agrid =  self.Mlist[ipol].setup.agrid_c 
                     agrid_s =  self.Mlist[ipol].setup.agrid_s
@@ -633,7 +665,7 @@ class Agents:
                             self.iassets[ind[i_div],t+1] = VecOnGrid(agrid,sm).roll(shocks=shks)
                             
                         self.itheta[ind[i_div],t+1] = -1
-                        iz = izf if self.female else izm
+                        iz = izf_div if self.female else izm_div
                         self.iexo[ind[i_div],t+1] = iz[i_div]
                         fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
                         
