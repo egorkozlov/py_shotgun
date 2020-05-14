@@ -49,7 +49,7 @@ def calibration_params(xin=None,xfix=None):
               util_qbar=(0.0,4.0,0.5),
               disutil_marry_sm_mal_coef = (5.0,20.0,15.5),
               disutil_shotgun_coef=(0.0,3.0,0.63),
-              taste_shock_mult=(0.2,8.0,1.0)
+              taste_shock_mult=(0.2,2.0,1.0)
                         )
     
     

@@ -106,10 +106,11 @@ def plot_cumulative(moments,targets,setup):
     
     tval = np.arange(23,36)  
     
-    names = ['k then m in population','m then k in population','k then m in sample']
+    names = ['k then m in population','m then k in population','k then m in sample','ever married']
     captions = ["Kids First",
                 "Marriage First",
-                "Relative % of Kids First by age:\n (Kids First) / (Kids First + Marriage First)"]
+                "Relative % of Kids First by age:\n (Kids First) / (Kids First + Marriage First)",
+                "ever married"]
     
     probs_model = []
     probs_data = []
@@ -162,6 +163,17 @@ def plot_cumulative(moments,targets,setup):
     ax.grid(True)
     plt.savefig('relshares.pdf')
     
+    
+    fig, ax = plt.subplots()
+    ax.plot(tval,probs_model[3],'o-k',label='Model')
+    ax.plot(tval,probs_data[3],'o--k',label='Data')
+    ax.set_xlabel('age')
+    ax.set_ylabel('share (%)')
+    ax.set_title(captions[3])
+    ax.legend()
+    ax.set_xticks(xticks)
+    ax.grid(True)
+    plt.savefig('evermar.pdf')
     
 
 def plot_by_years_after_marriage(moments,targets,setup):
@@ -257,11 +269,11 @@ def plot_kfmf_ref(moments,targets,setup):
     #ref_kf = np.array([0.08114558, 0.10186335, 0.11817027, 0.11984021, 0.11823362, 0.11746032, 0.13162393, 0.15057915, 0.14123007, 0.14550265])
     #ref_mf = np.array([0.        , 0.01083856, 0.02031424, 0.02864134, 0.03768433, 0.04414536, 0.05390435, 0.05976757, 0.0625543 , 0.06301748])
     
-    ref_kf = np.array([0.01759015, 0.04748062, 0.05549738, 0.07514451, 0.08118557,
-       0.09784173, 0.11556982, 0.13248639, 0.13375796, 0.13429257])
+    ref_kf = np.array([0.04018692, 0.06937562, 0.10032362, 0.12110727, 0.1419598 ,
+       0.16      , 0.17559524, 0.19800333, 0.21928166, 0.23717949])
     
-    ref_mf = np.array([0., 0.00878563, 0.01751227, 0.02703102, 0.03438596,
-       0.04137836, 0.04951321, 0.05559515, 0.05821051, 0.06106629])
+    ref_mf = np.array([0.0       , 0.0084332 , 0.01612903, 0.02414425, 0.03030303,
+       0.03931137, 0.04668896, 0.05361714, 0.05681184, 0.06176471])
     
     here_kf = np.zeros_like(yval,dtype=np.float64)
     here_mf = np.zeros_like(yval,dtype=np.float64)

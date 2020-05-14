@@ -13,8 +13,8 @@ def target_values(mode='high education'):
         
     if mode=='high education':
         
-        targets['ever kids by years after marriage, 1'] = (.1901175,.0018521)
-        targets['ever kids by years after marriage, 2'] = (.3416996,.0022054)
+        #targets['ever kids by years after marriage, 1'] = (.1901175,.0018521)
+        #targets['ever kids by years after marriage, 2'] = (.3416996,.0022054)
         targets['ever kids by years after marriage, 3'] = (.4902692,.0023415)
         targets['ever kids by years after marriage, 4'] = (.6114712,.0023096)
         targets['ever kids by years after marriage, 5'] = (.7039068,.0021802)
@@ -33,8 +33,8 @@ def target_values(mode='high education'):
         targets['divorced by years after marriage, 6']  =  (.0807483,.0012872)
         targets['divorced by years after marriage, 7']  =  (.0879516,.0013595)
         targets['divorced by years after marriage, 8']  =  (.1011097,.0014718*(1/2))
-        #targets['divorced by years after marriage, 9']  =  (.1027806,.001517*(1/2))
-        #targets['divorced by years after marriage, 10'] =  (.116314,.0016379*(1/2))
+        targets['divorced by years after marriage, 9']  =  (.1027806,.001517*(1/2))
+        targets['divorced by years after marriage, 10'] =  (.116314,.0016379*(1/2))
         
         
         
@@ -90,19 +90,19 @@ def target_values(mode='high education'):
         
         
         #targets['k then m in sample at 22'] = (.3495573,.0264092)
-        targets['k then m in sample at 23'] = (.2700996,.0134549*0.5)
-        targets['k then m in sample at 24'] = (.2235426,.008985*0.5)
-        targets['k then m in sample at 25'] = (.2079784,.0063642*0.5)
-        targets['k then m in sample at 26'] = (.1838923,.0048233*0.5)
-        targets['k then m in sample at 27'] = (.1503958,.0036041*0.5)
-        targets['k then m in sample at 28'] = (.1393456,.0029425*0.5)
-        targets['k then m in sample at 29'] = (.1217223,.0024172*0.5)
-        targets['k then m in sample at 30'] = (.1158390,.0021046*0.5)
-        targets['k then m in sample at 31'] = (.1006838,.0018461*0.5)
-        targets['k then m in sample at 32'] = (.0967356,.0016985*0.5)
-        targets['k then m in sample at 33'] = (.0914910,.001601*0.5)
-        targets['k then m in sample at 34'] = (.0947637,.0015799*0.5)
-        targets['k then m in sample at 35'] = (.1018985,.001609*0.5)
+        targets['k then m in sample at 23'] = (.2700996,.0134549/2)
+        targets['k then m in sample at 24'] = (.2235426,.008985/2)
+        targets['k then m in sample at 25'] = (.2079784,.0063642/2)
+        targets['k then m in sample at 26'] = (.1838923,.0048233/2)
+        targets['k then m in sample at 27'] = (.1503958,.0036041/2)
+        targets['k then m in sample at 28'] = (.1393456,.0029425/2)
+        targets['k then m in sample at 29'] = (.1217223,.0024172/2)
+        targets['k then m in sample at 30'] = (.1158390,.0021046/2)
+        targets['k then m in sample at 31'] = (.1006838,.0018461/2)
+        targets['k then m in sample at 32'] = (.0967356,.0016985/2)
+        targets['k then m in sample at 33'] = (.0914910,.001601/2)
+        targets['k then m in sample at 34'] = (.0947637,.0015799/2)
+        targets['k then m in sample at 35'] = (.1018985,.001609/2)
         
         #targets['hazard of new child at 22'] = (0.0136671,0.0005373)
         targets['hazard of new child at 23'] = (.0188677,.0005959)
@@ -120,65 +120,33 @@ def target_values(mode='high education'):
         targets['hazard of new child at 35'] = (.0799924,.0019688)
         
         
+        targets['ever married at 22'] = (.0648409,.0013704)
+        targets['ever married at 23'] = (.1092023,.0014232)
+        targets['ever married at 24'] = (.1651963,.0015907)
+        targets['ever married at 25'] = (.2321176,.0017455)
+        targets['ever married at 26'] = (.3186594,.0019039)
+        targets['ever married at 27'] = (.3979381,.0019605)
+        targets['ever married at 28'] = (.4797466,.0019814)
+        targets['ever married at 29'] = (.5492900,.0019650)
+        targets['ever married at 30'] = (.6053985,.0018938)
+        targets['ever married at 31'] = (.6557630,.0018604)
+        targets['ever married at 32'] = (.7029164,.0017864)
+        targets['ever married at 33'] = (.7277533,.0017525)
+        targets['ever married at 34'] = (.7562652,.0016944)
+        targets['ever married at 35'] = (.7776588,.0016421)
         
         
         
-        
-        targets['mean x share'] = (0.4,0.001)
-        targets['divorced at 30 if one marriage'] = (.0686837,.0012484)
-        targets['divorced if k then m and one marriage'] = (.1480121,.0024232*(1/4))
-        targets['divorced if m then k and one marriage'] = (.0536316,.0004861*(1/4))
-        targets['divorced with kids at 30']      = (.0267382,.0007793)
-        targets['never married with kids at 30'] = (.0463395,.0008145)      
-        targets['more than one mar at 40']       = (.1190139,.0012735)
-        targets['in labor force at 30 if kids'] = (.739675,.0028066*(1/4))
-        
-        #targets['relative income at 30 if childless'] = (1.141977,.0144169*(1/5))
-        #targets['men, relative income just married / single at 30'] = (1.197164,.0206279*(1/5))
-        #targets['men, relative income with kids / no kids at 30'] = (0.9478894,.011772*(1/5))
-        
-        
-        '''
-        targets['men, relative income with kids / no kids at 24'] = (1.005178,.0293669)
-        targets['men, relative income with kids / no kids at 25'] = (.9937299,.018525)
-        targets['men, relative income with kids / no kids at 26'] = (.9629551,.0138367)
-        targets['men, relative income with kids / no kids at 27'] = (.9670526,.0122425)
-        targets['men, relative income with kids / no kids at 28'] = (.9550475,.0096132)
-        targets['men, relative income with kids / no kids at 29'] = (.9499401,.0091448)
-        targets['men, relative income with kids / no kids at 30'] = (.9641474,.008827)
-        targets['men, relative income with kids / no kids at 31'] = (1.000548,.0096499)
-        targets['men, relative income with kids / no kids at 32'] = (1.012243,.0093645)
-        targets['men, relative income with kids / no kids at 33'] = (1.035536,.0105833)
-        targets['men, relative income with kids / no kids at 34'] = (1.069198,.0112587)
-        targets['men, relative income with kids / no kids at 35'] = (1.097902,.0121228)
-        
-        
-        targets['men, relative income just married / single at 24'] = (1.158090,.0192292)
-        targets['men, relative income just married / single at 25'] = (1.091558,.0177764)
-        targets['men, relative income just married / single at 26'] = (1.108925,.0149643)
-        targets['men, relative income just married / single at 27'] = (1.125526,.015914)
-        targets['men, relative income just married / single at 28'] = (1.159013,.015304)
-        targets['men, relative income just married / single at 29'] = (1.217950,.018949)
-        targets['men, relative income just married / single at 30'] = (1.195528,.0175883)
-        targets['men, relative income just married / single at 31'] = (1.208334,.0215594)
-        targets['men, relative income just married / single at 31'] = (1.252952,.0225951)
-        targets['men, relative income just married / single at 32'] = (1.252952,.0225951)
-        targets['men, relative income just married / single at 33'] = (1.285158,.029411)
-        targets['men, relative income just married / single at 34'] = (1.260427,.0308268)
-        targets['men, relative income just married / single at 35'] = (1.222406,.0344223)
-        '''
-        
-        
-        targets['divorced by years after marriage if kids first, 1'] = (.0113142,.0020309)
-        targets['divorced by years after marriage if kids first, 2'] = (.0216539,.0027502)
-        targets['divorced by years after marriage if kids first, 3'] = (.0492118,.0041846)
-        targets['divorced by years after marriage if kids first, 4'] = (.0893572,.0053861)
-        targets['divorced by years after marriage if kids first, 5'] = (.1054101,.0058989)
-        targets['divorced by years after marriage if kids first, 6'] = (.1386944,.0068164)
-        targets['divorced by years after marriage if kids first, 7'] = (.1506841,.0072127)
-        targets['divorced by years after marriage if kids first, 8'] = (.1866493,.0080136)
-        targets['divorced by years after marriage if kids first, 9'] = (.1786823,.0078907)
-        targets['divorced by years after marriage if kids first, 10'] = (.20118,.0084048)
+        targets['divorced by years after marriage if kids first, 1'] = (.0113142,.0020309/5)
+        targets['divorced by years after marriage if kids first, 2'] = (.0216539,.0027502/5)
+        targets['divorced by years after marriage if kids first, 3'] = (.0492118,.0041846/5)
+        targets['divorced by years after marriage if kids first, 4'] = (.0893572,.0053861/5)
+        targets['divorced by years after marriage if kids first, 5'] = (.1054101,.0058989/5)
+        targets['divorced by years after marriage if kids first, 6'] = (.1386944,.0068164/5)
+        targets['divorced by years after marriage if kids first, 7'] = (.1506841,.0072127/5)
+        targets['divorced by years after marriage if kids first, 8'] = (.1866493,.0080136/5)
+        targets['divorced by years after marriage if kids first, 9'] = (.1786823,.0078907/5)
+        targets['divorced by years after marriage if kids first, 10'] = (.20118,.0084048/5)
         
         
         targets['divorced by years after marriage if marriage first, 1'] = (.000818,.0005133)
@@ -194,6 +162,14 @@ def target_values(mode='high education'):
         
         
         
+        targets['mean x share'] = (0.4,0.001)
+        targets['divorced at 30 if one marriage'] = (.0686837,.0012484)
+        targets['divorced if k then m and one marriage'] = (.1480121,.0024232*(1/4))
+        targets['divorced if m then k and one marriage'] = (.0536316,.0004861*(1/4))
+        targets['divorced with kids at 30']      = (.0267382,.0007793)
+        targets['never married with kids at 30'] = (.0463395,.0008145)      
+        targets['more than one mar at 40']       = (.1190139,.0012735)
+        targets['in labor force at 30 if kids'] = (.739675,.0028066*(1/4))
         
         
         
@@ -224,7 +200,7 @@ def target_values(mode='high education'):
         targets['divorced by years after marriage, 6'] =  (.1724024,.0022962)
         targets['divorced by years after marriage, 7'] =  (.1908162,.002408)
         targets['divorced by years after marriage, 8'] =  (.2068432,.002495*(1/2))
-        targets['divorced by years after marriage, 9'] =  (.216311,.0025916)
+        targets['divorced by years after marriage, 9'] =  (.216311,.0025916*(1/2))
         targets['divorced by years after marriage, 10'] = (.2174107,.0025545*(1/2))
         
         

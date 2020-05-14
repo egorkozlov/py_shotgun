@@ -429,6 +429,9 @@ def compute_moments(self):
     haz_nk = n_newkids / n_childless 
     
     for t in range(1,15):
+        moments['ever married at {}'.format(21+t)] = ever_mar[:,t].mean()
+    
+    for t in range(1,15):
         moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
     for t in range(1,15):
         moments['hazard of marriage & having a child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
