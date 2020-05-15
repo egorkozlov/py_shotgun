@@ -177,110 +177,163 @@ def target_values(mode='high education'):
     
         
         
-        targets['ever kids by years after marriage, 1'] = (.6371565,.0030758)
-        targets['ever kids by years after marriage, 2'] = (.694856,.0028766)
-        targets['ever kids by years after marriage, 3'] = (.7534413,.0027062)
-        targets['ever kids by years after marriage, 4'] = (.7929944,.0026026)
-        targets['ever kids by years after marriage, 5'] = (.8249145,.0024629)
-        targets['ever kids by years after marriage, 6'] = (.8519912,.00235419)
-        #targets['ever kids by years after marriage, 7'] = (.8737004,.0022449)
-        #targets['ever kids by years after marriage, 8'] = (.881806,.0022094)
-        #targets['ever kids by years after marriage, 9'] = (.8990071,.0021148)
-        #targets['ever kids by years after marriage, 10']= (.9025669,.0020562)
+        #targets['ever kids by years after marriage, 1'] = (.6371565, .0030758)
+        #targets['ever kids by years after marriage, 2'] = (.694856, .0028766)
+        targets['ever kids by years after marriage, 3'] = (.7534413, .0027062)
+        targets['ever kids by years after marriage, 4'] = (.7929944, .0026026)
+        targets['ever kids by years after marriage, 5'] = (.8249145, .0024629)
+        targets['ever kids by years after marriage, 6'] = (.8519912, .0023541)
+        targets['ever kids by years after marriage, 7'] = (.8737004, .0022449)
+        targets['ever kids by years after marriage, 8'] = (.881806, .0022094)
+        #targets['ever kids by years after marriage, 9'] = (.8990071, .0021148)
+        #targets['ever kids by years after marriage, 10'] = (.9025669, .0020562)
+        
+        
+        targets['divorced by years after marriage, 1'] = (.0231847, .0009513)
+        targets['divorced by years after marriage, 2'] = (.0601223, .0014428)
+        targets['divorced by years after marriage, 3'] = (.0943086, .0017544)
+        targets['divorced by years after marriage, 4'] = (.1245948, .001997)
+        targets['divorced by years after marriage, 5'] = (.153307, .0021667)
+        targets['divorced by years after marriage, 6'] = (.1724024, .0022962)
+        targets['divorced by years after marriage, 7'] = (.1908162, .002408)
+        targets['divorced by years after marriage, 8'] = (.2068432, .002495/2)
+        targets['divorced by years after marriage, 9'] = (.216311, .0025916/2)
+        targets['divorced by years after marriage, 10'] = (.2174107, .0025545/2)
+        
+        #targets['hazard of marriage at 22'] = (.0459992, .0009848)
+        targets['hazard of marriage at 23'] = (.0480085, .0010465)
+        targets['hazard of marriage at 24'] = (.0507163, .0011001)
+        targets['hazard of marriage at 25'] = (.0505483, .0011527)
+        targets['hazard of marriage at 26'] = (.0513198, .0011989)
+        targets['hazard of marriage at 27'] = (.0533364, .0012555)
+        targets['hazard of marriage at 28'] = (.0534521, .0013044)
+        targets['hazard of marriage at 29'] = (.0518105, .0012773)
+        targets['hazard of marriage at 30'] = (.0526195, .0013629)
+        targets['hazard of marriage at 31'] = (.0509349, .001358)
+        targets['hazard of marriage at 32'] = (.0477095, .0013521)
+        targets['hazard of marriage at 33'] = (.0461142, .0013488)
+        targets['hazard of marriage at 34'] = (.0437701, .0013087)
+        targets['hazard of marriage at 35'] = (.0398101, .0012805)
+        
+        
+        #targets['k then m in population at 22'] = (.0471337, .0008786)
+        targets['k then m in population at 23'] = (.0630275, .0010425)
+        targets['k then m in population at 24'] = (.0765292, .001157)
+        targets['k then m in population at 25'] = (.0891691, .0012334)
+        targets['k then m in population at 26'] = (.0974226, .0013089)
+        targets['k then m in population at 27'] = (.1065944, .0013648)
+        targets['k then m in population at 28'] = (.1122013, .0013894)
+        targets['k then m in population at 29'] = (.1141492, .0014134)
+        targets['k then m in population at 30'] = (.1187029, .0013998)
+        targets['k then m in population at 31'] = (.1203012, .0014483)
+        targets['k then m in population at 32'] = (.1200893, .0014305)
+        targets['k then m in population at 33'] = (.1245074, .001461)
+        targets['k then m in population at 34'] = (.1270016, .0014689)
+        targets['k then m in population at 35'] = (.1215744, .0014184)
+        
+        
+
+        
+        #targets['m then k in population at 22'] = (.0569954, .0009611)
+        targets['m then k in population at 23'] = (.0745946, .0011272)
+        targets['m then k in population at 24'] = (.0946999, .0012743)
+        targets['m then k in population at 25'] = (.113709, .001374)
+        targets['m then k in population at 26'] = (.1358313, .0015123)
+        targets['m then k in population at 27'] = (.1569375, .0016087)
+        targets['m then k in population at 28'] = (.1726471, .0016638)
+        targets['m then k in population at 29'] = (.1872816, .001734)
+        targets['m then k in population at 30'] = (.2009962, .0017343)
+        targets['m then k in population at 31'] = (.2210822, .0018475)
+        targets['m then k in population at 32'] = (.2294688, .0018504)
+        targets['m then k in population at 33'] = (.2389265, .001887)
+        targets['m then k in population at 34'] = (.2457679, .0018993)
+        targets['m then k in population at 35'] = (.249713, .0018788)
+        
+        
+        #targets['k then m in sample at 22'] = (.4526467, .0062011)
+        targets['k then m in sample at 23'] = (.4579749, .0054619/2)
+        targets['k then m in sample at 24'] = (.4469404, .0049857/2)
+        targets['k then m in sample at 25'] = (.4395206, .0045602/2)
+        targets['k then m in sample at 26'] = (.4176675, .0043115/2)
+        targets['k then m in sample at 27'] = (.4044838, .0040408/2)
+        targets['k then m in sample at 28'] = (.3938983, .003864/2)
+        targets['k then m in sample at 29'] = (.3786911, .0037764/2)
+        targets['k then m in sample at 30'] = (.3712956, .0035625/2)
+        targets['k then m in sample at 31'] = (.3523933, .003516/2)
+        targets['k then m in sample at 32'] = (.3435461, .0034191/2)
+        targets['k then m in sample at 33'] = (.3425861, .0033878/2)
+        targets['k then m in sample at 34'] = (.3406974, .0033269/2)
+        targets['k then m in sample at 35'] = (.3274401, .003233/2)
+        
+        #targets['hazard of new child at 22'] = (0.0136671,0.0005373)
+        targets['hazard of new child at 22'] = (.0723763, .0014004)
+        targets['hazard of new child at 23'] = (.0686844, .0014701)
+        targets['hazard of new child at 24'] = (.0660664, .0015141)
+        targets['hazard of new child at 25'] = (.0656788, .0016069)
+        targets['hazard of new child at 26'] = (.0640507, .0016735)
+        targets['hazard of new child at 27'] = (.0641009, .0017645)
+        targets['hazard of new child at 28'] = (.0665277, .0019017)
+        targets['hazard of new child at 29'] = (.0588031, .0018288)
+        targets['hazard of new child at 30'] = (.0558206, .0018416)
+        targets['hazard of new child at 31'] = (.0531504, .0019242)
+        targets['hazard of new child at 32'] = (.0456938, .0018372)
+        targets['hazard of new child at 33'] = (.0415602, .0017985)
+        targets['hazard of new child at 34'] = (.0408571, .0018053)
+        targets['hazard of new child at 35'] = (.0343058, .001669)
+        
+        
+        #targets['ever married at 21'] = (.1198675, .0012708)
+        #targets['ever married at 22'] = (.1725177, .0015664)
+        targets['ever married at 23'] = (.2182572, .0017721)
+        targets['ever married at 24'] = (.2691566, .0019303)
+        targets['ever married at 25'] = (.3205891, .0020199)
+        targets['ever married at 26'] = (.369406, .0021304)
+        targets['ever married at 27'] = (.4139921, .0021783)
+        targets['ever married at 28'] = (.4536668, .0021917)
+        targets['ever married at 29'] = (.4897026, .0022219)
+        targets['ever married at 30'] = (.5310084, .0021597)
+        targets['ever married at 31'] = (.5669783, .002206)
+        targets['ever married at 32'] = (.5937097, .0021613)
+        targets['ever married at 33'] = (.6194696, .0021484)
+        targets['ever married at 34'] = (.6386038, .0021192)
+        targets['ever married at 35'] = (.6639089, .0020503)
         
         
         
- 
-        
-        targets['divorced by years after marriage, 1'] =  (.0231847,.0009513)
-        targets['divorced by years after marriage, 2'] =  (.0601223,.0014428)
-        targets['divorced by years after marriage, 3'] =  (.0943086,.0017544)        
-        targets['divorced by years after marriage, 4'] =  (.1245948,.001997)
-        targets['divorced by years after marriage, 5'] =  (.153307,.0021667)
-        targets['divorced by years after marriage, 6'] =  (.1724024,.0022962)
-        targets['divorced by years after marriage, 7'] =  (.1908162,.002408)
-        targets['divorced by years after marriage, 8'] =  (.2068432,.002495*(1/2))
-        targets['divorced by years after marriage, 9'] =  (.216311,.0025916*(1/2))
-        targets['divorced by years after marriage, 10'] = (.2174107,.0025545*(1/2))
+        targets['divorced by years after marriage if kids first, 1'] = (.0201514, .0017159/4)
+        targets['divorced by years after marriage if kids first, 2'] = (.0471255, .0025286/4)
+        targets['divorced by years after marriage if kids first, 3'] = (.0813251, .0032273/4)
+        targets['divorced by years after marriage if kids first, 4'] = (.1166151, .0038275/4)
+        targets['divorced by years after marriage if kids first, 5'] = (.1376778, .0041438/4)
+        targets['divorced by years after marriage if kids first, 6'] = (.1580319, .0044724/4)
+        targets['divorced by years after marriage if kids first, 7'] = (.1836251, .0047913/4)
+        targets['divorced by years after marriage if kids first, 8'] = (.2043214, .0049916/4)
+        targets['divorced by years after marriage if kids first, 9'] = (.2066351, .0051605/4)
+        targets['divorced by years after marriage if kids first, 10'] = (.2115082, .0050606/4)
         
         
+        targets['divorced by years after marriage if kids first, 1'] = (.010328, .0022173/2)
+        targets['divorced by years after marriage if kids first, 2'] = (.0289688, .002371/2)
+        targets['divorced by years after marriage if kids first, 3'] = (.0505473, .0025391/2)
+        targets['divorced by years after marriage if kids first, 4'] = (.0645814, .0025787/2)
+        targets['divorced by years after marriage if kids first, 5'] = (.0918597, .0028409/2)
+        targets['divorced by years after marriage if kids first, 6'] = (.105973, .0029251/2)
+        targets['divorced by years after marriage if kids first, 7'] = (.113954, .0029394/2)
+        targets['divorced by years after marriage if kids first, 8'] = (.1333069, .0030814/2)
+        targets['divorced by years after marriage if kids first, 9'] = (.1407658, .0031131/2)
+        targets['divorced by years after marriage if kids first, 10'] = (.1443613, .0030424/2)
         
         
-  
-        
-        targets['hazard of marriage at 22'] = (.0550399,.0010074)
-        targets['hazard of marriage at 23'] = (.0573569,.001092)
-        targets['hazard of marriage at 24'] = (.058633,.0011528)
-        targets['hazard of marriage at 25'] = (.0594683,.0011878)
-        targets['hazard of marriage at 26'] = (.059702,.0012534)
-        targets['hazard of marriage at 27'] = (.0616718,.0013152)
-        targets['hazard of marriage at 28'] = (.0620773,.0013581)
-        targets['hazard of marriage at 29'] = (.0621857,.0014114)
-        targets['hazard of marriage at 30'] = (.0596791,.001373)
-        targets['hazard of marriage at 31'] = (.0600205,.0014634)
-        targets['hazard of marriage at 32'] = (.0585699,.0014619)
-        targets['hazard of marriage at 33'] = (.055078,.0014608)
-        targets['hazard of marriage at 34'] = (.0535931,.0014591)
-        targets['hazard of marriage at 35'] = (.0505956,.0014132)
-        
-        
-        
-        targets['hazard of marriage & having a child at 22'] = (.0250424,.0006871)
-        targets['hazard of marriage & having a child at 23'] = (.0261222,.0007443)
-        targets['hazard of marriage & having a child at 24'] = (.0286651,.0008126)
-        targets['hazard of marriage & having a child at 25'] = (.0328221,.0008876)
-        targets['hazard of marriage & having a child at 26'] = (.0336944,.0009461)
-        targets['hazard of marriage & having a child at 27'] = (.0360572,.0010091)
-        targets['hazard of marriage & having a child at 28'] = (.0381652,.0010673)
-        targets['hazard of marriage & having a child at 29'] = (.0399589,.0011331)
-        targets['hazard of marriage & having a child at 30'] = (.0389913,.0011104)
-        targets['hazard of marriage & having a child at 31'] = (.039547, .0011884)
-        targets['hazard of marriage & having a child at 32'] = (.0393054,.0011971)
-        targets['hazard of marriage & having a child at 33'] = (.0387907,.0012253)
-        targets['hazard of marriage & having a child at 34'] = (.0382023,.0012309)
-        targets['hazard of marriage & having a child at 35'] = (.0363907,.0011973)
-        
-        
-        
-        targets['hazard of new child at 22'] = (.0706884,.0012251)
-        targets['hazard of new child at 23'] = (.0715649,.001351)
-        targets['hazard of new child at 24'] = (.0673874,.0014081)
-        targets['hazard of new child at 25'] = (.064768,.0014436)
-        targets['hazard of new child at 26'] = (.0631538,.0015125)
-        targets['hazard of new child at 27'] = (.061789,.0015726)
-        targets['hazard of new child at 28'] = (.0617785,.0016493)
-        targets['hazard of new child at 29'] = (.0631569,.001762)
-        targets['hazard of new child at 30'] = (.0551772,.0016781)
-        targets['hazard of new child at 31'] = (.0521211,.0016806)
-        targets['hazard of new child at 32'] = (.0496799,.0017484)
-        targets['hazard of new child at 33'] = (.0425128,.0016656)
-        targets['hazard of new child at 34'] = (.0393337,.0016417)
-        targets['hazard of new child at 35'] = (.0389228,.001653)
-        
-        
-        
+    
         
         targets['mean x share'] = (0.4,0.001)
-        
-        targets['divorced at 30 if one marriage'] = (.1427936,.0019867)
-        
-        
-        
-        targets['k then m by age, b0'] = (.3759993,.0015512)
-        targets['k then m by age, b1'] = (-.0113458,.000246)
-        targets['k then m by age, b2'] = (-.0002164,.0000395)
-        
-        
+        targets['divorced at 30 if one marriage'] = (.1691302,.0023003)
         targets['divorced if k then m and one marriage'] = (.1727448,.0014886*(1/4))
         targets['divorced if m then k and one marriage'] = (.1394705,.000983*(1/4))
-        
-        
-        targets['divorced with kids at 30']      = (.0899426,.001527 )
-        targets['never married with kids at 30'] = (.2156013,.0017011)      
-        targets['more than one mar at 40']       = (.1770624,.0014789)
-        
+        targets['divorced with kids at 30']      = (.1066072,.0017801)
+        targets['never married with kids at 30'] = (.2368133,.0018398)      
+        targets['more than one mar at 40']       = (.1714891,.0015326)
         targets['in labor force at 30 if kids'] = (.5466037,.0033879*(1/4))
-        
         
         
     else:
