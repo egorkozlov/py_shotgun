@@ -137,28 +137,28 @@ def target_values(mode='high education'):
         
         
         
-        targets['divorced by years after marriage if kids first, 1'] = (.0113142,.0020309/5)
-        targets['divorced by years after marriage if kids first, 2'] = (.0216539,.0027502/5)
-        targets['divorced by years after marriage if kids first, 3'] = (.0492118,.0041846/5)
-        targets['divorced by years after marriage if kids first, 4'] = (.0893572,.0053861/5)
-        targets['divorced by years after marriage if kids first, 5'] = (.1054101,.0058989/5)
-        targets['divorced by years after marriage if kids first, 6'] = (.1386944,.0068164/5)
-        targets['divorced by years after marriage if kids first, 7'] = (.1506841,.0072127/5)
-        targets['divorced by years after marriage if kids first, 8'] = (.1866493,.0080136/5)
-        targets['divorced by years after marriage if kids first, 9'] = (.1786823,.0078907/5)
-        targets['divorced by years after marriage if kids first, 10'] = (.20118,.0084048/5)
+        targets['divorced by years after marriage if kids first, 1'] = (.0113142,.0020309/4)
+        targets['divorced by years after marriage if kids first, 2'] = (.0216539,.0027502/4)
+        targets['divorced by years after marriage if kids first, 3'] = (.0492118,.0041846/4)
+        targets['divorced by years after marriage if kids first, 4'] = (.0893572,.0053861/4)
+        targets['divorced by years after marriage if kids first, 5'] = (.1054101,.0058989/4)
+        targets['divorced by years after marriage if kids first, 6'] = (.1386944,.0068164/4)
+        targets['divorced by years after marriage if kids first, 7'] = (.1506841,.0072127/4)
+        targets['divorced by years after marriage if kids first, 8'] = (.1866493,.0080136/4)
+        targets['divorced by years after marriage if kids first, 9'] = (.1786823,.0078907/4)
+        targets['divorced by years after marriage if kids first, 10'] = (.20118,.0084048/4)
         
         
-        targets['divorced by years after marriage if marriage first, 1'] = (.000818,.0005133)
-        targets['divorced by years after marriage if marriage first, 2'] = (.0050849,.000689)
-        targets['divorced by years after marriage if marriage first, 3'] = (.0102901,.0007538)
-        targets['divorced by years after marriage if marriage first, 4'] = (.0165388,.000839)
-        targets['divorced by years after marriage if marriage first, 5'] = (.0201483,.000850)
-        targets['divorced by years after marriage if marriage first, 6'] = (.0268928,.0009448)
-        targets['divorced by years after marriage if marriage first, 7'] = (.0320433,.0010079)
-        targets['divorced by years after marriage if marriage first, 8'] = (.0401776,.001116)
-        targets['divorced by years after marriage if marriage first, 9'] = (.0479392,.0012191)
-        targets['divorced by years after marriage if marriage first, 10'] = (.0602147,.0013719)
+        targets['divorced by years after marriage if marriage first, 1'] = (.000818,.0005133/2)
+        targets['divorced by years after marriage if marriage first, 2'] = (.0050849,.000689/2)
+        targets['divorced by years after marriage if marriage first, 3'] = (.0102901,.0007538/2)
+        targets['divorced by years after marriage if marriage first, 4'] = (.0165388,.000839/2)
+        targets['divorced by years after marriage if marriage first, 5'] = (.0201483,.000850/2)
+        targets['divorced by years after marriage if marriage first, 6'] = (.0268928,.0009448/2)
+        targets['divorced by years after marriage if marriage first, 7'] = (.0320433,.0010079/2)
+        targets['divorced by years after marriage if marriage first, 8'] = (.0401776,.001116/2)
+        targets['divorced by years after marriage if marriage first, 9'] = (.0479392,.0012191/2)
+        targets['divorced by years after marriage if marriage first, 10'] = (.0602147,.0013719/2)
         
         
         

@@ -284,7 +284,7 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     
     
     f1 = gpu_type(1.0)
-    nu = 0.5772156649
+    nu = log(2.0) #0.5772156649
     correction = sig*nu
     
     if ia < na and ie < ne:
