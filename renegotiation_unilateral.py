@@ -392,8 +392,8 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
     # (so if two functions are passed, v_y_ni is np.stack(v_y_c,v_y_m)),
     # otherwise it is just v_y_m[None,...]. x[0] is equivalent to x[0,...].
     
-    #nu = 0.5772156649
-    correction = 0 #*sig*nu
+    nu = 0.5772156649
+    correction = sig*nu
     
     
     if v_y_ni.shape[0] == 2:
