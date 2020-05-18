@@ -85,7 +85,8 @@ def fun(x):
                         npt=len(xc)+5,scaling_within_bounds=True, 
                         user_params={'tr_radius.gamma_dec':0.75,'tr_radius.gamma_inc':1.5,
                                      'tr_radius.alpha1':0.5,'tr_radius.alpha2':0.75,
-                                     'regression.momentum_extra_steps':True},
+                                     'regression.momentum_extra_steps':True,
+				     'restarts.use_restarts':True},
                         objfun_has_noise=False)
         
         print(res)
