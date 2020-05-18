@@ -59,7 +59,7 @@ class ModelSetup(object):
         
         p['z_drift'] = -0.09
         p['no kids at meeting'] = True
-        p['high education'] = True # what trend to pick
+        p['high education'] = False # what trend to pick
         
         p['wret'] = 0.8
         p['uls'] = 0.2
@@ -111,8 +111,8 @@ class ModelSetup(object):
             p['sig_zm_0']  = 0.40376647
             
             
-            p['sig_zf']    = 0.08942736
-            p['sig_zf_0']  = 0.39882978
+            p['sig_zf']    = p['m_zf']*0.08942736
+            p['sig_zf_0']  = p['m_zf0']*0.39882978
             
         
         
