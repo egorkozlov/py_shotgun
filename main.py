@@ -44,9 +44,8 @@ if __name__ == '__main__':
     
     fix_values = False
     if fix_values:
-        xfix = {'u_shift_mar': 0.725863356303563,
-                'util_alp': 0.6534190912803465,
-                'util_kap': 1.9136130954048896}
+        xfix = {'u_shift_mar': 1.7329041070973545,
+                'util_alp': 0.6182672481649074}
     else:
         xfix = None
         
