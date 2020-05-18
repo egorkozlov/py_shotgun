@@ -38,11 +38,11 @@ from calibration_params import calibration_params
 if __name__ == '__main__':
     
     
-    from numba import config
-    config.NUMBA_NUM_THREADS = 2
+    #from numba import config
+    #config.NUMBA_NUM_THREADS = 2
 
     
-    fix_values = False
+    fix_values = True
     if fix_values:
         xfix = {'u_shift_mar': 1.7329041070973545,
                 'util_alp': 0.6182672481649074}

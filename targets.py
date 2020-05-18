@@ -7,7 +7,7 @@ Created on Fri Feb 14 07:59:29 2020
 """
 
         
-def target_values(mode='high education'):
+def target_values(mode='low education'):
     targets = dict()
         
         
@@ -265,7 +265,6 @@ def target_values(mode='high education'):
         targets['k then m in sample at 34'] = (.3406974, .0033269/2)
         targets['k then m in sample at 35'] = (.3274401, .003233/2)
         
-        #targets['hazard of new child at 22'] = (0.0136671,0.0005373)
         targets['hazard of new child at 22'] = (.0723763, .0014004)
         targets['hazard of new child at 23'] = (.0686844, .0014701)
         targets['hazard of new child at 24'] = (.0660664, .0015141)
@@ -283,7 +282,7 @@ def target_values(mode='high education'):
         
         
         #targets['ever married at 21'] = (.1198675, .0012708)
-        #targets['ever married at 22'] = (.1725177, .0015664)
+        targets['ever married at 22'] = (.1725177, .0015664)
         targets['ever married at 23'] = (.2182572, .0017721)
         targets['ever married at 24'] = (.2691566, .0019303)
         targets['ever married at 25'] = (.3205891, .0020199)
