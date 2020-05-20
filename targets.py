@@ -311,16 +311,16 @@ def target_values(mode='low education'):
         targets['divorced by years after marriage if kids first, 10'] = (.2115082, .0050606/4)
         
         
-        targets['divorced by years after marriage if kids first, 1'] = (.010328, .0022173/2)
-        targets['divorced by years after marriage if kids first, 2'] = (.0289688, .002371/2)
-        targets['divorced by years after marriage if kids first, 3'] = (.0505473, .0025391/2)
-        targets['divorced by years after marriage if kids first, 4'] = (.0645814, .0025787/2)
-        targets['divorced by years after marriage if kids first, 5'] = (.0918597, .0028409/2)
-        targets['divorced by years after marriage if kids first, 6'] = (.105973, .0029251/2)
-        targets['divorced by years after marriage if kids first, 7'] = (.113954, .0029394/2)
-        targets['divorced by years after marriage if kids first, 8'] = (.1333069, .0030814/2)
-        targets['divorced by years after marriage if kids first, 9'] = (.1407658, .0031131/2)
-        targets['divorced by years after marriage if kids first, 10'] = (.1443613, .0030424/2)
+        targets['divorced by years after marriage if marriage first, 1'] = (.010328, .0022173/2)
+        targets['divorced by years after marriage if marriage first, 2'] = (.0289688, .002371/2)
+        targets['divorced by years after marriage if marriage first, 3'] = (.0505473, .0025391/2)
+        targets['divorced by years after marriage if marriage first, 4'] = (.0645814, .0025787/2)
+        targets['divorced by years after marriage if marriage first, 5'] = (.0918597, .0028409/2)
+        targets['divorced by years after marriage if marriage first, 6'] = (.105973, .0029251/2)
+        targets['divorced by years after marriage if marriage first, 7'] = (.113954, .0029394/2)
+        targets['divorced by years after marriage if marriage first, 8'] = (.1333069, .0030814/2)
+        targets['divorced by years after marriage if marriage first, 9'] = (.1407658, .0031131/2)
+        targets['divorced by years after marriage if marriage first, 10'] = (.1443613, .0030424/2)
         
         
     
