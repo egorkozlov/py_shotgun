@@ -24,16 +24,16 @@ def calibration_params(xin=None,xfix=None):
               pmeet_21=(0.0,1.0,0.09),
               pmeet_28=(0.0,1.0,0.37),
               pmeet_35=(0.0,1.0,0.47),
-              preg_21=(-0.05,0.3,0.02),
-              preg_28=(0.0,0.3,0.04),
-              preg_35=(-0.05,0.3,0.03),
+              preg_21=(-0.1,0.7,0.02),
+              preg_28=(0.0,0.7,0.04),
+              preg_35=(-0.1,0.7,0.03),
               u_shift_mar=(0.4,2.8,1.83),
               util_alp=(0.1,1.0,0.627),
               util_kap=(0.2,1.2,0.834),
               util_qbar=(0.0,4.0,0.5),
-              disutil_marry_sm_mal_coef = (5.0,20.0,15.5),
+              disutil_marry_sm_mal_coef = (0.0,20.0,15.5),
               disutil_shotgun_coef=(0.0,3.0,0.63),
-              taste_shock_mult=(0.2,10.0,1.0)
+              taste_shock_mult=(0.2,8.0,1.0)
                         )
     
     
