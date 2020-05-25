@@ -19,7 +19,7 @@ def calibration_params(xin=None,xfix=None):
     
     
     params = OrderedDict(
-              sigma_psi=(0.001,0.3,0.1),
+              sigma_psi=(0.001,0.6,0.1),
               sigma_psi_mult=(1.0,9.0,5.1),
               pmeet_21=(0.0,1.0,0.09),
               pmeet_28=(0.0,1.0,0.37),
@@ -31,7 +31,7 @@ def calibration_params(xin=None,xfix=None):
               util_alp=(0.1,1.0,0.627),
               util_kap=(0.2,1.2,0.834),
               util_qbar=(0.0,4.0,0.5),
-              disutil_marry_sm_mal_coef = (5.0,20.0,15.5),
+              disutil_marry_sm_mal_coef = (0.0,25.0,15.5),
               disutil_shotgun_coef=(0.0,3.0,0.63),
               taste_shock_mult=(0.2,10.0,1.0)
                         )

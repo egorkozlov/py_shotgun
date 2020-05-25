@@ -437,12 +437,7 @@ def target_values(mode='high education'):
         targets['never married and kids in population at 33'] = (.2173221, .001825)
         targets['never married and kids in population at 34'] = (.2097827, .0017961)
         targets['never married and kids in population at 35'] = (.1935926, .001715)
-        targets['never married and kids in population at 36'] = (.1818443, .0016959)
-        targets['never married and kids in population at 37'] = (.1698818, .0016481)
-        targets['never married and kids in population at 38'] = (.1575284, .0015676)
-        targets['never married and kids in population at 39'] = (.152505, .0015391)
-        targets['never married and kids in population at 40'] = (.1304645, .0013695)
-        
+       
         
         targets['never married and no kids in population at 23'] = (.5262399, .0021421)
         targets['never married and no kids in population at 24'] = (.4602966, .0021692)

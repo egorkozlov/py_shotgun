@@ -38,8 +38,8 @@ from calibration_params import calibration_params
 if __name__ == '__main__':
     
     
-    from numba import config
-    config.NUMBA_NUM_THREADS = 2
+    #from numba import config
+    #config.NUMBA_NUM_THREADS = 2
 
     
     fix_values = False
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     
     
     #Tik Tak Optimization
-    param=tiktak(xfix=xfix,N=20000,N_st=200,skip_local=False,skip_global=True,
+    param=tiktak(xfix=xfix,N=20000,N_st=250,skip_local=False,skip_global=True,
                              resume_global=False,resume_local=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))
