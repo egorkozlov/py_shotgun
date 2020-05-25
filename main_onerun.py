@@ -48,6 +48,21 @@ if __name__ == '__main__':
          'taste_shock_mult': 4.116448914683272}
     
 
+    x = {'sigma_psi': 0.22225792188972474,
+         'sigma_psi_mult': 7.461120766010872,
+         'pmeet_21': 0.2841209803418755,
+         'pmeet_28': 0.5972782973618359,
+         'pmeet_35': 0.8495146505392482,
+         'preg_21': 0.03351967307448346,
+         'preg_28': 0.02658760503060691,
+         'preg_35': 0.023934310550573212,
+         'u_shift_mar': 1.1813684776362563,
+         'util_alp': 0.41580007423909804,
+         'util_kap': 0.9018094315778211,
+         'util_qbar': 0.9224730817253374,
+         'disutil_marry_sm_mal_coef': 9.191322692652617,
+         'disutil_shotgun_coef': 0.23934745280098635,
+         'taste_shock_mult': 5.224732545765163}
 
 
     
@@ -56,7 +71,7 @@ if __name__ == '__main__':
     
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      save_to='mdl.pkl',
+                                      #save_to='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_repeat=2)
     
