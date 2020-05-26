@@ -16,8 +16,11 @@ import os
 # return format is any combination of 'distance', 'all_residuals' and 'models'
 # we can add more things too for convenience
 
+'''
 w = {'divorced if k then m and one marriage':1.0,
      'divorced if m then k and one marriage':1.0}
+'''
+w = dict()
 
 def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
@@ -196,7 +199,7 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
     # normalize W
     #W = W/np.sum(W)
     
-    W = W/1e6
+    W = W/1e4
     
             
     resid_scaled = resid*np.sqrt(np.diag(W))
