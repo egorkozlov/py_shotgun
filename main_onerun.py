@@ -20,7 +20,7 @@ if system() != 'Darwin' and system() != 'Windows':
  
  
 from residuals import mdl_resid
-from targets import target_values
+from targets import target_values, all_targets
 
 print('Hi!')
  
@@ -48,21 +48,23 @@ if __name__ == '__main__':
          'taste_shock_mult': 4.116448914683272}
     
 
-    x = {'sigma_psi': 0.22225792188972474,
-         'sigma_psi_mult': 7.461120766010872,
-         'pmeet_21': 0.2841209803418755,
-         'pmeet_28': 0.5972782973618359,
-         'pmeet_35': 0.8495146505392482,
-         'preg_21': 0.03351967307448346,
-         'preg_28': 0.02658760503060691,
-         'preg_35': 0.023934310550573212,
-         'u_shift_mar': 1.1813684776362563,
-         'util_alp': 0.41580007423909804,
-         'util_kap': 0.9018094315778211,
-         'util_qbar': 0.9224730817253374,
-         'disutil_marry_sm_mal_coef': 9.191322692652617,
-         'disutil_shotgun_coef': 0.23934745280098635,
-         'taste_shock_mult': 5.224732545765163}
+    x = {'sigma_psi': 0.13140335512127152,
+         'sigma_psi_mult': 7.318494317792161,
+         'pmeet_21': 0.31499861958165964,
+         'pmeet_28': 0.60067071370404,
+         'pmeet_35': 0.7472621428312332,
+         'preg_21': 0.040420105606407006,
+         'preg_28': 0.02296063935559003,
+         'preg_35': 0.0698790264219899,
+         'u_shift_mar': 0.9606447172924117,
+         'util_alp': 0.3468964692327379,
+         'util_kap': 0.9378088317753515,
+         'util_qbar': 0.9082817629134391,
+         'disutil_marry_sm_mal_coef': 8.44506597458977,
+         'disutil_shotgun_coef': 0.25841666575918587,
+         'taste_shock_mult': 5.476599495906876}
+
+
 
 
     
@@ -84,7 +86,7 @@ if __name__ == '__main__':
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
     from fit_plot import make_fit_plots
-    make_fit_plots(agents,target_values('high education'))#,moments_aux=moments_aux)
+    make_fit_plots(agents,all_targets('high education'))#,moments_aux=moments_aux)
     
     
     '''
