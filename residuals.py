@@ -11,6 +11,7 @@ Created on Sat Dec 14 10:58:43 2019
 import numpy as np
 import dill
 import os
+from tiktak import filer
 
 
 # return format is any combination of 'distance', 'all_residuals' and 'models'
@@ -25,7 +26,8 @@ w = dict()
 def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
-              rel_diff=False,cs_moments=False,moments_repeat=5):
+              rel_diff=False,cs_moments=False,moments_repeat=5,
+              moments_save_name=None):
     
     
     
@@ -115,6 +117,13 @@ def mdl_resid(x=None,targets=None,weights=w,
     mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
     #mom_men = agents_extra.compute_moments()
     mom.update(mom_join)
+    
+    
+    
+    if moments_save_name: # is not None can be ommited
+        filer('{}.pkl'.format(moments_save_name),mom,True)
+        
+        
     
     if targets is None:
         from targets import target_values

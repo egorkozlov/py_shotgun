@@ -60,10 +60,14 @@ class ModelSetup(object):
         p['z_drift'] = -0.09
         p['no kids at meeting'] = True
         p['high education'] = True # what trend to pick
+        p['any kids'] = True
         
         p['wret'] = 0.8
         p['uls'] = 0.2
         p['pls'] = 1.0
+        
+        p['income_sd_mult'] = 1.0
+        p['pay_gap'] = True
         
         
         p['preg_mult'] = 1.0
@@ -83,7 +87,7 @@ class ModelSetup(object):
        
         
         p['child_a_cost'] = 0.0
-        p['child_support_share'] = 0.0           
+        p['child_support_share'] = 0.0    
             
         
         
@@ -111,33 +115,27 @@ class ModelSetup(object):
         
         
         if p['high education']:            
-            p['sig_zm']    = 0.03269622
-            p['sig_zm_0']  = 0.44197336
+            p['sig_zm']    = p['income_sd_mult']*0.03269622
+            p['sig_zm_0']  = p['income_sd_mult']*0.44197336
             
             
-            p['sig_zf']    = p['m_zf']*0.04167489
-            p['sig_zf_0']  = p['m_zf0']*0.40614873
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.04167489
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.40614873
             
         else:
-            p['sig_zm']    = 0.09294824
-            p['sig_zm_0']  = 0.40376647
+            p['sig_zm']    = p['income_sd_mult']*0.09294824
+            p['sig_zm_0']  = p['income_sd_mult']*0.40376647
             
             
-            p['sig_zf']    = p['m_zf']*0.08942736
-            p['sig_zf_0']  = p['m_zf0']*0.39882978
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.08942736
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.39882978
             
         
         
         # college
         
         if p['high education']:
-            p['f_wage_trend'] = np.array(
-                                [0.0 + 
-                                 0.0685814*(min(t,30) - 5)
-                                 -.0038631*((min(t,30)-5)**2)
-                                 + 0.0000715*((min(t,30)-5)**3)
-                                             for t in range(T)]
-                                        )
+            
             
             p['m_wage_trend'] = np.array(
                                         [0.0818515 + 0.0664369*(min(t+2,30)-5)  
@@ -145,17 +143,18 @@ class ModelSetup(object):
                                              + 0.0000529*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
+            
+            p['f_wage_trend'] = np.array(
+                                [0.0 + 
+                                 0.0685814*(min(t,30) - 5)
+                                 -.0038631*((min(t,30)-5)**2)
+                                 + 0.0000715*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
         
         else:
         # no college
         
-            p['f_wage_trend'] = np.array(
-                                [-0.3668214 + 
-                                 0.0264887*(min(t,30) - 5)
-                                 -0.0012464*((min(t,30)-5)**2)
-                                 +0.0000251*((min(t,30)-5)**3)
-                                             for t in range(T)]
-                                        )
             
             p['m_wage_trend'] = np.array(
                                         [-0.2424105 + 0.037659*(min(t+2,30)-5)  
@@ -164,6 +163,18 @@ class ModelSetup(object):
                                              for t in range(T)]
                                         )
         
+            p['f_wage_trend'] = np.array(
+                                [-0.3668214 + 
+                                 0.0264887*(min(t,30) - 5)
+                                 -0.0012464*((min(t,30)-5)**2)
+                                 +0.0000251*((min(t,30)-5)**3)
+                                             for t in range(T)]
+                                        )
+        
+        
+        if not p['pay_gap']:
+            p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
+            p['f_wage_trend'] = p['m_wage_trend']
         
         
         # derivative parameters
@@ -182,7 +193,7 @@ class ModelSetup(object):
         
         p['taste_shock'] = p['taste_shock_mult']*0.1#p['sigma_psi']
         
-        p['is fertile'] = [True]*Tfert + [False]*(T-Tfert)
+        p['is fertile'] = [p['any kids']]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
         #p['poutsm_t'] = [p['poutsm']]*T
         
