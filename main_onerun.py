@@ -30,9 +30,10 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
-    high_e = False
+    high_e = True
     
     if high_e:
+        
         x = {'sigma_psi': 0.13140335512127152,
              'sigma_psi_mult': 7.318494317792161,
              'pmeet_21': 0.31499861958165964,

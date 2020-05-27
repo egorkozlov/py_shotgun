@@ -16,7 +16,7 @@ import numpy as np
 
 # TODO: this should have nan-like values and throw errors
 class VecOnGrid(object):
-    def __init__(self,grid,values,iwn=None,trim=True):
+    def __init__(self,grid,values,iwn=None,trim=True,fix_w=True):
         # this assumes grid is strictly increasing o/w unpredictable
         self.val = values
         self.val_trimmed = np.clip(values,grid[0],grid[-1])
@@ -34,11 +34,13 @@ class VecOnGrid(object):
             self.i[ichange] = 0
             self.wnext[ichange] = 0.0
             
-        i_fix_w = (np.isclose(self.wnext,1.0)) & (self.i < (self.grid.size-2))
-        if np.any(i_fix_w):
-            # manual correction to avoid -1
-            self.i[i_fix_w] = self.i[i_fix_w] + 1
-            self.wnext[i_fix_w] = 0.0
+            
+        if fix_w:
+            i_fix_w = (np.isclose(self.wnext,1.0)) & (self.i < (self.grid.size-2))
+            if np.any(i_fix_w):
+                # manual correction to avoid -1
+                self.i[i_fix_w] = self.i[i_fix_w] + 1
+                self.wnext[i_fix_w] = 0.0
         
             
         self.wnext = self.wnext.astype(grid.dtype)
