@@ -44,8 +44,13 @@ if __name__ == '__main__':
     
     fix_values = False
     if fix_values:
-        xfix = {'u_shift_mar': 1.7329041070973545,
-                'util_alp': 0.6182672481649074}
+        xfix = {'sigma_psi': 0.2476722655689144,
+                'sigma_psi_mult': 5.125801752198881,
+                'u_shift_mar': 1.7329041070973545,
+                 'util_alp': 0.6182672481649074,
+                 'util_kap': 0.8081836080864513,
+                 'taste_shock_mult': 4.116448914683272
+                }
     else:
         xfix = None
         

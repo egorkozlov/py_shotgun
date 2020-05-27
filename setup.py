@@ -111,8 +111,8 @@ class ModelSetup(object):
             p['sig_zm_0']  = 0.40376647
             
             
-            p['sig_zf']    = 0.08942736
-            p['sig_zf_0']  = 0.39882978
+            p['sig_zf']    = p['m_zf']*0.08942736
+            p['sig_zf_0']  = p['m_zf0']*0.39882978
             
         
         
@@ -140,6 +140,8 @@ class ModelSetup(object):
         for key, value in kwargs.items():
             assert (key in p), 'wrong name?'
             p[key] = value
+        
+        
         
         '''
               h_female_T |   .0685814   .0004133   165.92   0.000     .0677713    .0693915
