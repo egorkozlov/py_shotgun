@@ -164,8 +164,8 @@ def target_values(mode='low education'):
         
         
         targets['mean x share'] = (0.4,0.001)
-        targets['divorced if k then m and one marriage'] = (.1480121,.0024232*(1/4))
-        targets['divorced if m then k and one marriage'] = (.0536316,.0004861*(1/4))
+        targets['divorced if k then m and one marriage'] = (.1480121,.0024232*(1/2))
+        targets['divorced if m then k and one marriage'] = (.0536316,.0004861*(1/2))
         targets['more than one mar at 40']       = (.1190139,.0012735)
         targets['in labor force at 30 if kids'] = (.739675,.0028066*(1/4))
         
