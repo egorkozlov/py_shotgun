@@ -32,7 +32,9 @@ for name, high_e in zip(['college','high school'],[True,False]):
                     ('no home production',{'util_kappa':0.001})]
     
     for adj_name, fix in adjustments:
-        x_new = x.copy().update(fix)
+        x_new = x.copy()
+        x_new.update(fix)
+        
         try:
             out,  mom = mdl_resid(x=x_new,targets=tar,
                                           return_format=['distance','moments'],
