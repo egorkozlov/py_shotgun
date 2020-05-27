@@ -172,8 +172,8 @@ def plot_cumulative(moments,targets,setup):
     ax.set_ylabel('share (%)')
     ax.set_title('Kids First and Marriage First')
     ax.legend()
-    yticks = [i*5 for i in range(12)]
-    ax.set_yticks(yticks)
+    #yticks = [i*5 for i in range(12)]
+    #ax.set_yticks(yticks)
     xticks = [i for i in range(22,36)]
     ax.set_xticks(xticks)
     ax.grid(True)

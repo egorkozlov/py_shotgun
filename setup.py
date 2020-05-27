@@ -6,7 +6,7 @@ This contains things relevant for setting up the model
 
 import numpy as np
 
-from rw_approximations import rouw_nonst
+from rw_approximations import tauchen_nonst, rouw_nonst
 from mc_tools import combine_matrices_two_lists, int_prob,cut_matrix
 from scipy.stats import norm
 from collections import namedtuple
@@ -35,7 +35,7 @@ class ModelSetup(object):
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.025]*T
-        p['n_psi_t']     = [15]*T
+        p['n_psi'] = 15
         p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
@@ -83,41 +83,7 @@ class ModelSetup(object):
        
         
         p['child_a_cost'] = 0.0
-        p['child_support_share'] = 0.0
-        
-        '''
-            Condition is h_male==1
-            Age 24, h_male==1: .44558678
-            Age 30, h_male==1: .45272711
-            Implied standard deviation if h_male==1 is .03269622
-            Implied initial if h_male==1 is .44197336
-            Condition is h_female==1
-            Age 24, h_female==1: .41251325
-            Age 30, h_female==1: .42495642
-            Implied standard deviation if h_female==1 is .04167489
-            Implied initial if h_female==1 is .40614873
-        '''
-        
-        if p['high education']:            
-            p['sig_zm']    = 0.03269622
-            p['sig_zm_0']  = 0.44197336
-            
-            
-            p['sig_zf']    = p['m_zf']*0.04167489
-            p['sig_zf_0']  = p['m_zf0']*0.40614873
-            
-        else:
-            p['sig_zm']    = 0.09294824
-            p['sig_zm_0']  = 0.40376647
-            
-            
-            p['sig_zf']    = 0.08942736
-            p['sig_zf_0']  = 0.39882978
-            
-        
-        
-        # college
-            
+        p['child_support_share'] = 0.0           
             
         
         
@@ -141,23 +107,28 @@ class ModelSetup(object):
             assert (key in p), 'wrong name?'
             p[key] = value
         
-        '''
-              h_female_T |   .0685814   .0004133   165.92   0.000     .0677713    .0693915
-             h_female_T2 |  -.0038631   .0000449   -86.03   0.000    -.0039511   -.0037751
-             h_female_T3 |   .0000715   1.30e-06    55.20   0.000      .000069    .0000741
-                  h_male |   .0818515   .0018308    44.71   0.000     .0782632    .0854398
-                h_male_T |   .0664369   .0005108   130.07   0.000     .0654358    .0674379
-               h_male_T2 |  -.0032096   .0000528   -60.77   0.000    -.0033131   -.0031061
-               h_male_T3 |   .0000529   1.48e-06    35.68   0.000       .00005    .0000558
-                l_female |  -.3715448   .0015389  -241.43   0.000    -.3745611   -.3685285
-              l_female_T |   .0258538   .0003048    84.83   0.000     .0252564    .0264512
-             l_female_T2 |  -.0012931   .0000378   -34.20   0.000    -.0013672    -.001219
-             l_female_T3 |   .0000273   1.15e-06    23.79   0.000     .0000251    .0000296
-                  l_male |  -.2587716   .0014324  -180.66   0.000     -.261579   -.2559641
-                l_male_T |   .0348409   .0002597   134.14   0.000     .0343319      .03535
-               l_male_T2 |  -.0013866   .0000328   -42.27   0.000    -.0014509   -.0013223
-               l_male_T3 |    .000024   1.01e-06    23.79   0.000     .0000221     .000026
-        '''
+        
+        
+        
+        if p['high education']:            
+            p['sig_zm']    = 0.03269622
+            p['sig_zm_0']  = 0.44197336
+            
+            
+            p['sig_zf']    = p['m_zf']*0.04167489
+            p['sig_zf_0']  = p['m_zf0']*0.40614873
+            
+        else:
+            p['sig_zm']    = 0.09294824
+            p['sig_zm_0']  = 0.40376647
+            
+            
+            p['sig_zf']    = p['m_zf']*0.08942736
+            p['sig_zf_0']  = p['m_zf0']*0.39882978
+            
+        
+        
+        # college
         
         if p['high education']:
             p['f_wage_trend'] = np.array(
@@ -228,6 +199,10 @@ class ModelSetup(object):
         
         p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         
+        
+        
+        
+        p['n_psi_t'] = [p['n_psi']]*T
         
         
         self.pars = p

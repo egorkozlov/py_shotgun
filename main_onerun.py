@@ -30,55 +30,63 @@ os.environ['MKL_CBWR']='AUTO'
  
 if __name__ == '__main__':
     
-
-    x = {'sigma_psi': 0.2476722655689144,
-         'sigma_psi_mult': 5.125801752198881,
-         'pmeet_21': 0.13090071390433766,
-         'pmeet_28': 0.38392851771344155,
-         'pmeet_35': 0.40800438661571153,
-         'preg_21': 0.07677173244887601,
-         'preg_28': 0.06061469851763078,
-         'preg_35': 0.01825557056243586,
-         'u_shift_mar': 1.7329041070973545,
-         'util_alp': 0.6182672481649074,
-         'util_kap': 0.8081836080864513,
-         'util_qbar': 0.5163163798943308,
-         'disutil_marry_sm_mal_coef': 14.446603934890161,
-         'disutil_shotgun_coef': 0.4904309002252879,
-         'taste_shock_mult': 4.116448914683272}
+    high_e = True
     
-
-    x = {'sigma_psi': 0.13140335512127152,
-         'sigma_psi_mult': 7.318494317792161,
-         'pmeet_21': 0.31499861958165964,
-         'pmeet_28': 0.60067071370404,
-         'pmeet_35': 0.7472621428312332,
-         'preg_21': 0.040420105606407006,
-         'preg_28': 0.02296063935559003,
-         'preg_35': 0.0698790264219899,
-         'u_shift_mar': 0.9606447172924117,
-         'util_alp': 0.3468964692327379,
-         'util_kap': 0.9378088317753515,
-         'util_qbar': 0.9082817629134391,
-         'disutil_marry_sm_mal_coef': 8.44506597458977,
-         'disutil_shotgun_coef': 0.25841666575918587,
-         'taste_shock_mult': 5.476599495906876}
+    if high_e:
+        
+        x = {'sigma_psi': 0.13140335512127152,
+             'sigma_psi_mult': 7.318494317792161,
+             'pmeet_21': 0.31499861958165964,
+             'pmeet_28': 0.60067071370404,
+             'pmeet_35': 0.7472621428312332,
+             'preg_21': 0.040420105606407006,
+             'preg_28': 0.02296063935559003,
+             'preg_35': 0.0698790264219899,
+             'u_shift_mar': 0.9606447172924117,
+             'util_alp': 0.3468964692327379,
+             'util_kap': 0.9378088317753515,
+             'util_qbar': 0.9082817629134391,
+             'disutil_marry_sm_mal_coef': 8.44506597458977,
+             'disutil_shotgun_coef': 0.25841666575918587,
+             'taste_shock_mult': 5.476599495906876,
+             'high education':True}
+        
+        targ_mode = 'high education'
+    else:
+        x = {'sigma_psi': 0.480991547005569,
+             'sigma_psi_mult': 4.600215309475741,
+             'pmeet_21': 0.48886846739080425,
+             'pmeet_28': 0.17451514254902903,
+             'pmeet_35': 0.5918506163621335,
+             'preg_21': 0.3960300615120441,
+             'preg_28': 0.115344941557771,
+             'preg_35': 0.5167972159585046,
+             'u_shift_mar': 1.9291671160578177,
+             'util_alp': 0.47953144662272207,
+             'util_kap': 0.8247164477867641,
+             'util_qbar': 0.015315764308810709,
+             'disutil_marry_sm_mal_coef': 7.70003003525308,
+             'disutil_shotgun_coef': 0.4186198614019019,
+             'taste_shock_mult': 3.1008647867466848,
+             'high education':False}
+        targ_mode = 'low education'
 
 
 
 
     
-
-    tar = target_values('high education')
+    tar = target_values(targ_mode)
     
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #save_to='mdl.pkl',
+                                      #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_repeat=2)
     
     mdl[0].time_statistics()
                          
+    
+
     
     print('Done. Residual in point x0 is {}'.format(out))
     
@@ -86,8 +94,10 @@ if __name__ == '__main__':
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
     from fit_plot import make_fit_plots
-    make_fit_plots(agents,all_targets('high education'))#,moments_aux=moments_aux)
+    make_fit_plots(agents,all_targets(targ_mode))#,moments_aux=moments_aux)
     
+    
+    mdl[0].mar_graphs()
     
     '''
     from crosssection import CrossSection
@@ -119,3 +129,5 @@ if __name__ == '__main__':
     
     moments_comp = {key: (moments_cs[key],moments_pl[key]) for key in moments_cs}
     '''
+    
+    

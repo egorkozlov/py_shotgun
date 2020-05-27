@@ -47,6 +47,7 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
     
     
     
+    
     # substantial part
     ind, izf, izm, ipsi = setup.all_indices(t,ind_or_inds)
     
@@ -88,8 +89,11 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
     ins = [setup.dtype(x,copy=False) for x in ins] # optional type conversion
     vfout, vmout, nbsout, agree, ithetaout = mar_mat(*ins)
     
-
-    return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
+    if not return_all:
+        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
+    else:
+        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree, 'ins':ins}
+    
 
 
 def v_no_mar(setup,t,V,icouple,ind_or_inds,*,female,giveabirth):
