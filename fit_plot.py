@@ -9,14 +9,17 @@ Created on Fri Apr 24 15:32:21 2020
 
 
 import matplotlib.pyplot as plt
+from targets import all_targets
 
 
 import numpy as np
 
 
-def make_fit_plots(agents,targets,moments_aux=None):
+def make_fit_plots(agents,targ_mode,moments_aux=None):
     setup = agents.setup
     moments = agents.compute_moments()
+    targets = all_targets(targ_mode)
+    
     try:
         plot_estimates(setup)
     except:
@@ -48,7 +51,7 @@ def make_fit_plots(agents,targets,moments_aux=None):
         except:
             print('failed to plot men')
     try:
-        plot_kfmf_ref(moments,targets,setup)
+        plot_kfmf_ref(moments,targets,setup,targ_mode)
     except:
         print('failed to plot ref')
     
@@ -291,16 +294,23 @@ def plot_kfmf(moments,targets,setup):
     # ref_kf = [0.08114558, 0.10186335, 0.11817027, 0.11984021, 0.11823362, 0.11746032, 0.13162393, 0.15057915, 0.14123007, 0.14550265]
     # ref_mf = [0.        , 0.01083856, 0.02031424, 0.02864134, 0.03768433, 0.04414536, 0.05390435, 0.05976757, 0.0625543 , 0.06301748]
     
-def plot_kfmf_ref(moments,targets,setup):
+def plot_kfmf_ref(moments,targets,setup, targ_mode):
     yval = np.arange(1,11) 
     #ref_kf = np.array([0.08114558, 0.10186335, 0.11817027, 0.11984021, 0.11823362, 0.11746032, 0.13162393, 0.15057915, 0.14123007, 0.14550265])
     #ref_mf = np.array([0.        , 0.01083856, 0.02031424, 0.02864134, 0.03768433, 0.04414536, 0.05390435, 0.05976757, 0.0625543 , 0.06301748])
     
-    ref_kf = np.array([0.03219107, 0.06490649, 0.08013937, 0.08991495, 0.09724047,
-       0.10518732, 0.11538462, 0.12629758, 0.13806706, 0.15437788])
-    
-    ref_mf = np.array([0.        , 0.00940496, 0.01853282, 0.02416011, 0.02771235,
-       0.03738832, 0.04405594, 0.05178366, 0.05938639, 0.06609948])
+    if targ_mode == 'high education':
+        ref_kf = np.array([0.03697876, 0.07397737, 0.09510086, 0.12460401, 0.1457346 ,
+       0.16467463, 0.18292683, 0.18918919, 0.19642857, 0.21967963])
+        
+        ref_mf = np.array([0.        , 0.00997299, 0.01585933, 0.02122016, 0.0277903 ,
+       0.03765505, 0.04619769, 0.05458448, 0.06238917, 0.06841011])
+    else:
+        ref_kf = np.array([0.02801336, 0.05332585, 0.08019741, 0.10971467, 0.13539367,
+       0.1536    , 0.17518248, 0.19001832, 0.20896249, 0.23069054])
+        
+        ref_mf = np.array([0.        , 0.01145147, 0.0232318 , 0.0351265 , 0.04966411,
+       0.06725495, 0.08349328, 0.10104955, 0.11824745, 0.13481709])
     
     here_kf = np.zeros_like(yval,dtype=np.float64)
     here_mf = np.zeros_like(yval,dtype=np.float64)

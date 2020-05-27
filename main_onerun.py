@@ -20,7 +20,7 @@ if system() != 'Darwin' and system() != 'Windows':
  
  
 from residuals import mdl_resid
-from targets import target_values, all_targets
+from targets import target_values
 
 print('Hi!')
  
@@ -50,8 +50,9 @@ if __name__ == '__main__':
              'disutil_shotgun_coef': 0.25841666575918587,
              'taste_shock_mult': 5.476599495906876,
              'high education':True}
-        
+    
         targ_mode = 'high education'
+        
     else:
         x = {'sigma_psi': 0.480991547005569,
              'sigma_psi_mult': 4.600215309475741,
@@ -69,6 +70,7 @@ if __name__ == '__main__':
              'disutil_shotgun_coef': 0.4186198614019019,
              'taste_shock_mult': 3.1008647867466848,
              'high education':False}
+        
         targ_mode = 'low education'
 
 
@@ -94,7 +96,7 @@ if __name__ == '__main__':
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
     from fit_plot import make_fit_plots
-    make_fit_plots(agents,all_targets(targ_mode))#,moments_aux=moments_aux)
+    make_fit_plots(agents,targ_mode)#,moments_aux=moments_aux)
     
     
     mdl[0].mar_graphs()
