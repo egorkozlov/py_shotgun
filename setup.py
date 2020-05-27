@@ -6,7 +6,7 @@ This contains things relevant for setting up the model
 
 import numpy as np
 
-from rw_approximations import rouw_nonst
+from rw_approximations import tauchen_nonst, rouw_nonst
 from mc_tools import combine_matrices_two_lists, int_prob,cut_matrix
 from scipy.stats import norm
 from collections import namedtuple
@@ -35,7 +35,7 @@ class ModelSetup(object):
         p['sigma_psi_mult'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.025]*T
-        p['n_psi_t']     = [15]*T
+        p['n_psi'] = 15
         p['beta_t'] = [0.98]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
@@ -228,6 +228,10 @@ class ModelSetup(object):
         
         p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         
+        
+        
+        
+        p['n_psi_t'] = [p['n_psi']]*T
         
         
         self.pars = p

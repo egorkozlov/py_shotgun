@@ -33,6 +33,12 @@ class VecOnGrid(object):
             assert np.allclose(self.wnext[ichange],1.0)
             self.i[ichange] = 0
             self.wnext[ichange] = 0.0
+            
+        i_fix_w = (np.isclose(self.wnext,1.0)) & (self.i < (self.grid.size-2))
+        if np.any(i_fix_w):
+            # manual correction to avoid -1
+            self.i[i_fix_w] = self.i[i_fix_w] + 1
+            self.wnext[i_fix_w] = 0.0
         
             
         self.wnext = self.wnext.astype(grid.dtype)
