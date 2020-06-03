@@ -11,24 +11,32 @@ Created on Fri Apr 24 15:32:21 2020
 import matplotlib.pyplot as plt
 from targets import all_targets
 from tiktak import filer
+from setup import ModelSetup
 
 
 import numpy as np
 
 class FitPlots(object):
     
-    def __init__(self,agents,targ_mode,load=None,load_compare=None,
+    def __init__(self,*,base,targ_mode,compare=None,
+                 setup=None,
                  base_name='Model',
                  compare_name='Data',
                  graphs_title_add=None,
                  moments_aux=None):
-        self.setup = agents.setup
         
-        if load:
-            self.moments = filer(load,0,0)
+        
+        
+        if setup is None: self.setup = ModelSetup()
+        
+        
+        if type(base) is str:
+            self.moments = filer(base,0,0)
         else:
-            self.moments = agents.compute_moments()
+            self.moments = base
             
+            
+                    
             
         self.targ_mode = targ_mode
         self.base_name = base_name
@@ -40,13 +48,19 @@ class FitPlots(object):
             self.graphs_title_add = ''
         
             
-        if load_compare:
-            targ_load = filer(load_compare,0,0)
+        if type(compare) is str:
+            targ_load = filer(compare,0,0)
             # emulating targets
             self.targets = {key: (targ_load[key],0.0) for key in targ_load}
         else:
             self.targets = all_targets(targ_mode)
         
+        
+        
+        try:
+            self.print_things()
+        except:
+            print('failed to print')
         
         try:
             self.plot_estimates()
@@ -86,6 +100,15 @@ class FitPlots(object):
             print('failed to plot ref')
         
     
+    def print_things(self):
+        labels = ['divorced if k then m and one marriage',
+                  'divorced by years after marriage if kids first, 10',
+                  'divorced if m then k and one marriage',
+                  'divorced by years after marriage if marriage first, 10']
+        for l in labels:
+            print('{}: base {}, compare {}'.format(l,self.moments[l],self.targets[l][0]))
+    
+    
     
     def plot_estimates(self):
         setup = self.setup
@@ -105,6 +128,9 @@ class FitPlots(object):
         plt.xlabel('age')
         plt.ylabel('probability (%)')
             
+        
+        
+    
         
     
     
@@ -148,8 +174,8 @@ class FitPlots(object):
                
             
             fig, ax = plt.subplots()
-            plt.plot(tval,haz_model*100,'o-k',label=self.base_name)
-            plt.plot(tval,haz_data*100,'o--k',label=self.compare_name)
+            plt.plot(tval,haz_model*100,'o-b',label=self.base_name)
+            plt.plot(tval,haz_data*100,'o-k',label=self.compare_name)
             if ci: plt.plot(tval,haz_data_lci*100,label='lower 95%')
             if ci: plt.plot(tval,haz_data_uci*100,label='upper 95%')
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
@@ -203,8 +229,8 @@ class FitPlots(object):
             ax = fig.add_subplot(gs[0,0])
             #else:
             #    ax = fig.add_subplot(gs[:,1])
-            ax.plot(tval,probs_model[i],'{}-k'.format(ch[i]),label='{}: {}'.format(nm[i],self.base_name.lower()))
-            ax.plot(tval,probs_data[i],'{}--k'.format(ch[i]),label='{}: {}'.format(nm[i],self.compare_name.lower()))
+            ax.plot(tval,probs_model[i],'{}-b'.format(ch[i]),label='{}: {}'.format(nm[i],self.base_name.lower()))
+            ax.plot(tval,probs_data[i],'{}-k'.format(ch[i]),label='{}: {}'.format(nm[i],self.compare_name.lower()))
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
         ax.set_title('% in female population by age:\nKids First and Marriage First' + self.graphs_title_add)
@@ -217,8 +243,8 @@ class FitPlots(object):
         plt.savefig('popshares.pdf')
         
         fig, ax = plt.subplots()
-        ax.plot(tval,probs_model[2],'o-k',label=self.base_name)
-        ax.plot(tval,probs_data[2],'o--k',label=self.compare_name)
+        ax.plot(tval,probs_model[2],'o-b',label=self.base_name)
+        ax.plot(tval,probs_data[2],'o-k',label=self.compare_name)
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
         ax.set_title(captions[2])
@@ -229,8 +255,8 @@ class FitPlots(object):
         
         
         fig, ax = plt.subplots()
-        ax.plot(tval,probs_model[3],'o-k',label=self.base_name)
-        ax.plot(tval,probs_data[3],'o--k',label=self.compare_name)
+        ax.plot(tval,probs_model[3],'o-b',label=self.base_name)
+        ax.plot(tval,probs_data[3],'o-k',label=self.compare_name)
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
         ax.set_title(captions[3])
@@ -269,8 +295,8 @@ class FitPlots(object):
             fig, ax = plt.subplots()
             i_data = ~np.isnan(prob_data)
             i_model = ~np.isnan(prob_model)
-            plt.plot(yval[i_model],prob_model[i_model]*100,'o-k',label=self.base_name)
-            plt.plot(yval[i_data],prob_data[i_data]*100,'o--k',label=self.compare_name)
+            plt.plot(yval[i_model],prob_model[i_model]*100,'o-b',label=self.base_name)
+            plt.plot(yval[i_data],prob_data[i_data]*100,'o-k',label=self.compare_name)
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
             plt.legend()
             plt.title(cap) 
@@ -316,8 +342,8 @@ class FitPlots(object):
                 
             i_data = ~np.isnan(prob_data)
             i_model = ~np.isnan(prob_model)
-            plt.plot(yval[i_model],prob_model[i_model]*100,'{}-k'.format(mrkr),label='{}: {}'.format(cap,self.base_name.lower()))
-            plt.plot(yval[i_data],prob_data[i_data]*100,'{}--k'.format(mrkr),label='{}: {}'.format(cap,self.compare_name.lower()))
+            plt.plot(yval[i_model],prob_model[i_model]*100,'{}-b'.format(mrkr),label='{}: {}'.format(cap,self.base_name.lower()))
+            plt.plot(yval[i_data],prob_data[i_data]*100,'{}-k'.format(mrkr),label='{}: {}'.format(cap,self.compare_name.lower()))
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
         plt.legend()
         plt.title('Divorced by years after marriage by groups' + self.graphs_title_add) 
@@ -375,9 +401,9 @@ class FitPlots(object):
         
         lbl_cmp = '$\phi_s = 0$'
         #lbl_cmp = 'equal pay'
-        plt.plot(yval,ref_kf*100,'x-k',label='KF: {}'.format(self.base_name.lower()))
+        plt.plot(yval,ref_kf*100,'x-b',label='KF: {}'.format(self.base_name.lower()))
         plt.plot(yval,here_kf*100,'o-b',label='KF: {}'.format(lbl_cmp))
-        plt.plot(yval,ref_mf*100,'x--k',label='MF: {}'.format(self.base_name.lower()))
+        plt.plot(yval,ref_mf*100,'x-k',label='MF: {}'.format(self.base_name.lower()))
         plt.plot(yval,here_mf*100,'o--b',label='MF: {}'.format(lbl_cmp))
         plt.legend()
         plt.title('Divorced by years after marriage: social stigma matters') 
@@ -418,8 +444,8 @@ class FitPlots(object):
                 
             
             fig, ax = plt.subplots()
-            plt.plot(tval,haz_model*100,'o-k',label=self.base_name)
-            plt.plot(tval,haz_data*100,'o--k',label=self.compare_name)
+            plt.plot(tval,haz_model*100,'o-b',label=self.base_name)
+            plt.plot(tval,haz_data*100,'o-k',label=self.compare_name)
             ax.grid(True)
             xticks = tval#[i for i in range(24,36)]
             ax.set_xticks(xticks)
