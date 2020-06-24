@@ -480,7 +480,7 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                         pick_1 = (v_y_1 > v_y_0)
                         
                         ichoice_out[ia,ie,it] = pick_1 
-                        pchoice_out[ia,ie,it] = 1.0
+                        pchoice_out[ia,ie,it] = 1.0*pick_1
                         
                         if pick_1:
                             vf_opt[it] = wsum(vf_y_ni_1)

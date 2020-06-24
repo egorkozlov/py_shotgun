@@ -197,7 +197,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = p['taste_shock_mult']*0.1#p['sigma_psi']
+        p['taste_shock'] = 0.0*p['taste_shock_mult']*0.1#p['sigma_psi']
         
         p['is fertile'] = [p['any kids']]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
