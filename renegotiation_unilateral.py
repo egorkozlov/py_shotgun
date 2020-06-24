@@ -121,18 +121,18 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     wntht = setup.v_thetagrid_fine.wnext
     thtgrid = setup.thetagrid_fine
 
-    sig = setup.pars['taste_shock']
+    
     
         
     if haschild:        
         
         if not ugpu:
-            v_out, vf_out, vm_out, itheta_out, _, _ = \
+            v_out, vf_out, vm_out, itheta_out, _ = \
              v_ren_core_two_opts_with_int(V['Couple and child']['V'][None,...],
                                           V['Couple and child']['VF'][None,...], 
                                           V['Couple and child']['VM'][None,...], 
                                           vf_n, vm_n,
-                                          itht, wntht, thtgrid, sig)
+                                          itht, wntht, thtgrid)
             
         else:
             v_out, vf_out, vm_out, itheta_out = \
@@ -140,7 +140,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
                                           V['Couple and child']['VF'], 
                                           V['Couple and child']['VM'], 
                                           vf_n, vm_n,
-                                          itht, wntht, thtgrid, sig)
+                                          itht, wntht, thtgrid)
         
             
         assert v_out.dtype == setup.dtype
@@ -154,34 +154,34 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
             if not ugpu:                
                 
                     
-                v_out, vf_out, vm_out, itheta_out, switch, pchoice = \
+                v_out, vf_out, vm_out, itheta_out, switch = \
                     v_ren_core_two_opts_with_int(
                                np.stack([V['Couple, no children']['V'],vcc_v]),
                                np.stack([V['Couple, no children']['VF'],vcc_vf]), 
                                np.stack([V['Couple, no children']['VM'],vcc_vm]), 
                                         vf_n, vm_n,
-                                        itht, wntht, thtgrid, sig)
+                                        itht, wntht, thtgrid)
                     
                 
             else:    
-                v_out, vf_out, vm_out, itheta_out, switch, pchoice = \
+                v_out, vf_out, vm_out, itheta_out, switch = \
                        v_ren_gpu_twoopt(
                                        V['Couple, no children']['V'], vcc_v,
                                        V['Couple, no children']['VF'],vcc_vf, 
                                        V['Couple, no children']['VM'],vcc_vm, 
                                         vf_n, vm_n,
-                                        itht, wntht, thtgrid, sig)     
+                                        itht, wntht, thtgrid) 
+           
         else:
             if not ugpu:
-                v_out, vf_out, vm_out, itheta_out, switch, _ = \
+                v_out, vf_out, vm_out, itheta_out, switch = \
                     v_ren_core_two_opts_with_int(
                               V['Couple, no children']['V'][None,...],
                               V['Couple, no children']['VF'][None,...], 
                               V['Couple, no children']['VM'][None,...], 
                                         vf_n, vm_n,
-                                        itht, wntht, thtgrid, sig)
-                    
-                pchoice = np.zeros_like(itheta_out,dtype=setup.dtype)
+                                        itht, wntht, thtgrid)
+                
                 
             else:    
                 v_out, vf_out, vm_out, itheta_out = \
@@ -190,8 +190,8 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
                                        V['Couple, no children']['VF'], 
                                        V['Couple, no children']['VM'], 
                                         vf_n, vm_n,
-                                        itht, wntht, thtgrid,sig)  
-                pchoice = np.zeros_like(itheta_out,dtype=setup.dtype)              
+                                        itht, wntht, thtgrid)  
+                switch = np.zeros_like(itheta_out,dtype=np.bool)              
                 
         assert v_out.dtype == setup.dtype
         
@@ -241,10 +241,12 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     
     
     if not haschild:
-        result['Probability of a birth'] = pchoice
+        result['Give a birth'] = switch
         
-        
-       
+    
+    
+    
+    
     extra = {'Values':result['Values'],
              'Value of Divorce, male': vm_n, 'Value of Divorce, female': vf_n}
     
@@ -378,10 +380,9 @@ def v_no_ren(setup,V,haschild,canswitch,t):
     return result
 
 
-ofval = 14.0
 
 @njit(parallel=upar)
-def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, wntht, thtgrid, sig):
+def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, wntht, thtgrid):
     # this takes values with no interpolation and interpolates inside
     # this also makes a choice of mar / coh
     # choice is based on comparing v_y_ni_0 vs v_y_ni_1 in the interpolated pt
@@ -391,10 +392,6 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
     # note that v_y_ni has either 1 or 2 elements at 0th dimension
     # (so if two functions are passed, v_y_ni is np.stack(v_y_c,v_y_m)),
     # otherwise it is just v_y_m[None,...]. x[0] is equivalent to x[0,...].
-    
-    nu = np.log(2) # 0.5772156649
-    correction = sig*nu
-    
     
     if v_y_ni.shape[0] == 2:
         nochoice = False
@@ -422,7 +419,6 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
     
     itheta_out = np.full(v_out.shape,-1,dtype=np.int16)
     ichoice_out = np.zeros(v_out.shape,dtype=np.bool_)
-    pchoice_out = np.zeros(v_out.shape,dtype=dtype)
     
     
     f1 = np.float32(1)
@@ -448,9 +444,6 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
             
             is_good = np.zeros((nt,),dtype=np.bool_)
             
-            logit = False if sig <= 1e-3 else True
-            
-            
             for it in range(nt):
                 it_c = itht[it]
                 it_cp = it_c+1
@@ -460,79 +453,23 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                 def wsum(x):
                     return x[ia,ie,it_c]*wt_c + x[ia,ie,it_cp]*wn_c
                 
-                def L(x):
-                    if not logit:
-                        return (1.0 if x>=0 else 0.0)
-                    else:
-                        emx = np.exp(-x)
-                        return 1.0/(1.0+emx)
-                
-                    
-                
                 v_y_0 = wsum(v_y_ni_0)
                 
                 
                 if not nochoice:
-                    v_y_1 = wsum(v_y_ni_1)     
+                    v_y_1 = wsum(v_y_ni_1)                
+                    pick_1 = (v_y_1 > v_y_0)
                     
-                    if not logit:
+                    ichoice_out[ia,ie,it] = pick_1 
                     
-                        pick_1 = (v_y_1 > v_y_0)
-                        
-                        ichoice_out[ia,ie,it] = pick_1 
-                        pchoice_out[ia,ie,it] = 1.0*pick_1
-                        
-                        if pick_1:
-                            vf_opt[it] = wsum(vf_y_ni_1)
-                            vm_opt[it] = wsum(vm_y_ni_1)
-                            v_opt[it] = v_y_1
-                        else:
-                            vf_opt[it] = wsum(vf_y_ni_0)
-                            vm_opt[it] = wsum(vm_y_ni_0)
-                            v_opt[it] = v_y_0
+                    if pick_1:
+                        vf_opt[it] = wsum(vf_y_ni_1)
+                        vm_opt[it] = wsum(vm_y_ni_1)
+                        v_opt[it] = v_y_1
                     else:
-                        
-                        pick_1 = (v_y_1 > v_y_0)
-                        
-                        ichoice_out[ia,ie,it] = pick_1
-                        
-                        v_diff_scaled = (v_y_1 - v_y_0)/sig
-                        
-                        if (v_diff_scaled <= ofval) and (v_diff_scaled >=-ofval):
-                            p1 = L(v_diff_scaled)
-                            p0 = f1 - p1
-                            
-                            
-                            v_smax = v_y_0 + sig*np.logaddexp(0.0,v_diff_scaled) - correction
-                            
-                            vf_0 = wsum(vf_y_ni_0)
-                            vm_0 = wsum(vm_y_ni_0)
-                            vf_1 = wsum(vf_y_ni_1)
-                            vm_1 = wsum(vm_y_ni_1)
-                            
-                            #vf_smax = v_smax + p1*(vf_1-v_y_1) + p0*(vf_0-v_y_0)
-                            #vm_smax = v_smax + p1*(vm_1-v_y_1) + p0*(vm_0-v_y_0)
-                            v_pure = v_smax - p1*v_y_1 - p0*v_y_0
-                            vf_smax = v_pure + p1*vf_1 + p0*vf_0
-                            vm_smax = v_pure + p1*vm_1 + p0*vm_0
-                            
-                        elif (v_diff_scaled >= ofval):
-                            p1 = f1
-                            v_smax = v_y_1 - correction
-                            vf_smax = wsum(vf_y_ni_1) - correction
-                            vm_smax = wsum(vm_y_ni_1) - correction
-                        elif (v_diff_scaled <= -ofval):
-                            p1 = 0.0
-                            v_smax = v_y_0 - correction
-                            vf_smax = wsum(vf_y_ni_0) - correction
-                            vm_smax = wsum(vm_y_ni_0) - correction
-                        
-                        
-                        pchoice_out[ia,ie,it] = p1
-                        vf_opt[it] = vf_smax
-                        vm_opt[it] = vm_smax
-                        v_opt[it] = v_smax
-                        
+                        vf_opt[it] = wsum(vf_y_ni_0)
+                        vm_opt[it] = wsum(vm_y_ni_0)
+                        v_opt[it] = v_y_0
                         
                 else:                    
                     vf_opt[it] = wsum(vf_y_ni_0)
@@ -607,7 +544,7 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                     assert vm_out[ia,ie,it] >= vm_no_ae
             
                 
-    return v_out, vf_out, vm_out, itheta_out, ichoice_out, pchoice_out
+    return v_out, vf_out, vm_out, itheta_out, ichoice_out
 
 
 
