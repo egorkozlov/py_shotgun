@@ -101,6 +101,8 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
         
         
         is_good_store = cuda.local.array((500,),b1)
+        is_good_fem_store = cuda.local.array((500,),b1)
+        is_good_mal_store = cuda.local.array((500,),b1)
         it_left_store = cuda.local.array((500,),i2)
         it_right_store = cuda.local.array((500,),i2)
         it_best_store = cuda.local.array((500,),i2)
@@ -114,7 +116,7 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             it_right_store[it] = -1
             it_best_store[it] = -1
             
-            
+             
             it_int = itht[it]
             for ittc in range(ittc,nt_crude):
                 if ittc==it_int: break
@@ -125,9 +127,13 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             wttc = f1 - wttp
             
             
+            
             v_in_store[it]  = wttc*v_y_ni[ia,ie,ittc]  + wttp*v_y_ni[ia,ie,ittp]
             vf_in_store[it] = wttc*vf_y_ni[ia,ie,ittc] + wttp*vf_y_ni[ia,ie,ittp]
             vm_in_store[it] = wttc*vm_y_ni[ia,ie,ittc] + wttp*vm_y_ni[ia,ie,ittp]
+            
+            is_good_fem_store[it] = (vf_in_store[it] >= vf_no)
+            is_good_mal_store[it] = (vm_in_store[it] >= vm_no)
             
             
             if vf_in_store[it] >= vf_no and vm_in_store[it] >= vm_no:
@@ -165,38 +171,27 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             if is_good_store[it]:
                 it_best_store[it] = it
             else:
-                if it_right_store[it] >= 0 and it_left_store[it] >= 0:
-                    dist_right = it_right_store[it] - it
-                    dist_left = it - it_left_store[it]
-                    assert dist_right>0
-                    assert dist_left>0
-                    
-                    if dist_right < dist_left:
+                if is_good_fem_store[it] and (not is_good_mal_store[it]):
+                            if it_left_store[it] >= 0:
+                                it_best_store[it] = it_left_store[it]
+                if is_good_mal_store[it] and (not is_good_fem_store[it]):
+                    if it_right_store[it] >= 0:
                         it_best_store[it] = it_right_store[it]
-                    elif dist_right > dist_left:
-                        it_best_store[it] = it_left_store[it]
-                    else:                                
-                        # tie breaker
-                        drc = 2*it_right_store[it] - nt
-                        if drc<0: drc = -drc
-                        dlc = 2*it_left_store[it] - nt
-                        if dlc<0: dlc = -dlc                                
-                        it_best_store[it] = it_left_store[it] if \
-                            dlc <= drc else it_right_store[it]
-                elif it_right_store[it] >= 0:
-                    it_best_store[it] = it_right_store[it]
-                elif it_left_store[it] >= 0:
-                    it_best_store[it] = it_left_store[it]
-                else:
-                    assert False, 'this should not happen'
+                            
             
             itb = it_best_store[it]
             
-            
-            v_out[ia,ie,it] = v_in_store[itb]
-            vf_out[ia,ie,it] = vf_in_store[itb]
-            vm_out[ia,ie,it] = vm_in_store[itb]
-            itheta_out[ia,ie,it] = itb
+            if itb >= 0:
+                v_out[ia,ie,it] = v_in_store[itb]
+                vf_out[ia,ie,it] = vf_in_store[itb]
+                vm_out[ia,ie,it] = vm_in_store[itb]
+                itheta_out[ia,ie,it] = itb
+            else:
+                tht = thtgrid[it]
+                v_out[ia,ie,it] = tht*vf_no + (f1-tht)*vm_no
+                vf_out[ia,ie,it] = vf_no
+                vm_out[ia,ie,it] = vm_no
+                itheta_out[ia,ie,it] = -1
             
             assert vf_out[ia,ie,it] >= vf_no
             assert vm_out[ia,ie,it] >= vm_no
@@ -292,6 +287,8 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
         
         
         is_good_store = cuda.local.array((500,),b1)
+        is_good_fem_store = cuda.local.array((500,),b1)
+        is_good_mal_store = cuda.local.array((500,),b1)
         it_left_store = cuda.local.array((500,),i2)
         it_right_store = cuda.local.array((500,),i2)
         it_best_store = cuda.local.array((500,),i2)
@@ -333,6 +330,8 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
                 vf_in_store[it] = wttc*vf_y_ni0[ia,ie,ittc] + wttp*vf_y_ni0[ia,ie,ittp]
                 vm_in_store[it] = wttc*vm_y_ni0[ia,ie,ittc] + wttp*vm_y_ni0[ia,ie,ittp]
             
+            is_good_fem_store[it] = (vf_in_store[it] >= vf_no)
+            is_good_mal_store[it] = (vm_in_store[it] >= vm_no)
             
             if vf_in_store[it] >= vf_no and vm_in_store[it] >= vm_no:
                 is_good_store[it] = True
@@ -366,43 +365,32 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
         
         # find the best number
         for it in range(nt):
+            
             if is_good_store[it]:
                 it_best_store[it] = it
             else:
-                if it_right_store[it] >= 0 and it_left_store[it] >= 0:
-                    dist_right = it_right_store[it] - it
-                    dist_left = it - it_left_store[it]
-                    assert dist_right>0
-                    assert dist_left>0
-                    
-                    if dist_right < dist_left:
+                if is_good_fem_store[it] and (not is_good_mal_store[it]):
+                            if it_left_store[it] >= 0:
+                                it_best_store[it] = it_left_store[it]
+                if is_good_mal_store[it] and (not is_good_fem_store[it]):
+                    if it_right_store[it] >= 0:
                         it_best_store[it] = it_right_store[it]
-                    elif dist_right > dist_left:
-                        it_best_store[it] = it_left_store[it]
-                    else:                                
-                        # tie breaker
-                        drc = 2*it_right_store[it] - nt
-                        if drc<0: drc = -drc
-                        dlc = 2*it_left_store[it] - nt
-                        if dlc<0: dlc = -dlc                                
-                        it_best_store[it] = it_left_store[it] if \
-                            dlc <= drc else it_right_store[it]
-                elif it_right_store[it] >= 0:
-                    it_best_store[it] = it_right_store[it]
-                elif it_left_store[it] >= 0:
-                    it_best_store[it] = it_left_store[it]
-                else:
-                    assert False, 'this should not happen'
+                  
+            
             
             itb = it_best_store[it]
             
-        
-            
-            
-            v_out[ia,ie,it] = v_in_store[itb]
-            vf_out[ia,ie,it] = vf_in_store[itb]
-            vm_out[ia,ie,it] = vm_in_store[itb]
-            itheta_out[ia,ie,it] = itb
+            if itb >= 0:
+                v_out[ia,ie,it] = v_in_store[itb]
+                vf_out[ia,ie,it] = vf_in_store[itb]
+                vm_out[ia,ie,it] = vm_in_store[itb]
+                itheta_out[ia,ie,it] = itb
+            else:
+                tht = thtgrid[it]
+                v_out[ia,ie,it] = tht*vf_no + (f1-tht)*vm_no
+                vf_out[ia,ie,it] = vf_no
+                vm_out[ia,ie,it] = vm_no
+                itheta_out[ia,ie,it] = -1
             
             assert vf_out[ia,ie,it] >= vf_no
             assert vm_out[ia,ie,it] >= vm_no

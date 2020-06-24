@@ -443,6 +443,8 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
             
             
             is_good = np.zeros((nt,),dtype=np.bool_)
+            is_good_fem = np.zeros((nt,),dtype=np.bool_)
+            is_good_mal = np.zeros((nt,),dtype=np.bool_)
             
             for it in range(nt):
                 it_c = itht[it]
@@ -476,9 +478,15 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                     vm_opt[it] = wsum(vm_y_ni_0)
                     v_opt[it] = v_y_0
                 
+                if vf_opt[it] >= vf_no_ae: is_good_fem[it] = True
+                if vm_opt[it] >= vm_no_ae: is_good_mal[it] = True
+                    
+                
                 if vf_opt[it] >= vf_no_ae and vm_opt[it] >= vm_no_ae:
                     is_good[it] = True
                     found_ren = True
+                    
+                
                 
             
             if not found_ren:
@@ -489,6 +497,7 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                     vf_out[ia,ie,it] = vf_no_ae
                     vm_out[ia,ie,it] = vm_no_ae
                     itheta_out[ia,ie,it] = -1
+                    
             else:
                 it_right = -np.ones((nt,),dtype=np.int16)
                 it_left  = -np.ones((nt,),dtype=np.int16)
@@ -506,6 +515,7 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                 for it in range(nt):
                     # pick the best and fill the values
                     
+                    '''
                     if is_good[it]:
                         it_best[it] = it
                     else:
@@ -533,16 +543,45 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                             it_best[it] = it_left[it]
                         else:
                             assert False, 'this should not happen'
+                    '''
                     
+                    assert is_good[it] == (is_good_mal[it] and is_good_fem[it])
+                    
+                    if is_good[it]:
+                        
+                        it_best[it] = it
+                        
+                    else:
+                        
+                        if is_good_fem[it] and (not is_good_mal[it]):
+                            if it_left[it] >= 0:
+                                it_best[it] = it_left[it]
+                            else:
+                                print('weird mal')
+                                
+                        if is_good_mal[it] and (not is_good_fem[it]):
+                            if it_right[it] >= 0:
+                                it_best[it] = it_right[it]
+                            else:
+                                print('weird fem')
+                            
+                                
                     itb = it_best[it]
-                    v_out[ia,ie,it] = v_opt[itb]
-                    vf_out[ia,ie,it] = vf_opt[itb]
-                    vm_out[ia,ie,it] = vm_opt[itb]
-                    itheta_out[ia,ie,it] = itb
+                    if itb >= 0:
+                        v_out[ia,ie,it] = v_opt[itb]
+                        vf_out[ia,ie,it] = vf_opt[itb]
+                        vm_out[ia,ie,it] = vm_opt[itb]
+                        itheta_out[ia,ie,it] = itb
+                    else:
+                        tht = thtgrid[it]
+                        v_out[ia,ie,it] = tht*vf_no_ae + (f1-tht)*vm_no_ae
+                        vf_out[ia,ie,it] = vf_no_ae
+                        vm_out[ia,ie,it] = vm_no_ae
+                        itheta_out[ia,ie,it] = -1
                     
                     assert vf_out[ia,ie,it] >= vf_no_ae
                     assert vm_out[ia,ie,it] >= vm_no_ae
-            
+                    
                 
     return v_out, vf_out, vm_out, itheta_out, ichoice_out
 
