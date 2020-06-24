@@ -11,9 +11,9 @@ Created on Thu May 28 11:06:41 2020
 
 from fit_plot import FitPlots
 fp = FitPlots(targ_mode='low education',
-               compare='college baseline.pkl',
-               base='college no social stigma.pkl',
-               base_name='$\phi_r = 0$',
+               compare='high school baseline.pkl',
+               base='high school 2O percent child support.pkl',
+               base_name='20 percent child support',
                compare_name='Baseline',
                #graphs_title_add="Experiment: Child Support for Divorced",
                moments_aux=None)#,moments_aux=moments_aux)

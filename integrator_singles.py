@@ -152,6 +152,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     
     
     dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
+    abn = np.zeros(matches['iexo'].shape,dtype=np.bool)
     morc = np.zeros(matches['iexo'].shape,dtype=np.bool)
     tht = -1*np.ones(matches['iexo'].shape,dtype=np.int32)
     iconv = matches['iconv']
@@ -196,8 +197,8 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
             res_m = res_c
             
         
-        (vfoutc, vmoutc), nprc, decc, thtc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta']
-        (vfoutm,vmoutm), nprm, decm, thtm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta']
+        (vfoutc, vmoutc), nprc, decc, thtc, abnc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta'], res_c['Abortion']
+        (vfoutm,vmoutm), nprm, decm, thtm, abnm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta'], res_m['Abortion']
         
         # choice is made based on Nash Surplus value
         i_birth = (nprm>nprc) 
@@ -211,6 +212,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
             
         dec[:,:,iconv[:,i]] = (i_birth*decm + (1-i_birth)*decc)[:,None,:]
         tht[:,:,iconv[:,i]] = (i_birth*thtm + (1-i_birth)*thtc)[:,None,:]
+        abn[:,:,iconv[:,i]] = (i_birth*abnm + (1-i_birth)*abnc)[:,None,:]
         
         if not unplanned_preg and not single_mom:
             morc[:,:,iconv[:,i]] = i_birth[:,None,:]
@@ -225,5 +227,7 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     mout['Decision'] = dec
     mout['Child immediately'] = morc
     mout['theta'] = tht
+    
+    mout['Abortion'] = abn if female and unplanned_preg else False*abn
     
     return EV, mout

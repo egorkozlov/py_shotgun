@@ -40,6 +40,11 @@ def compute_moments(self):
     
     
     have_kid = (self.state == n_mark) | (self.state == n_singlek)
+    new_child_check = np.zeros_like(have_kid,dtype=np.bool_)
+    new_child_check[:,1:] = (have_kid[:,1:] & ~have_kid[:,:-1])
+    assert np.all(new_child_check == self.new_child)
+    
+    
     num_mar = np.cumsum( self.agreed, axis = 1 )
     one_mar = (num_mar == 1)
     
@@ -457,6 +462,11 @@ def compute_moments(self):
         moments['spouse log coef 1 year after'] = 0.0
     
     moments['relative income at 30 if childless'] = np.mean(self.female_earnings[pick_top,9])/np.mean(self.female_earnings[pick_bottom,9])
+    
+    
+    moments['abortion ratio'] = 1000*(self.aborted.sum())/(self.new_child + self.aborted).sum()
+    moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)
+    
     
     
     if self.verbose:

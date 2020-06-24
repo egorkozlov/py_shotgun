@@ -76,6 +76,7 @@ class Agents:
         
         self._shocks_child_support_fem = np.random.random_sample((N,T))
         self._shocks_child_support_mal = np.random.random_sample((N,T))
+        
 
         # no randomnes past this line please
         
@@ -103,6 +104,7 @@ class Agents:
         self.unplanned_preg = np.zeros((N,T),dtype=np.bool)
         self.planned_preg = np.zeros((N,T),dtype=np.bool)
         self.disagreed = np.zeros((N,T),dtype=np.bool)
+        self.aborted = np.zeros((N,T),dtype=np.bool)
         self.met_a_partner = np.zeros((N,T),dtype=np.bool)
         self.agreed = np.zeros((N,T),dtype=np.bool)   
         self.agreed_k = np.zeros((N,T),dtype=np.bool) 
@@ -344,7 +346,7 @@ class Agents:
                     
                     
                     pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
-                    
+                    p_abortion_access = self.Mlist[ipol].setup.pars['p_abortion_access']
                     
                     # divide by 2 subgroups
                     
@@ -431,25 +433,49 @@ class Agents:
                     i_nomeet =  np.array( vmeet > pmeet )
                     
                     
-                    self.met_a_partner[ind,t] = ~i_nomeet
-                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet) & ~(sname=='Female and child')
+                    v_abortion = self._shocks_outsm[ind,t]
+                    i_abortion_allowed = np.array( v_abortion < p_abortion_access )
+                    
+                    
                     
                     i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat_np]*(~i_preg) \
                                     + matches['Pregnant']['Decision'][ia,iznow,i_pmat_p]*(i_preg)
                                     
                     i_m_preferred = matches['Not pregnant']['Child immediately'][ia,iznow,i_pmat_np]*(~i_preg) \
                                     + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat_p]*(i_preg)
+                                    
+                    i_abortion_preferred = matches['Not pregnant']['Abortion'][ia,iznow,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Abortion'][ia,iznow,i_pmat_p]*(i_preg)
+                                    
+                    
+                    
+                    
                     
                     i_disagree = (~i_pot_agree)
+                    
                     
                     
                     i_disagree_or_nomeet = (i_disagree) | (i_nomeet)
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
                     
+                    i_abortion = (i_abortion_allowed) & (i_abortion_preferred) & (i_disagree_and_meet) & (i_preg) &  (sname=='Female, single')
+                    i_kept = (i_abortion_allowed) & (~i_abortion_preferred) & (i_disagree_and_meet) &  (i_preg) & (sname=='Female, single')
+                    i_no_access = ~(i_abortion_allowed) & (i_disagree_and_meet) &  (i_preg) &  (sname=='Female, single')
+                    
+                    
                     self.disagreed[ind,t] = i_disagree_and_meet
+                    self.met_a_partner[ind,t] = ~i_nomeet
+                    self.unplanned_preg[ind,t] = (i_preg) & (~i_nomeet) & ~(sname=='Female and child')
+                    self.aborted[ind,t] = i_abortion
+                    
+                    n_abortions = i_abortion.sum()
+                    n_kept = i_kept.sum()
+                    if n_abortions>0: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
+                    if n_kept>0: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
+                    
                     
                     if not sname=='Female and child':
-                        become_sm = (i_disagree_and_meet) & (i_preg) & self.female
+                        become_sm = (i_disagree_and_meet) & (i_preg) & self.female & ~(i_abortion)
                         become_single = (i_disagree_or_nomeet) & ~(become_sm)   
                     else:
                         become_sm = (i_disagree_or_nomeet) & (i_preg)
@@ -465,6 +491,11 @@ class Agents:
                     
                     self.agreed[ind,t] = (i_agree_mar) | (i_agree_coh)
                     self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
+                    
+                    
+                    self.new_child[ind,t+1] = (i_kept | i_no_access) | (i_agree_mar & ~(sname=='Female and child'))
+                    
+                    
                     
                     assert np.all(~i_nomeet[i_agree])
                     
@@ -702,14 +733,15 @@ class Agents:
                             
                             self.m_k[ind[i_ren][i_birth1],(t+1):] = True
                             
-                            
+                            self.new_child[ind[i_ren],t+1] = i_birth1
+                                           
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
                             ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
                             ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
                             
                             self.ils_i[ind[i_ren],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
                             self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
-                          
+                            
                                 
                            
                         
@@ -728,6 +760,8 @@ class Agents:
                             self.m_k[ind[i_sq][i_birth1],(t+1):] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
+                            
+                            self.new_child[ind[i_sq],t+1] = i_birth1
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             

@@ -28,14 +28,18 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
         coup = 'Couple, no children'
     
     
+    
+    p_access, abortion_costs = setup.pars['p_abortion_access'], setup.pars['abortion_costs']
+    
+    
     if unplanned_pregnancy:
         assert giveabirth
-        Vfem = V['Female and child']['V']
+        Vfem = (1-p_access)*V['Female and child']['V'] + \
+                p_access*np.maximum(V['Female and child']['V'],V['Female, single']['V']-abortion_costs)
     else:
         Vfem = V['Female, single']['V']
     
-    
-    
+   
     # import objects
     agrid_c = setup.agrid_c
     agrid_s = setup.agrid_s
@@ -76,7 +80,7 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
         Vms = VMval_single[:,izm]
         Vfs = s_partner_v.apply(VFval_single,axis=0,take=(1,izf))
         
-        
+    do_abortion = ((V['Female, single']['V'][:,izf]-abortion_costs) >= V['Female and child']['V'][:,izf])
     
     expnd = lambda x : setup.v_thetagrid_fine.apply(x,axis=2)
     
@@ -90,9 +94,9 @@ def v_mar_igrid(setup,t,V,icouple,ind_or_inds,*,female,giveabirth,
     vfout, vmout, nbsout, agree, ithetaout = mar_mat(*ins)
     
     if not return_all:
-        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
+        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree, 'Abortion': do_abortion}
     else:
-        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree, 'ins':ins}
+        return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree,  'Abortion': do_abortion, 'ins':ins}
     
 
 
@@ -108,8 +112,9 @@ def v_no_mar(setup,t,V,icouple,ind_or_inds,*,female,giveabirth):
     nbsout = np.zeros_like(vmout,dtype=setup.dtype)
     ithetaout = -np.ones_like(vmout,dtype=np.int16)
     agree = np.zeros_like(vmout,dtype=np.bool_)
+    abn = np.zeros_like(vmout,dtype=np.bool_)
     
-    return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree}
+    return {'Values': (vfout, vmout), 'NBS': nbsout, 'theta': ithetaout, 'Decision':agree, 'Abortion':abn}
 
 
 

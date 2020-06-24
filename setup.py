@@ -84,6 +84,10 @@ class ModelSetup(object):
         
         p['taste_shock_mult'] = 1.0
         
+        p['p_abortion_access'] = 0.5
+        p['abortion_costs_mult'] = 10.0
+        
+        
        
         
         p['child_a_cost'] = 0.0
@@ -184,6 +188,8 @@ class ModelSetup(object):
         p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
         p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
         p['disutil_shotgun'] =  p['disutil_shotgun_coef']*p['sigma_psi_init']
+        p['abortion_costs'] = p['abortion_costs_mult']*p['u_shift_mar']
+        
         
         p['preg_az'] =  0.00
         p['preg_azt'] = 0.00

@@ -32,13 +32,14 @@ if __name__ == '__main__':
     
     high_e = True
     x, targ_mode = get_point(high_e)
+    '''
     x.update({'pmeet_21': 0.48748331898178726,
              'pmeet_28': 0.1675112412415896,
              'pmeet_35': 0.4901448272323501,
              'preg_21': 0.39984814046827155,
              'preg_28': 0.08209777096634693,
              'preg_35': 0.5214583896915517})
-
+    '''
 
 
 
@@ -49,7 +50,7 @@ if __name__ == '__main__':
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
-                                      moments_save_name = 'college with all probabilities of high school',
+                                      moments_save_name = 'college with abortions',
                                       moments_repeat=2)
     
     mdl[0].time_statistics()
@@ -79,10 +80,10 @@ if __name__ == '__main__':
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   base='college no social stigma.pkl',
-                   compare='college baseline.pkl',
-                   base_name='$\phi_s = 0$',
-                   compare_name='Baseline',
+                   base='college with abortions.pkl',
+                   compare='college no abortions.pkl',
+                   base_name='abortion',
+                   compare_name='no abortion',
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None)#,moments_aux=moments_aux)
     
