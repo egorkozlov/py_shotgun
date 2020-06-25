@@ -25,7 +25,7 @@ if system() != 'Darwin':
         upar = False
 else:
     ugpu = False
-    upar = True
+    upar = False
     
 
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
