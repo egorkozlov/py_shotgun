@@ -77,7 +77,7 @@ if __name__ == '__main__':
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None)#,moments_aux=moments_aux)
     '''
-    
+    '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
                    base='college no taste shocks.pkl',
@@ -88,5 +88,5 @@ if __name__ == '__main__':
                    moments_aux=None)#,moments_aux=moments_aux)
     
     mdl[0].mar_graphs()
-    
+    '''
     
