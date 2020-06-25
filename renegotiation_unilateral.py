@@ -556,14 +556,14 @@ def v_ren_core_two_opts_with_int(v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, w
                         if is_good_fem[it] and (not is_good_mal[it]):
                             if it_left[it] >= 0:
                                 it_best[it] = it_left[it]
-                            else:
-                                print('weird mal')
+                            #else:
+                            #    print('weird mal')
                                 
                         if is_good_mal[it] and (not is_good_fem[it]):
                             if it_right[it] >= 0:
                                 it_best[it] = it_right[it]
-                            else:
-                                print('weird fem')
+                            #else:
+                            #    print('weird fem')
                             
                                 
                     itb = it_best[it]

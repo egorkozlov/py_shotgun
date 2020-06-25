@@ -32,21 +32,13 @@ if __name__ == '__main__':
     
     high_e = True
     x, targ_mode = get_point(high_e)
-    '''
-    x.update({'pmeet_21': 0.48748331898178726,
-             'pmeet_28': 0.1675112412415896,
-             'pmeet_35': 0.4901448272323501,
-             'preg_21': 0.39984814046827155,
-             'preg_28': 0.08209777096634693,
-             'preg_35': 0.5214583896915517})
-    '''
 
 
 
     
     tar = target_values(targ_mode)
     
-    out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
+    out, mdl, agents, res, mom = mdl_resid(x=None,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
