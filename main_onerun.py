@@ -50,7 +50,7 @@ if __name__ == '__main__':
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
-                                      moments_save_name = 'college with abortions',
+                                      moments_save_name = 'college no taste shocks',
                                       moments_repeat=2)
     
     mdl[0].time_statistics()
@@ -77,16 +77,16 @@ if __name__ == '__main__':
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None)#,moments_aux=moments_aux)
     '''
-    
+    '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   base='college with abortions.pkl',
-                   compare='college no abortions.pkl',
-                   base_name='abortion',
-                   compare_name='no abortion',
+                   base='college no taste shocks.pkl',
+                   compare='college sigma zero.pkl',
+                   base_name='no shocks',
+                   compare_name='sigma zero',
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None)#,moments_aux=moments_aux)
     
     mdl[0].mar_graphs()
-    
+    '''
     

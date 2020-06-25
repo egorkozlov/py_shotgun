@@ -22,7 +22,7 @@ else:
 
 from math import ceil
 
-def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, sig):
+def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, thtgrid):
     
                     
     na, ne, nt_coarse = v_y_ni.shape
@@ -101,6 +101,8 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
         
         
         is_good_store = cuda.local.array((500,),b1)
+        is_good_fem_store = cuda.local.array((500,),b1)
+        is_good_mal_store = cuda.local.array((500,),b1)
         it_left_store = cuda.local.array((500,),i2)
         it_right_store = cuda.local.array((500,),i2)
         it_best_store = cuda.local.array((500,),i2)
@@ -114,7 +116,7 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             it_right_store[it] = -1
             it_best_store[it] = -1
             
-            
+             
             it_int = itht[it]
             for ittc in range(ittc,nt_crude):
                 if ittc==it_int: break
@@ -129,6 +131,9 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             v_in_store[it]  = wttc*v_y_ni[ia,ie,ittc]  + wttp*v_y_ni[ia,ie,ittp]
             vf_in_store[it] = wttc*vf_y_ni[ia,ie,ittc] + wttp*vf_y_ni[ia,ie,ittp]
             vm_in_store[it] = wttc*vm_y_ni[ia,ie,ittc] + wttp*vm_y_ni[ia,ie,ittp]
+            
+            is_good_fem_store[it] = (vf_in_store[it] >= vf_no)
+            is_good_mal_store[it] = (vm_in_store[it] >= vm_no)
             
             
             if vf_in_store[it] >= vf_no and vm_in_store[it] >= vm_no:
@@ -166,45 +171,34 @@ def cuda_ker_one_opt(v_y_ni, vf_y_ni, vm_y_ni, vf_n, vm_n, itht, wntht, thtgrid,
             if is_good_store[it]:
                 it_best_store[it] = it
             else:
-                if it_right_store[it] >= 0 and it_left_store[it] >= 0:
-                    dist_right = it_right_store[it] - it
-                    dist_left = it - it_left_store[it]
-                    assert dist_right>0
-                    assert dist_left>0
-                    
-                    if dist_right < dist_left:
+                if is_good_fem_store[it] and (not is_good_mal_store[it]):
+                            if it_left_store[it] >= 0:
+                                it_best_store[it] = it_left_store[it]
+                if is_good_mal_store[it] and (not is_good_fem_store[it]):
+                    if it_right_store[it] >= 0:
                         it_best_store[it] = it_right_store[it]
-                    elif dist_right > dist_left:
-                        it_best_store[it] = it_left_store[it]
-                    else:                                
-                        # tie breaker
-                        drc = 2*it_right_store[it] - nt
-                        if drc<0: drc = -drc
-                        dlc = 2*it_left_store[it] - nt
-                        if dlc<0: dlc = -dlc                                
-                        it_best_store[it] = it_left_store[it] if \
-                            dlc <= drc else it_right_store[it]
-                elif it_right_store[it] >= 0:
-                    it_best_store[it] = it_right_store[it]
-                elif it_left_store[it] >= 0:
-                    it_best_store[it] = it_left_store[it]
-                else:
-                    assert False, 'this should not happen'
+                            
             
             itb = it_best_store[it]
             
-            
-            v_out[ia,ie,it] = v_in_store[itb]
-            vf_out[ia,ie,it] = vf_in_store[itb]
-            vm_out[ia,ie,it] = vm_in_store[itb]
-            itheta_out[ia,ie,it] = itb
+            if itb >= 0:
+                v_out[ia,ie,it] = v_in_store[itb]
+                vf_out[ia,ie,it] = vf_in_store[itb]
+                vm_out[ia,ie,it] = vm_in_store[itb]
+                itheta_out[ia,ie,it] = itb
+            else:
+                tht = thtgrid[it]
+                v_out[ia,ie,it] = tht*vf_no + (f1-tht)*vm_no
+                vf_out[ia,ie,it] = vf_no
+                vm_out[ia,ie,it] = vm_no
+                itheta_out[ia,ie,it] = -1
             
             assert vf_out[ia,ie,it] >= vf_no
             assert vm_out[ia,ie,it] >= vm_no
             
             
 
-def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, sig, 
+def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n_ni, vm_n_ni, itht, wntht, thtgrid, 
                           rescale = True):
     
     
@@ -222,13 +216,12 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     vf_out = cuda.device_array((na,ne,nt),dtype=cpu_type)
     itheta_out = cuda.device_array((na,ne,nt),dtype=np.int16)
     switch_out = cuda.device_array((na,ne,nt),dtype=np.bool_)
-    pswitch_out = cuda.device_array((na,ne,nt),dtype=cpu_type)
     
     
     thtgrid = cuda.to_device(thtgrid)
     
 
-    threadsperblock = (16, 32)
+    threadsperblock = (16, 64)
         
     b_a = ceil(na/threadsperblock[0])
     b_exo = ceil(ne/threadsperblock[1])
@@ -256,22 +249,20 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     
     
     cuda_ker_two_opt[blockspergrid, threadsperblock](v_y0, v_y1, vf_y0, vf_y1, vm_y0, vm_y1, vf_n, vm_n, 
-                                    itht, wntht, thtgrid, sig,
-                                    v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out)
+                                    itht, wntht, thtgrid,  
+                                    v_out, vm_out, vf_out, itheta_out, switch_out)
     
-    v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out = (x.copy_to_host() 
-                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out))
+    v_out, vm_out, vf_out, itheta_out, switch_out = (x.copy_to_host() 
+                            for x in (v_out, vm_out, vf_out, itheta_out, switch_out))
     
-    return v_out, vf_out, vm_out, itheta_out, switch_out, pswitch_out  
+    return v_out, vf_out, vm_out, itheta_out, switch_out   
             
             
 
 
-from math import exp, log
-ofval = 14.0
 
 @cuda.jit   
-def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n, vm_n, itht, wntht, thtgrid, sig, v_out, vm_out, vf_out, itheta_out, switch_out, pswitch_out):
+def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, vf_n, vm_n, itht, wntht, thtgrid, v_out, vm_out, vf_out, itheta_out, switch_out):
     # this assumes block is for the same a and theta
     ia, ie  = cuda.grid(2)
     
@@ -284,8 +275,6 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     
     
     f1 = gpu_type(1.0)
-    nu = log(2.0) #0.5772156649
-    correction = sig*nu
     
     if ia < na and ie < ne:
         
@@ -298,6 +287,8 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
         
         
         is_good_store = cuda.local.array((500,),b1)
+        is_good_fem_store = cuda.local.array((500,),b1)
+        is_good_mal_store = cuda.local.array((500,),b1)
         it_left_store = cuda.local.array((500,),i2)
         it_right_store = cuda.local.array((500,),i2)
         it_best_store = cuda.local.array((500,),i2)
@@ -327,57 +318,20 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
             vy_0 = wttc*v_y_ni0[ia,ie,ittc] + wttp*v_y_ni0[ia,ie,ittp]
             vy_1 = wttc*v_y_ni1[ia,ie,ittc] + wttp*v_y_ni1[ia,ie,ittp]
             
-            vfy_0 = wttc*vf_y_ni0[ia,ie,ittc] + wttp*vf_y_ni0[ia,ie,ittp]
-            vfy_1 = wttc*vf_y_ni1[ia,ie,ittc] + wttp*vf_y_ni1[ia,ie,ittp]
-            
-            vmy_0 = wttc*vm_y_ni0[ia,ie,ittc] + wttp*vm_y_ni0[ia,ie,ittp]
-            vmy_1 = wttc*vm_y_ni1[ia,ie,ittc] + wttp*vm_y_ni1[ia,ie,ittp]
-            
-            
-            
-            v_diff_scaled = (vy_1 - vy_0)/sig
-            
-            overflow_up = True if v_diff_scaled >= ofval else False 
-            overflow_down = True if v_diff_scaled <= -ofval else False
-            
-            overflow = overflow_up or overflow_down
-            
-            
-            if not overflow:
-                emx = exp(-v_diff_scaled)
-                p1 = 1.0/(1.0+emx)
-                p0 = f1 - p1              
-                v_smax = vy_0 + sig*log(1+exp(v_diff_scaled)) - correction                
-                v_pure = v_smax - p1*vy_1 - p0*vy_0
-                vf_smax = v_pure + p1*vfy_1 + p0*vfy_0
-                vm_smax = v_pure + p1*vmy_1 + p0*vmy_0
-            elif overflow_up:
-                p1 = f1                
-                v_smax = vy_1 - correction
-                vf_smax = vfy_1 - correction
-                vm_smax = vmy_1 - correction
-            elif overflow_down:
-                p1 = 0.0                
-                v_smax = vy_0 - correction
-                vf_smax = vfy_0 - correction
-                vm_smax = vmy_0 - correction                
-            else:
-                assert False, 'this should not happen'
-                
-            
-            
-            pick1 = (vy_1 > vy_0) 
-            pswitch_out[ia,ie,it] = p1
+            pick1 = (vy_1 > vy_0)       
             switch_out[ia,ie,it] = pick1
             
+            if pick1:
+                v_in_store[it]  = vy_1
+                vf_in_store[it] = wttc*vf_y_ni1[ia,ie,ittc] + wttp*vf_y_ni1[ia,ie,ittp]
+                vm_in_store[it] = wttc*vm_y_ni1[ia,ie,ittc] + wttp*vm_y_ni1[ia,ie,ittp]
+            else:
+                v_in_store[it]  = vy_0
+                vf_in_store[it] = wttc*vf_y_ni0[ia,ie,ittc] + wttp*vf_y_ni0[ia,ie,ittp]
+                vm_in_store[it] = wttc*vm_y_ni0[ia,ie,ittc] + wttp*vm_y_ni0[ia,ie,ittp]
             
-            
-            v_in_store[it]  = v_smax
-            vf_in_store[it] = vf_smax
-            vm_in_store[it] = vm_smax
-            
-            
-            
+            is_good_fem_store[it] = (vf_in_store[it] >= vf_no)
+            is_good_mal_store[it] = (vm_in_store[it] >= vm_no)
             
             if vf_in_store[it] >= vf_no and vm_in_store[it] >= vm_no:
                 is_good_store[it] = True
@@ -411,43 +365,32 @@ def cuda_ker_two_opt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
         
         # find the best number
         for it in range(nt):
+            
             if is_good_store[it]:
                 it_best_store[it] = it
             else:
-                if it_right_store[it] >= 0 and it_left_store[it] >= 0:
-                    dist_right = it_right_store[it] - it
-                    dist_left = it - it_left_store[it]
-                    assert dist_right>0
-                    assert dist_left>0
-                    
-                    if dist_right < dist_left:
+                if is_good_fem_store[it] and (not is_good_mal_store[it]):
+                            if it_left_store[it] >= 0:
+                                it_best_store[it] = it_left_store[it]
+                if is_good_mal_store[it] and (not is_good_fem_store[it]):
+                    if it_right_store[it] >= 0:
                         it_best_store[it] = it_right_store[it]
-                    elif dist_right > dist_left:
-                        it_best_store[it] = it_left_store[it]
-                    else:                                
-                        # tie breaker
-                        drc = 2*it_right_store[it] - nt
-                        if drc<0: drc = -drc
-                        dlc = 2*it_left_store[it] - nt
-                        if dlc<0: dlc = -dlc                                
-                        it_best_store[it] = it_left_store[it] if \
-                            dlc <= drc else it_right_store[it]
-                elif it_right_store[it] >= 0:
-                    it_best_store[it] = it_right_store[it]
-                elif it_left_store[it] >= 0:
-                    it_best_store[it] = it_left_store[it]
-                else:
-                    assert False, 'this should not happen'
+                  
+            
             
             itb = it_best_store[it]
             
-        
-            
-            
-            v_out[ia,ie,it] = v_in_store[itb]
-            vf_out[ia,ie,it] = vf_in_store[itb]
-            vm_out[ia,ie,it] = vm_in_store[itb]
-            itheta_out[ia,ie,it] = itb
+            if itb >= 0:
+                v_out[ia,ie,it] = v_in_store[itb]
+                vf_out[ia,ie,it] = vf_in_store[itb]
+                vm_out[ia,ie,it] = vm_in_store[itb]
+                itheta_out[ia,ie,it] = itb
+            else:
+                tht = thtgrid[it]
+                v_out[ia,ie,it] = tht*vf_no + (f1-tht)*vm_no
+                vf_out[ia,ie,it] = vf_no
+                vm_out[ia,ie,it] = vm_no
+                itheta_out[ia,ie,it] = -1
             
             assert vf_out[ia,ie,it] >= vf_no
             assert vm_out[ia,ie,it] >= vm_no

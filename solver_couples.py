@@ -159,6 +159,8 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     '''
     assert V_all.dtype==EVc_all.dtype==V_couple.dtype
     
+    
+    '''
     if uf.shape[-1] > 1:
         assert np.all(np.diff(uf,axis=-1)>0), 'Monotonicity is violated for females in u'
         assert np.all(np.diff(um,axis=-1)<0), 'Monotonicity is violated for males in u'
@@ -167,6 +169,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         assert np.all(np.diff(V_fem,axis=-1)>0), 'Monotonicity is violated for females in V'
         assert np.all(np.diff(V_mal,axis=-1)<0), 'Monotonicity is violated for males in V'
         
+    '''
     return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt, r(V_all_l)
 
 

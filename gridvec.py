@@ -27,7 +27,7 @@ class VecOnGrid(object):
         else:
             self.i, self.wnext = iwn
         
-        '''
+        
         if np.any(self.i<0):
             # manual correction to avoid -1
             ichange = (self.i<0)
@@ -42,7 +42,7 @@ class VecOnGrid(object):
                 # manual correction to avoid -1
                 self.i[i_fix_w] = self.i[i_fix_w] + 1
                 self.wnext[i_fix_w] = 0.0
-        '''
+        
             
         self.wnext = self.wnext.astype(grid.dtype)
         
