@@ -19,5 +19,6 @@ dependencies:
   - pip:
     - sobol-seq==0.2.0
     - msgpack
+    - DFO-LS
 prefix: /Users/egorkozlov/opt/anaconda3/envs/py-shotgun
 

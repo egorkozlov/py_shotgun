@@ -15,6 +15,7 @@ from gridvec import VecOnGrid
 from platform import system
 if system() != 'Darwin':
     try:
+        #assert False
         g = cuda.device_array((2,5))
         del(g)
         ugpu = True

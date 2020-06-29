@@ -470,8 +470,8 @@ class Agents:
                     
                     n_abortions = i_abortion.sum()
                     n_kept = i_kept.sum()
-                    if n_abortions>0: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
-                    if n_kept>0: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
+                    #if n_abortions>0: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
+                    #if n_kept>0: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
                     
                     
                     if not sname=='Female and child':
