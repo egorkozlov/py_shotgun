@@ -13,6 +13,8 @@ from collections import namedtuple
 from gridvec import VecOnGrid
 from aux_routines import prob_polyfit
 from itertools import product
+from tiktak import filer
+from nopar_assets_dist import get_estimates
 
 from scipy import sparse
 
@@ -487,6 +489,9 @@ class ModelSetup(object):
         
         # this pre-computes transition matrices for meeting a partner
        
+        #self.partners_distribution = get_estimates(zlist=self.exogrid.zm_t[2:])
+       
+        
         self.build_matches()
         
         
@@ -561,11 +566,6 @@ class ModelSetup(object):
         
         return prob_a_mat, i_a_mat
             
-    #def mar_mats_assets(self,npoints=4,abar=0.1):
-        #self.prob_a_mat_female_noupp, self.i_a_mat_female_noupp = self._mar_mats_assets(npoints=npoints,female=True,upp=False,abar=abar)
-        #self.prob_a_mat_male, self.i_a_mat_male = self._mar_mats_assets(npoints=npoints,female=False,abar=abar)
-        #self.prob_a_mat_female_upp, self.i_a_mat_female_upp = self._mar_mats_assets(npoints=npoints,female=True,upp=True,abar=abar)
-        
     
     def _mar_mats_iexo(self,t,female=True,upp=False,trim_lvl=0.001):
         # TODO: check timing
