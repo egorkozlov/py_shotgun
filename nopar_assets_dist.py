@@ -72,6 +72,7 @@ def nonpar_distribution(z,data,nbins):
         a_vals_by_z[iz,:] = a_vals
         #assert np.all(np.diff(a_vals)>=0)
         assert np.allclose(np.sum(p_groups),1.0)
+        
     return z_probs, a_probs_by_z, a_vals_by_z
 
 
