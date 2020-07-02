@@ -125,8 +125,8 @@ def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
     
     uloss_fem_single = setup.pars['disutil_shotgun'] if (unplanned_preg and not single_mom) else 0.0
     uloss_mal_single = setup.pars['disutil_shotgun'] if (unplanned_preg and not single_mom) else 0.0
-    if unplanned_preg and not single_mom:
-        print('check')
+    #if unplanned_preg and not single_mom:
+        #print('check')
     
         
     V_next = np.ones((ns,nexo))*(-1e20)

@@ -17,6 +17,12 @@ from calibration_params import calibration_params
 #    print('hi, my x is {}'.format(x))
 #    #if np.random.random_sample()>0.8: raise Exception('oh')
 #    return sum([i**2 for i in x])
+try:
+    from numba import cuda
+    g = cuda.device_array((2,5))
+    npt = 160
+except:
+    npt = 90
 
 
 def fun(x):
@@ -81,7 +87,7 @@ def fun(x):
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-5, maxfun=160, bounds=(xl,xu),
+        res=dfols.solve(q, xc, rhobeg = 0.1, rhoend=1e-5, maxfun=npt, bounds=(xl,xu),
                         npt=len(xc)+5,scaling_within_bounds=True, 
                         user_params={'tr_radius.gamma_dec':0.75,'tr_radius.gamma_inc':1.5,
                                      'tr_radius.alpha1':0.5,'tr_radius.alpha2':0.75,
