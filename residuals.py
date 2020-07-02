@@ -57,8 +57,8 @@ def mdl_resid(x=None,targets=None,weights=w,
     if verbose: print(kwords)
     
     # this is for the default model
-    dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
-    dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
+    #dc_k  = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
+    #dc_nk = DivorceCosts(unilateral_divorce=True,assets_kept = 1.0,u_lost_m=0.00,u_lost_f=0.00,eq_split=1.0)
     
     
     
@@ -87,8 +87,7 @@ def mdl_resid(x=None,targets=None,weights=w,
                 
     if load_from is None:
         
-        mdl = Model(iterator_name=iter_name,divorce_costs_k=dc_k,
-                    divorce_costs_nk=dc_nk,**kwords)
+        mdl = Model(iterator_name=iter_name,**kwords)
         mdl_list = [mdl]
         
     else:       

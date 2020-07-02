@@ -87,7 +87,7 @@ class ModelSetup(object):
         p['p_abortion_access'] = 0.5
         p['abortion_costs_mult'] = 10.0
         
-        
+        p['u_lost_divorce_mult'] = 0.0 
        
         
         p['child_a_cost'] = 0.0
@@ -189,7 +189,7 @@ class ModelSetup(object):
         p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
         p['disutil_shotgun'] =  p['disutil_shotgun_coef']*p['sigma_psi_init']
         p['abortion_costs'] = p['abortion_costs_mult']*p['u_shift_mar']
-        
+        p['u_lost_divorce'] = p['u_lost_divorce_mult']*p['sigma_psi_init']
         
         p['preg_az'] =  0.00
         p['preg_azt'] = 0.00
@@ -197,7 +197,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = 0.0*p['taste_shock_mult']*0.1#p['sigma_psi']
+        p['taste_shock'] = 0.0*p['taste_shock_mult']*0.0#p['sigma_psi']
         
         p['is fertile'] = [p['any kids']]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
@@ -281,7 +281,8 @@ class ModelSetup(object):
         #Cost of Divorce
         if divorce_costs_k == 'Default':
             # by default the costs are set in the bottom
-            self.divorce_costs_k = DivorceCosts()
+            self.divorce_costs_k = DivorceCosts(u_lost_m=self.pars['u_lost_divorce'],
+                                                u_lost_f=self.pars['u_lost_divorce'])
         else:
             if isinstance(divorce_costs_k,dict):
                 # you can feed in arguments to DivorceCosts
@@ -294,7 +295,8 @@ class ModelSetup(object):
         #Cost of Separation
         if divorce_costs_nk == 'Default':
             # by default the costs are set in the bottom
-            self.dov_costs_nok = DivorceCosts()
+            self.divorce_costs_nk = DivorceCosts(u_lost_m=self.pars['u_lost_divorce'],
+                                              u_lost_f=self.pars['u_lost_divorce'])
         else:
             if isinstance(divorce_costs_nk,dict):
                 # you can feed in arguments to DivorceCosts
@@ -579,7 +581,7 @@ class ModelSetup(object):
         mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
-        mu_psi = 0.0 if not upp else -self.pars['disutil_shotgun']
+        mu_psi = 0.0 if not upp else 0.0 # -self.pars['disutil_shotgun']
         
         if female:
             nz_single = setup.exogrid.zf_t[t].shape[0]
