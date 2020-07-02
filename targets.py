@@ -34,8 +34,6 @@ def target_values(mode='high education'):
             ('divorced by years after marriage if kids first, ',(1,10)),
             ('divorced by years after marriage if marriage first, ',(1,10)),
             ('mean x share',),
-            ('divorced if k then m and one marriage',),
-            ('divorced if m then k and one marriage',),
             ('more than one mar at 40',),
             ('in labor force at 30 if kids',),
             ('divorced and kids in population at ',(23,35)),
