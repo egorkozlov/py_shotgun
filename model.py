@@ -135,7 +135,7 @@ class Model(object):
             
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
-                EV, dec = ev_single(setup,V_next,setup.agrid_s,female,t)
+                EV, dec = ev_single(setup,V_next,female,t)
                 assert EV.dtype == setup.dtype
             elif desc == 'Couple and child':
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
@@ -144,7 +144,7 @@ class Model(object):
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
                 assert EV[0].dtype == EV[1].dtype == EV[2].dtype == EV[3].dtype == setup.dtype
             elif desc == 'Female and child':
-                EV, dec = ev_single_k(setup,V_next,setup.agrid_s,t)
+                EV, dec = ev_single_k(setup,V_next,t)
                 assert EV.dtype == setup.dtype
             else:
                 raise Exception('I do not know this type...')

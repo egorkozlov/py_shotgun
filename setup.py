@@ -220,7 +220,6 @@ class ModelSetup(object):
         
         
         
-        
         p['n_psi_t'] = [p['n_psi']]*T
         
         
@@ -559,6 +558,7 @@ class ModelSetup(object):
         
         pz_all = pz_precomputed['prob_z']
         
+        
         pick = t if t < len(pz_all) else -1
         
         pz = pz_precomputed['prob_z'][pick]         
@@ -603,7 +603,7 @@ class ModelSetup(object):
             
         nexo_ext = nexo*na_matches
         p_exo_ext = np.empty((nz_single,nexo_ext),dtype=self.dtype)
-        ia_table = np.empty((setup.na,nexo_ext),dtype=self.dtype) # resulting ia for each na and nexo_ext
+        ia_table = np.empty((setup.na,nexo_ext),dtype=np.int16) # resulting ia for each na and nexo_ext
         
         
         
@@ -618,7 +618,6 @@ class ModelSetup(object):
         
         
             
-        
         return {'p_mat_iexo':p_mat,
                 'p_mat_extended':p_exo_ext,
                 'ia_c_table':ia_table,
@@ -637,8 +636,8 @@ class ModelSetup(object):
         out_m = []
         out_f = []
         for t in range(self.pars['Tret'] - 1):
-            out_m.append(self._mar_mats(t,female=True))
-            out_f.append(self._mar_mats(t,female=False))
+            out_m.append(self._mar_mats(t,female=False))
+            out_f.append(self._mar_mats(t,female=True))
             
         self.matches_fem = out_f
         self.matches_mal = out_m

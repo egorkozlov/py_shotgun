@@ -51,9 +51,6 @@ if __name__ == '__main__':
          'u_lost_divorce_mult': 4.009807165105703}
 
 
-
-
-
     
     tar = target_values(targ_mode)
     

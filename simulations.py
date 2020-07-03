@@ -359,11 +359,33 @@ class Agents:
                     # TODO: fix the seed
                     iznow = self.iexo[ind,t]
                     
-                    pmat_np = matches['Not pregnant']['p'][ia,iznow,:] # assuming it is identical !!!
-                    pmat_p = matches['Pregnant']['p'][ia,iznow,:]
-                    pmat_cum_np = pmat_np.cumsum(axis=1)
-                    pmat_cum_p = pmat_p.cumsum(axis=1)
                     
+                    if not 'Not pregnant' in matches or (pmeet<1e-5):
+                        assert pmeet<1e-5
+                        # propagate yaftmar
+                        # !!! this needs to be verified
+                        
+                        # iexo is set within iexonext
+                        izf = self.iexo[ind,t+1]
+                        self.yaftmar[ind,t+1] = \
+                            (self.yaftmar[ind,t] + 1)*(self.yaftmar[ind,t]>=0)+(-1)*(self.yaftmar[ind,t]<0)
+                        
+                        if sname != "Female and child":
+                            self.ils_i[ind,t+1] = self.ils_def
+                            self.state[ind,t+1] = self.state_codes[ss]
+                        else:
+                            fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                            self.state[ind,t+1] = self.state_codes['Female and child']  
+                            self.ils_i[ind,t+1] = fls_policy[self.iassets[ind,t+1],izf]
+                        continue
+                        
+                        
+                        
+                        
+                    
+                    pmat_np = matches['Not pregnant']['p_mat_extended'][iznow,:] # assuming it is identical !!!
+                    pmat_cum_np = pmat_np.cumsum(axis=1)
+                    pmat_cum_p = pmat_cum_np
                 
                     assert np.all(pmat_cum_np < 1 + 1e-5) 
                     assert np.all(pmat_cum_np[:,-1] > 1 - 1e-5)
@@ -413,14 +435,19 @@ class Agents:
                     
                     #i_pmat = i_pmat_p*(i_preg) + i_pmat_np*(~i_preg)
                     
-                    ic_out = matches['Not pregnant']['iexo'][ia,iznow,i_pmat_np]*(~i_preg) \
-                                + matches['Pregnant']['iexo'][ia,iznow,i_pmat_p]*(i_preg)
+                    
+                    ic_out = matches['Not pregnant']['corresponding_iexo'][i_pmat_np]*(~i_preg) \
+                                + matches['Pregnant']['corresponding_iexo'][i_pmat_p]*(i_preg)
+                    
+                    imatch = matches['Not pregnant']['corresponding_imatch'][i_pmat_np]*(~i_preg) \
+                                + matches['Pregnant']['corresponding_imatch'][i_pmat_p]*(i_preg)
+                    
+                     
+                    ia_out = matches['Not pregnant']['ia_c_table'][ia,i_pmat_np]*(~i_preg) \
+                                + matches['Pregnant']['ia_c_table'][ia,i_pmat_p]*(i_preg)
                                 
-                    ia_out = matches['Not pregnant']['ia'][ia,iznow,i_pmat_np]*(~i_preg) \
-                                + matches['Pregnant']['ia'][ia,iznow,i_pmat_p]*(i_preg)
-                                
-                    it_out = matches['Not pregnant']['theta'][ia,iznow,i_pmat_np]*(~i_preg) + \
-                                + matches['Pregnant']['theta'][ia,iznow,i_pmat_p]*(i_preg)
+                    it_out = matches['Not pregnant']['itheta'][ia,i_pmat_np]*(~i_preg) + \
+                                + matches['Pregnant']['itheta'][ia,i_pmat_p]*(i_preg)
                     
                     
                     iall, izf, izm, ipsi = self.Mlist[ipol].setup.all_indices(t,ic_out)
@@ -438,14 +465,14 @@ class Agents:
                     
                     
                     
-                    i_pot_agree = matches['Not pregnant']['Decision'][ia,iznow,i_pmat_np]*(~i_preg) \
-                                    + matches['Pregnant']['Decision'][ia,iznow,i_pmat_p]*(i_preg)
+                    i_pot_agree = matches['Not pregnant']['Decision'][ia,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Decision'][ia,i_pmat_p]*(i_preg)
                                     
-                    i_m_preferred = matches['Not pregnant']['Child immediately'][ia,iznow,i_pmat_np]*(~i_preg) \
-                                    + matches['Pregnant']['Child immediately'][ia,iznow,i_pmat_p]*(i_preg)
+                    i_m_preferred = matches['Not pregnant']['Child immediately'][ia,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Child immediately'][ia,i_pmat_p]*(i_preg)
                                     
-                    i_abortion_preferred = matches['Not pregnant']['Abortion'][ia,iznow,i_pmat_np]*(~i_preg) \
-                                    + matches['Pregnant']['Abortion'][ia,iznow,i_pmat_p]*(i_preg)
+                    i_abortion_preferred = matches['Not pregnant']['Abortion'][ia,i_pmat_np]*(~i_preg) \
+                                    + matches['Pregnant']['Abortion'][ia,i_pmat_p]*(i_preg)
                                     
                     
                     
