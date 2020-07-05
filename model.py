@@ -163,6 +163,7 @@ class Model(object):
                 if timed: self.time('Optimization for {}'.format(desc))
                 
                 self.wrap_decisions(desc,dec,vout)
+                if timed: self.time('Wrapping at iter for {}'.format(desc))
                 
                 return vout, dec
             def initialize(desc,t):
@@ -170,6 +171,8 @@ class Model(object):
                 if timed: self.time('Initialization for {}'.format(desc))
                 dec = {}
                 self.wrap_decisions(desc,dec,vout)
+                if timed: self.time('Wrapping at iter for {}'.format(desc))
+                
                 return vout, dec
         else:
             raise Exception('unsupported name')

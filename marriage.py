@@ -52,11 +52,22 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     
     it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     
+    from marriage_gpu import v_mar_gpu
+    
     v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
+    
+    v_f2, v_m2, agree2, nbs2, itheta2 = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
+    
+    assert np.all(agree==agree2)
+    assert np.allclose(v_f,v_f2)
+    assert np.allclose(v_m,v_m2)
+    assert np.all(itheta2==itheta)
+    assert np.allclose(nbs,nbs2)
+    print('marriage test ok')
     
     return {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
 
-@jit(nopython=True)
+@jit(nopython=True,parallel=True)
 def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     # this is the core function that does bargaining
     
@@ -78,10 +89,9 @@ def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     nbs = np.zeros((na,ne),dtype=vfy.dtype)
     itheta = np.empty((na,ne),dtype=np.int16)
     
-    
-    for ia in range(na):
-        for ie in range(ne):
-            
+    for ie in prange(ne):
+        for ia in prange(na):
+        
             vfy_store = np.empty((nt,),dtype=vfy.dtype)
             vmy_store = np.empty((nt,),dtype=vmy.dtype)
             
@@ -120,8 +130,8 @@ def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     
     
     return v_f, v_m, agree, nbs, itheta
-                    
-            
+
+
     
     
     
