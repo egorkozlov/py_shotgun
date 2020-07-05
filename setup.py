@@ -488,9 +488,19 @@ class ModelSetup(object):
         
         # this pre-computes transition matrices for meeting a partner
        
-        self.partners_distribution_fem = get_estimates(zlist=self.exogrid.zm_t[2:])
-        self.partners_distribution_mal = get_estimates(zlist=self.exogrid.zf_t[0:])
-       
+        
+        
+        try:
+            self.partners_distribution_fem = filer('az_dist_fem.pkl',0,0,repeat=False)
+            self.partners_distribution_mal = filer('az_dist_mal.pkl',0,0,repeat=False)
+        except:
+            print('recreating estimates...')
+            est_fem = get_estimates(zlist=self.exogrid.zm_t[2:])
+            filer('az_dist_fem.pkl',est_fem,True,repeat=False)
+            self.partners_distribution_fem = est_fem
+            est_mal = get_estimates(zlist=self.exogrid.zf_t[0:])
+            filer('az_dist_mal.pkl',est_mal,True,repeat=False)
+            self.partners_distribution_mal = est_mal
         
         self.build_matches()
         
