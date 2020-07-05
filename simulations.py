@@ -177,7 +177,19 @@ class Agents:
         if self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.ub_hit_couple: print('Assets upped bound is reached for couples')
         
-            
+    
+    def tht_interpolate(self,v,i_other,i_theta):
+        it = self.setup.v_thetagrid_fine.i[i_theta]
+        itp = self.setup.v_thetagrid_fine.i[i_theta]
+        wt = self.setup.v_thetagrid_fine.wthis[i_theta]
+        wtp = self.setup.v_thetagrid_fine.wnext[i_theta]
+        
+        ind_t = i_other + (it,)
+        ind_tp = i_other + (itp,)
+        return v[ind_t]*wt + v[ind_tp]*wtp
+        
+
+           
         
     def simulate(self):
         
@@ -216,7 +228,8 @@ class Agents:
                 
                 ind = np.where(is_state)[0]
                 
-                pol = self.Mlist[ipol].decisions[t][sname]
+                #pol = self.Mlist[ipol].decisions[t][sname]
+                vpol = self.Mlist[ipol].V[t][sname]
                     
                 
                 if not use_theta:
@@ -224,11 +237,11 @@ class Agents:
                     # apply for singles
                     
                     
-                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t]]
+                    anext = vpol['s'][self.iassets[ind,t],self.iexo[ind,t]]
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_s,anext).roll(shocks=self._shocks_single_a[ind,t])
                     self.s[ind,t] = anext
-                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t]]
-                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t]]
+                    self.c[ind,t] = vpol['c'][self.iassets[ind,t],self.iexo[ind,t]]
+                    self.x[ind,t] = vpol['x'][self.iassets[ind,t],self.iexo[ind,t]]
                     if np.any(self.iassets[ind,t+1]==self.setup.na-1): self.ub_hit_single=True
                     
                 else:
@@ -237,11 +250,15 @@ class Agents:
                     # function apply_2dim is experimental but I checked it at this setup
                     
                     # apply for couples
-                                        
-                    anext = pol['s'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    
+                    def tint(x): return self.tht_interpolate(x,(self.iassets[ind,t],self.iexo[ind,t]),self.itheta[ind,t])
+                                    
+                    anext = tint(vpol['s'])
                     self.s[ind,t] = anext
-                    self.x[ind,t] = pol['x'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
-                    self.c[ind,t] = pol['c'][self.iassets[ind,t],self.iexo[ind,t],self.itheta[ind,t]]
+                    
+                    
+                    self.x[ind,t] = tint(vpol['x'])
+                    self.c[ind,t] = tint(vpol['c'])
                     
                     self.iassets[ind,t+1] = VecOnGrid(self.setup.agrid_c,anext).roll(shocks=self._shocks_couple_a[ind,t])
                     if np.any(self.iassets[ind,t+1]==self.setup.na-1): self.couple=True
@@ -374,7 +391,7 @@ class Agents:
                             self.ils_i[ind,t+1] = self.ils_def
                             self.state[ind,t+1] = self.state_codes[ss]
                         else:
-                            fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                            fls_policy = self.Mlist[ipol].V[t+1]['Female and child']['fls']
                             self.state[ind,t+1] = self.state_codes['Female and child']  
                             self.ils_i[ind,t+1] = fls_policy[self.iassets[ind,t+1],izf]
                         continue
@@ -534,7 +551,6 @@ class Agents:
                     if self.verbose: print('for sname = {}: {} mar, {} coh,  {} disagreed, {} did not meet ({} total)'.format(sname,nmar,ncoh,ndis,nnom,ntot))
                     
                     
-                    
                     if np.any(i_agree_mar):
                         
                         self.itheta[ind[i_agree_mar],t+1] = it_out[i_agree_mar]
@@ -549,13 +565,14 @@ class Agents:
                         self.k_m_true[ind[i_agree_mar],(t+1):] = i_preg[i_agree_mar][:,None]
                         
                         
-                        # FLS decision
-                        #self.ils_i[ind[i_ren],t+1] = 
-                        tg = self.Mlist[ipol].setup.v_thetagrid_fine                    
-                        fls_policy = self.Mlist[ipol].decisions[t+1]['Couple and child']['fls']
+                        
+                        fls_policy = self.Mlist[ipol].V[t+1]['Couple and child']['fls']
+                        
+                        
+                        def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
                         
                         self.ils_i[ind[i_agree_mar],t+1] = \
-                            fls_policy[self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1],self.itheta[ind[i_agree_mar],t+1]]
+                            thti(fls_policy,(self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1]),self.itheta[ind[i_agree_mar],t+1])
                         
                         self.yaftmar[ind[i_agree_mar],t+1] = 0                        
                         self.nmar[ind[i_agree_mar],t+1:] += 1
@@ -572,10 +589,13 @@ class Agents:
                         # FLS decision
                         #tg = self.Mlist[ipol].setup.v_thetagrid_fine
                         #fls_policy = self.V[t+1]['Couple, no children']['fls']
-                        fls_policy = self.Mlist[ipol].decisions[t+1]['Couple, no children']['fls']
+                        
+                        def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
+                        
+                        fls_policy = self.Mlist[ipol].V[t+1]['Couple, no children']['fls']
                         
                         self.ils_i[ind[i_agree_coh],t+1] = \
-                            fls_policy[self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1],self.itheta[ind[i_agree_coh],t+1]]
+                            thti(fls_policy,(self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1]),self.itheta[ind[i_agree_coh],t+1])
                         
                         self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
                         self.nmar[ind[i_agree_coh],t+1:] += 1
@@ -583,7 +603,7 @@ class Agents:
                         
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
-                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        fls_policy = self.Mlist[ipol].V[t+1]['Female and child']['fls']
                         
                         
                         if sname=='Female and child': assert not np.any(become_single)
@@ -725,7 +745,7 @@ class Agents:
                         self.itheta[ind[i_div],t+1] = -1
                         iz = izf_div if self.female else izm_div
                         self.iexo[ind[i_div],t+1] = iz[i_div]
-                        fls_policy = self.Mlist[ipol].decisions[t+1]['Female and child']['fls']
+                        fls_policy = self.Mlist[ipol].V[t+1]['Female and child']['fls']
                         
                         if haschild and self.female:
                             self.state[ind[i_div],t+1] = self.state_codes['Female and child']
@@ -751,7 +771,8 @@ class Agents:
                             
                             
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
-                            self.ils_i[ind[i_ren],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
+                            def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
+                            self.ils_i[ind[i_ren],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
                             i_birth = (decision['Give a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_ren]
@@ -763,8 +784,12 @@ class Agents:
                             self.new_child[ind[i_ren],t+1] = i_birth1
                                            
                             ipick = (self.iassets[ind[i_ren],t+1],self.iexo[ind[i_ren],t+1],self.itheta[ind[i_ren],t+1])
-                            ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
+                            
+                            def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
+
+                            
+                            ils_if_k = thti(self.Mlist[ipol].V[t+1]["Couple and child"]['fls'],ipick[:-1],ipick[-1])
+                            ils_if_nk = thti(self.Mlist[ipol].V[t+1]["Couple, no children"]['fls'],ipick[:-1],ipick[-1])
                             
                             self.ils_i[ind[i_ren],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
                             self.state[ind[i_ren],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
@@ -776,11 +801,13 @@ class Agents:
                         self.state[ind[i_sq],t+1] = self.state_codes[sname]
                         # do not touch theta as already updated
                         
+                        def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
+                        
                         if sname == "Couple and child":
                             self.state[ind[i_sq],t+1] = self.state_codes[sname]
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
-                            self.ils_i[ind[i_sq],t+1] = self.Mlist[ipol].decisions[t+1][sname]['fls'][ipick]
+                            self.ils_i[ind[i_sq],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
                             i_birth = (decision['Give a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_sq]
@@ -792,8 +819,8 @@ class Agents:
                             
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             
-                            ils_if_k = self.Mlist[ipol].decisions[t+1]["Couple and child"]['fls'][ipick]
-                            ils_if_nk = self.Mlist[ipol].decisions[t+1]["Couple, no children"]['fls'][ipick]
+                            ils_if_k = thti(self.Mlist[ipol].V[t+1]["Couple and child"]['fls'],ipick[:-1],ipick[-1])
+                            ils_if_nk = thti(self.Mlist[ipol].V[t+1]["Couple, no children"]['fls'],ipick[:-1],ipick[-1])
                            
                             self.ils_i[ind[i_sq],t+1] = i_birth1*ils_if_k+(1-i_birth1)*ils_if_nk
                             self.state[ind[i_sq],t+1] = i_birth1*self.state_codes["Couple and child"]+(1-i_birth1)*self.state_codes["Couple, no children"]
