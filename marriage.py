@@ -10,6 +10,26 @@ import numpy as np
 from gridvec import VecOnGrid
 from numba import jit, prange
 
+
+
+from platform import system
+if system() != 'Darwin':
+    try:
+        from numba import cuda
+        #assert False
+        g = cuda.device_array((2,5))
+        del(g)
+        ugpu = True
+        upar = True
+    except:
+        print('no gpu mode')
+        ugpu = False
+        upar = False
+else:
+    ugpu = False
+    upar = False
+
+
 def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     
     # this builds matrix for all matches specified by grid positions
@@ -54,20 +74,14 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     
     from marriage_gpu import v_mar_gpu
     
-    v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
-    
-    v_f2, v_m2, agree2, nbs2, itheta2 = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
-    
-    assert np.all(agree==agree2)
-    assert np.allclose(v_f,v_f2)
-    assert np.allclose(v_m,v_m2)
-    assert np.all(itheta2==itheta)
-    assert np.allclose(nbs,nbs2)
-    print('marriage test ok')
+    if not ugpu:
+        v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
+    else:
+        v_f, v_m, agree, nbs, itheta = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     
     return {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
 
-@jit(nopython=True,parallel=True)
+@jit(nopython=True,parallel=upar)
 def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     # this is the core function that does bargaining
     
