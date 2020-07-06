@@ -174,8 +174,8 @@ class Agents:
         self.compute_aux()
         counts, offers, marriages = self.marriage_stats()
         
-        if self.ub_hit_single: print('Assets upped bound is reached for singles')
-        if self.ub_hit_couple: print('Assets upped bound is reached for couples')
+        if self.verbose and self.ub_hit_single: print('Assets upped bound is reached for singles')
+        if self.verbose and self.ub_hit_couple: print('Assets upped bound is reached for couples')
         
     
     def tht_interpolate(self,v,i_other,i_theta):

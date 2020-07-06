@@ -28,6 +28,7 @@ class ModelSetup(object):
         Tfert = 18 # first peroid when infertile
         Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
+        Tinc = 25 # first period where stop tracking income process and assume it to be fixed
         p['T'] = T
         p['Tret'] = Tret
         p['Tfert'] = Tfert
@@ -121,20 +122,20 @@ class ModelSetup(object):
         
         
         if p['high education']:            
-            p['sig_zm']    = p['income_sd_mult']*0.03269622
-            p['sig_zm_0']  = p['income_sd_mult']*0.44197336
+            p['sig_zm']    = p['income_sd_mult']*0.15720503
+            p['sig_zm_0']  = p['income_sd_mult']*0.40224352
             
+            # FIXME: I need guidance how to pin these down
             
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.04167489
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.40614873
-            
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.24631384
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.28806058
         else:
-            p['sig_zm']    = p['income_sd_mult']*0.09294824
-            p['sig_zm_0']  = p['income_sd_mult']*0.40376647
+            p['sig_zm']    = p['income_sd_mult']*0.2033373
+            p['sig_zm_0']  = p['income_sd_mult']*0.40317171
             
             
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.08942736
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.39882978
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.14586778
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.62761052
             
         
         
@@ -144,20 +145,22 @@ class ModelSetup(object):
             
             
             p['m_wage_trend'] = np.array(
-                                        [0.0818515 + 0.0664369*(min(t+2,30)-5)  
-                                             -.0032096*((min(t+2,30)-5)**2) 
-                                             + 0.0000529*((min(t+2,30)-5)**3)
+                                        [0.19427437 + 0.0634737 *(min(t,Tinc)-4)  
+                                             -.00231512*((min(t,Tinc)-4)**2) 
+                                             +.00002565*((min(t,Tinc)-4)**3)
                                              for t in range(T)]
                                         )
             
             p['f_wage_trend'] = np.array(
                                 [0.0 + 
-                                 0.0685814*(min(t,30) - 5)
-                                 -.0038631*((min(t,30)-5)**2)
-                                 + 0.0000715*((min(t,30)-5)**3)
+                                 0.03306186*(min(t,Tinc)-4)
+                                 -.00062043*((min(t,Tinc)-4)**2)
+                                 -.00003189*((min(t,Tinc)-4)**3)
                                              for t in range(T)]
                                         )
-        
+            
+            #print(p['m_wage_trend'])
+            #print(p['f_wage_trend'])
         else:
         # no college
         
@@ -176,7 +179,6 @@ class ModelSetup(object):
                                  +0.0000251*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
-        
         
         if not p['pay_gap']:
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
@@ -322,6 +324,12 @@ class ModelSetup(object):
             exogrid['zf_t'],  exogrid['zf_t_mat'] = rouw_nonst(p['T'],p['sig_zf'],p['sig_zf_0'],p['n_zf_t'][0])
             exogrid['zm_t'],  exogrid['zm_t_mat'] = rouw_nonst(p['T'],p['sig_zm'],p['sig_zm_0'],p['n_zm_t'][0])
             
+            
+            for t in range(Tinc,Tret):
+                for key in ['zf_t','zf_t_mat','zm_t','zm_t_mat']:
+                    exogrid[key][t] = exogrid[key][Tinc]
+            
+            
             for t in range(Tret,T):
                 exogrid['zf_t'][t] = np.array([np.log(p['wret'])])
                 exogrid['zm_t'][t] = np.array([np.log(p['wret'])])
@@ -405,7 +413,7 @@ class ModelSetup(object):
         #Grid Couple
         self.na = 40
         self.amin = 0
-        self.amax = 50
+        self.amax = 100
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
         #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
