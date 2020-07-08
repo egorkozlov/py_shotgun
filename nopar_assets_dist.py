@@ -32,7 +32,7 @@ def nonpar_distribution(z,data,nbins):
         
         if np.any(i_group):
             
-            p_z = i_group.mean()
+            p_z = (i_group*data['w']).sum() / (data['w'].sum())
             i_a0 = (data['a'] < 1e-2) & i_group
             p_a0 = (i_a0[i_group]*data['w'][i_group]).sum()/(data['w'][i_group].sum()) if np.any(i_a0) else 0.0
             i_ap = (~i_a0) & i_group
@@ -63,7 +63,7 @@ def nonpar_distribution(z,data,nbins):
                     pick = (i_ap) & (data['a'] >= a_low) & ((data['a'] < a_high) if i<n_q_groups-1 else True)                    
                     data['a_group'][pick] = i+1
                     p_groups[i+1] = (pick[i_group]*data['w'][i_group]).sum()/(data['w'][i_group].sum())
-                    a_vals[i+1] = (a_low+a_high)/2
+                    a_vals[i+1] = (a_low+a_high)/2 if np.sum(pick) < 2 else (data['a'][pick]*data['w'][pick]).sum()/(data['w'][pick].sum())
         else: # if no one has the right z
             p_groups[0] = 1.0
             
@@ -72,7 +72,8 @@ def nonpar_distribution(z,data,nbins):
         a_vals_by_z[iz,:] = a_vals
         #assert np.all(np.diff(a_vals)>=0)
         assert np.allclose(np.sum(p_groups),1.0)
-        
+    
+    assert np.allclose(z_probs.sum(),1.0)
     return z_probs, a_probs_by_z, a_vals_by_z
 
 
@@ -84,6 +85,7 @@ def get_estimates(fname='income_assets_distribution.csv',
                       zlist=None):
     print('obtaining estimates from file {}'.format(fname))
     df = pd.read_csv(fname)
+    assert not np.any(np.isnan(df))
         
     ages_array = np.arange(age_start,age_stop+1)
     out_list = []

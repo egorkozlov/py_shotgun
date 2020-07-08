@@ -122,13 +122,12 @@ class ModelSetup(object):
         
         
         if p['high education']:            
-            p['sig_zm']    = p['income_sd_mult']*0.15720503
-            p['sig_zm_0']  = p['income_sd_mult']*0.40224352
+            p['sig_zm']    = p['income_sd_mult']*0.16138593
+            p['sig_zm_0']  = p['income_sd_mult']*0.41966813 
             
             # FIXME: I need guidance how to pin these down
-            
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.24631384
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.28806058
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.19571624
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.43351219
         else:
             p['sig_zm']    = p['income_sd_mult']*0.2033373
             p['sig_zm_0']  = p['income_sd_mult']*0.40317171
@@ -141,28 +140,42 @@ class ModelSetup(object):
         
         # college
         
-        if p['high education']:
+        if p['high education']: 
             
+            
+            m_trend_data = [0.0,0.11316599,.2496034,.31260625,.37472204,.4268548,.48067884,.52687573,
+                            .57293878,.60941412,.65015743,.6685226,.72482815,.74446455,.76712521,.78038137,.79952806,
+                            .80092523,.81972567,.82913486,.83849471,.84308452,.84646086,.85437072,.85499576]
+            
+            
+            f_trend_data = [0.0,0.06715984,.21149606,.32283002,.46885336,.52712037,.58302632,.63348555,.68024646,
+                             .71450132,.74246337,.77044807,.79946406,.80640353,.83799304,.85356081,.86832235
+                             ,.87407447,.87820755,.86840901,.87630054,.8765972,.87894493,.87800553,.87932908]
+            
+            
+            nm = len(m_trend_data)-1
+            nf = len(f_trend_data)-1
+            
+            t0 = 4
+            gap = 3.0340077 - 2.8180354 # male - female
+            
+            c_female = -f_trend_data[t0]
+            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [0.19427437 + 0.0634737 *(min(t,Tinc)-4)  
-                                             -.00231512*((min(t,Tinc)-4)**2) 
-                                             +.00002565*((min(t,Tinc)-4)**3)
+                                        [c_male + m_trend_data[min(t,nm)]
                                              for t in range(T)]
                                         )
-            
             p['f_wage_trend'] = np.array(
-                                [0.0 + 
-                                 0.03306186*(min(t,Tinc)-4)
-                                 -.00062043*((min(t,Tinc)-4)**2)
-                                 -.00003189*((min(t,Tinc)-4)**3)
+                                [c_female + f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
-            #print(p['m_wage_trend'])
-            #print(p['f_wage_trend'])
         else:
         # no college
+        
+        
+        
         
             
             p['m_wage_trend'] = np.array(
@@ -171,7 +184,6 @@ class ModelSetup(object):
                                              + 0.000026*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
-        
             p['f_wage_trend'] = np.array(
                                 [-0.3668214 + 
                                  0.0264887*(min(t,30) - 5)
@@ -179,11 +191,10 @@ class ModelSetup(object):
                                  +0.0000251*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
-        
+            
         if not p['pay_gap']:
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
             p['f_wage_trend'] = p['m_wage_trend']
-        
         
         # derivative parameters
         p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
@@ -503,13 +514,17 @@ class ModelSetup(object):
             self.partners_distribution_mal = filer('az_dist_mal.pkl',0,0,repeat=False)
         except:
             print('recreating estimates...')
-            est_fem = get_estimates(zlist=self.exogrid.zm_t[2:])
+            est_fem = get_estimates(fname='income_assets_distribution_male.csv',
+                                    age_start=23,age_stop=42,
+                                    zlist=self.exogrid.zm_t[2:])
             filer('az_dist_fem.pkl',est_fem,True,repeat=False)
             self.partners_distribution_fem = est_fem
-            est_mal = get_estimates(zlist=self.exogrid.zf_t[0:])
+            est_mal = get_estimates(fname='income_assets_distribution_female.csv',
+                                    age_start=21,age_stop=40,
+                                    zlist=self.exogrid.zf_t[0:])
             filer('az_dist_mal.pkl',est_mal,True,repeat=False)
             self.partners_distribution_mal = est_mal
-        
+            
         self.build_matches()
         
         
