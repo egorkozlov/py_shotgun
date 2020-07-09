@@ -35,7 +35,7 @@ class ModelSetup(object):
         p['Tsim'] = T
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
-        p['sigma_psi_mult'] = 0.28
+        p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.025]*T
         p['n_psi'] = 15
@@ -79,18 +79,18 @@ class ModelSetup(object):
         p['u_shift_coh'] = 0.0
         p['sm_shift'] = 0.0
         
-        p['disutil_marry_sm_fem_coef'] = 0.0
-        p['disutil_marry_sm_mal_coef'] = 10.0
-        p['disutil_shotgun_coef'] = 2.0
+        p['disutil_marry_sm_fem'] = 0.0
+        p['disutil_marry_sm_mal'] = 10.0
+        p['disutil_shotgun'] = 2.0
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
         
         p['taste_shock_mult'] = 1.0
         
         p['p_abortion_access'] = 0.5
-        p['abortion_costs_mult'] = 10.0
+        p['abortion_costs'] = 10.0
         
-        p['u_lost_divorce_mult'] = 0.0 
+        p['u_lost_divorce'] = 0.0 
        
         
         p['child_a_cost'] = 0.0
@@ -196,15 +196,6 @@ class ModelSetup(object):
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
             p['f_wage_trend'] = p['m_wage_trend']
         
-        # derivative parameters
-        p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
-        
-        
-        p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
-        p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
-        p['disutil_shotgun'] =  p['disutil_shotgun_coef']*p['sigma_psi_init']
-        p['abortion_costs'] = p['abortion_costs_mult']*p['u_shift_mar']
-        p['u_lost_divorce'] = p['u_lost_divorce_mult']*p['sigma_psi_init']
         
         p['preg_az'] =  0.00
         p['preg_azt'] = 0.00
@@ -212,7 +203,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = 0.0*p['taste_shock_mult']*0.0#p['sigma_psi']
+        p['taste_shock'] = 0.0 #*p['taste_shock_mult']*0.0#p['sigma_psi']
         
         p['is fertile'] = [p['any kids']]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
