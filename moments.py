@@ -270,8 +270,6 @@ def compute_moments(self):
     moments['share of kids in new marriages at 30'] = just_mark_t0[self.agreed[:,9],9].mean()   if np.any(self.agreed[:,9]) else 0.0
     moments['share of kids in new marriages at 35'] = just_mark_t0[self.agreed[:,14],14].mean() if np.any(self.agreed[:,15]) else 0.0
     
-    
-    
     moments['just k & m at 25'] = (self.agreed_k & one_mar)[:,4].mean()
     moments['just k & m at 30'] = (self.agreed_k & one_mar)[:,9].mean()
     moments['just k & m at 35'] = (self.agreed_k & one_mar)[:,14].mean()
@@ -468,6 +466,27 @@ def compute_moments(self):
     moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)
     
     
+    
+    
+    # remarriage chances
+    
+    remar = np.zeros_like(self.nmar,dtype=np.bool_)
+    remar[:,1:] = ((self.nmar[:,1:] > 1) & (self.nmar[:,1:] > self.nmar[:,:-1]))
+    
+    # chances to remarry:
+    num_remar_k_2630 = (remar[:,5:10] & have_kid[:,5:10]).sum()
+    num_div_k_2630   = (div_now[:,5:10] & have_kid[:,5:10]).sum()
+    moments['remarriage chance if kids, 26-30'] = num_remar_k_2630 / (num_remar_k_2630 + num_div_k_2630) if num_div_k_2630 > 0 else 0.0
+    num_remar_k_3135 = (remar[:,10:15] & have_kid[:,10:15]).sum()
+    num_div_k_3135   = (div_now[:,10:15] & have_kid[:,10:15]).sum()
+    moments['remarriage chance if kids, 31-35'] = num_remar_k_3135 / (num_remar_k_3135 + num_div_k_3135) if num_div_k_3135 > 0 else 0.0
+    
+    num_remar_nk_2630 = (remar[:,5:10] & ~have_kid[:,5:10]).sum()
+    num_div_nk_2630   = (div_now[:,5:10] & ~have_kid[:,5:10]).sum()
+    moments['remarriage chance if no kids, 26-30'] = num_remar_nk_2630 / (num_remar_nk_2630 + num_div_nk_2630) if num_div_nk_2630 > 0 else 0.0
+    num_remar_nk_3135 = (remar[:,10:15] & ~have_kid[:,10:15]).sum()
+    num_div_nk_3135   = (div_now[:,10:15] & ~have_kid[:,10:15]).sum()
+    moments['remarriage chance if no kids, 31-35'] = num_remar_nk_3135 / (num_remar_nk_3135 + num_div_nk_3135) if num_div_nk_3135 > 0 else 0.0
     
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))

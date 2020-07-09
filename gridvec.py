@@ -53,6 +53,8 @@ class VecOnGrid(object):
         self.wthis = self.one-self.wnext
         self.trim = trim
         
+        i_next_closest = (self.wnext>0.5) 
+        self.i_closest = self.i + i_next_closest
         
         
         

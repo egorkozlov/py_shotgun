@@ -28,6 +28,7 @@ class ModelSetup(object):
         Tfert = 18 # first peroid when infertile
         Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 25 # first period when stop meeting partners
+        Tinc = 25 # first period where stop tracking income process and assume it to be fixed
         p['T'] = T
         p['Tret'] = Tret
         p['Tfert'] = Tfert
@@ -121,45 +122,60 @@ class ModelSetup(object):
         
         
         if p['high education']:            
-            p['sig_zm']    = p['income_sd_mult']*0.03269622
-            p['sig_zm_0']  = p['income_sd_mult']*0.44197336
+            p['sig_zm']    = p['income_sd_mult']*0.16138593
+            p['sig_zm_0']  = p['income_sd_mult']*0.41966813 
             
-            
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.04167489
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.40614873
-            
+            # FIXME: I need guidance how to pin these down
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.19571624
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.43351219
         else:
-            p['sig_zm']    = p['income_sd_mult']*0.09294824
-            p['sig_zm_0']  = p['income_sd_mult']*0.40376647
+            p['sig_zm']    = p['income_sd_mult']*0.2033373
+            p['sig_zm_0']  = p['income_sd_mult']*0.40317171
             
             
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.08942736
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.39882978
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.14586778
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.62761052
             
         
         
         # college
         
-        if p['high education']:
+        if p['high education']: 
             
+            
+            m_trend_data = [0.0,0.11316599,.2496034,.31260625,.37472204,.4268548,.48067884,.52687573,
+                            .57293878,.60941412,.65015743,.6685226,.72482815,.74446455,.76712521,.78038137,.79952806,
+                            .80092523,.81972567,.82913486,.83849471,.84308452,.84646086,.85437072,.85499576]
+            
+            
+            f_trend_data = [0.0,0.06715984,.21149606,.32283002,.46885336,.52712037,.58302632,.63348555,.68024646,
+                             .71450132,.74246337,.77044807,.79946406,.80640353,.83799304,.85356081,.86832235
+                             ,.87407447,.87820755,.86840901,.87630054,.8765972,.87894493,.87800553,.87932908]
+            
+            
+            nm = len(m_trend_data)-1
+            nf = len(f_trend_data)-1
+            
+            t0 = 4
+            gap = 3.0340077 - 2.8180354 # male - female
+            
+            c_female = -f_trend_data[t0]
+            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [0.0818515 + 0.0664369*(min(t+2,30)-5)  
-                                             -.0032096*((min(t+2,30)-5)**2) 
-                                             + 0.0000529*((min(t+2,30)-5)**3)
+                                        [c_male + m_trend_data[min(t,nm)]
+                                             for t in range(T)]
+                                        )
+            p['f_wage_trend'] = np.array(
+                                [c_female + f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
-            p['f_wage_trend'] = np.array(
-                                [0.0 + 
-                                 0.0685814*(min(t,30) - 5)
-                                 -.0038631*((min(t,30)-5)**2)
-                                 + 0.0000715*((min(t,30)-5)**3)
-                                             for t in range(T)]
-                                        )
-        
         else:
         # no college
+        
+        
+        
         
             
             p['m_wage_trend'] = np.array(
@@ -168,7 +184,6 @@ class ModelSetup(object):
                                              + 0.000026*((min(t+2,30)-5)**3)
                                              for t in range(T)]
                                         )
-        
             p['f_wage_trend'] = np.array(
                                 [-0.3668214 + 
                                  0.0264887*(min(t,30) - 5)
@@ -176,12 +191,10 @@ class ModelSetup(object):
                                  +0.0000251*((min(t,30)-5)**3)
                                              for t in range(T)]
                                         )
-        
-        
+            
         if not p['pay_gap']:
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
             p['f_wage_trend'] = p['m_wage_trend']
-        
         
         # derivative parameters
         p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
@@ -217,7 +230,6 @@ class ModelSetup(object):
         
         
         p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
-        
         
         
         
@@ -323,6 +335,12 @@ class ModelSetup(object):
             exogrid['zf_t'],  exogrid['zf_t_mat'] = rouw_nonst(p['T'],p['sig_zf'],p['sig_zf_0'],p['n_zf_t'][0])
             exogrid['zm_t'],  exogrid['zm_t_mat'] = rouw_nonst(p['T'],p['sig_zm'],p['sig_zm_0'],p['n_zm_t'][0])
             
+            
+            for t in range(Tinc,Tret):
+                for key in ['zf_t','zf_t_mat','zm_t','zm_t_mat']:
+                    exogrid[key][t] = exogrid[key][Tinc]
+            
+            
             for t in range(Tret,T):
                 exogrid['zf_t'][t] = np.array([np.log(p['wret'])])
                 exogrid['zm_t'][t] = np.array([np.log(p['wret'])])
@@ -406,7 +424,7 @@ class ModelSetup(object):
         #Grid Couple
         self.na = 40
         self.amin = 0
-        self.amax = 50
+        self.amax = 100
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
         #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
@@ -489,9 +507,24 @@ class ModelSetup(object):
         
         # this pre-computes transition matrices for meeting a partner
        
-        #self.partners_distribution = get_estimates(zlist=self.exogrid.zm_t[2:])
-       
         
+        
+        try:
+            self.partners_distribution_fem = filer('az_dist_fem.pkl',0,0,repeat=False)
+            self.partners_distribution_mal = filer('az_dist_mal.pkl',0,0,repeat=False)
+        except:
+            print('recreating estimates...')
+            est_fem = get_estimates(fname='income_assets_distribution_male.csv',
+                                    age_start=23,age_stop=42,
+                                    zlist=self.exogrid.zm_t[2:])
+            filer('az_dist_fem.pkl',est_fem,True,repeat=False)
+            self.partners_distribution_fem = est_fem
+            est_mal = get_estimates(fname='income_assets_distribution_female.csv',
+                                    age_start=21,age_stop=40,
+                                    zlist=self.exogrid.zf_t[0:])
+            filer('az_dist_mal.pkl',est_mal,True,repeat=False)
+            self.partners_distribution_mal = est_mal
+            
         self.build_matches()
         
         
@@ -524,51 +557,8 @@ class ModelSetup(object):
         self.compute_taxes()
         
         
-    def _mar_mats_assets(self,npoints=4,female=True,upp=False,abar=0.1):
-        # for each grid point on single's grid it returns npoints positions
-        # on (potential) couple's grid's and assets of potential partner 
-        # (that can be off grid) and correpsonding probabilities. 
-        
-        
-        na = self.agrid_s.size
-        
-        agrid_s = self.agrid_s
-        agrid_c = self.agrid_c
-        
-        s_a_partner = self.pars['sig_partner_a']
-        mu_a_partner = self.pars['mu_partner_a_female'] if female else self.pars['mu_partner_a_male']
-        
-        
-        prob_a_mat = np.zeros((na,npoints),dtype=self.dtype)
-        i_a_mat = np.zeros((na,npoints),dtype=np.int16)
-        
-        #if upp: assert female
-        
-        aloss = 0.0 if not upp else self.pars['child_a_cost']
-        
-        for ia, a in enumerate(agrid_s):
-            lagrid_t = np.zeros_like(agrid_c)
-            
-            i_neg = (agrid_c <= max(abar,a) - 1e-6)
-            
-            lagrid_t[~i_neg] = np.log(2e-6 + (agrid_c[~i_neg] - a)/max(abar,a))
-            lmin = lagrid_t[~i_neg].min()
-            # just fill with very negative values so this is never chosen
-            lagrid_t[i_neg] = lmin - s_a_partner*10 - \
-                s_a_partner*np.flip(np.arange(i_neg.sum())) 
-            
-            # TODO: this needs to be checked
-            p_a = int_prob(lagrid_t,mu=mu_a_partner-aloss,sig=s_a_partner,n_points=npoints)
-            i_pa = (-p_a).argsort()[:npoints] # this is more robust then nonzero
-            p_pa = p_a[i_pa]
-            prob_a_mat[ia,:] = p_pa
-            i_a_mat[ia,:] = i_pa
-        
-        return prob_a_mat, i_a_mat
-            
     
-    def _mar_mats_iexo(self,t,female=True,upp=False,trim_lvl=0.001):
-        # TODO: check timing
+    def _mar_mats(self,t,female=True):
         # this returns transition matrix for single agents into possible couples
         # rows are single's states
         # columnts are couple's states
@@ -577,61 +567,98 @@ class ModelSetup(object):
         
         nexo = setup.pars['nexo_t'][t]
         sigma_psi_init = setup.pars['sigma_psi_init']
-        sig_z_partner = setup.pars['sig_partner_z']
-        mu_z_partner = setup.pars['mu_partner_z_female']  if female else setup.pars['mu_partner_z_male']
         psi_couple = setup.exogrid.psi_t[t+1]
         
-        mu_psi = 0.0 if not upp else 0.0 # -self.pars['disutil_shotgun']
         
         if female:
             nz_single = setup.exogrid.zf_t[t].shape[0]
-            p_mat = np.empty((nexo,nz_single))
+            p_mat = np.empty((nz_single,nexo))
             z_own = setup.exogrid.zf_t[t]
             n_zown = z_own.shape[0]
             z_partner = setup.exogrid.zm_t[t+1]
             zmat_own = setup.exogrid.zf_t_mat[t]
+            pz_precomputed = self.partners_distribution_fem
         else:
             nz_single = setup.exogrid.zm_t[t].shape[0]
-            p_mat = np.empty((nexo,nz_single))
+            p_mat = np.empty((nz_single,nexo))
             z_own = setup.exogrid.zm_t[t]
             n_zown = z_own.shape[0]
             z_partner = setup.exogrid.zf_t[t+1]
-            zmat_own = setup.exogrid.zm_t_mat[t]    
+            zmat_own = setup.exogrid.zm_t_mat[t] 
+            pz_precomputed = self.partners_distribution_mal
             
         def ind_conv(a,b,c): return setup.all_indices(t,(a,b,c))[0]
         
+        pz_all = pz_precomputed['prob_z']
         
-        df = setup.pars['dump_factor_z']
+        
+        pick = t if t < len(pz_all) else -1
+        
+        pz = pz_precomputed['prob_z'][pick]         
+        pa = pz_precomputed['prob_a_by_z'][pick] 
+        va = pz_precomputed['val_a_by_z'][pick] 
+        
+        
+        na_matches = pa.shape[-1]
+        
+        p_mat_pa = np.empty((nexo,) + (na_matches,),dtype=setup.dtype)
+        p_mat_ia = np.empty((nexo,) + (setup.na,) + (na_matches,),dtype=np.int16)
+        
+        agrid_s = self.agrid_s
         
         for iz in range(n_zown):
-            p_psi = int_prob(psi_couple,mu=mu_psi,sig=sigma_psi_init)
+            p_psi = int_prob(psi_couple,mu=0.0,sig=sigma_psi_init)
             if female:
-                p_zm  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
+                p_zm  = np.array(pz)
                 p_zf  = zmat_own[iz,:]
             else:
-                p_zf  = int_prob(z_partner, mu=df*z_own[iz] + mu_z_partner,sig=sig_z_partner)
+                p_zf  = np.array(pz)
                 p_zm  = zmat_own[iz,:]
-            #sm = sf
-        
+            
+            
             p_vec = np.zeros(nexo)
+            ie, izf, izm, ipsi = setup.all_indices(t)
             
-            for izf, p_zf_i in enumerate(p_zf):
-                if p_zf_i < trim_lvl: continue
+            izpnext = izm if female else izf
             
-                for izm, p_zm_i in enumerate(p_zm):
-                    if p_zf_i*p_zm_i < trim_lvl: continue
-                
-                    for ipsi, p_psi_i in enumerate(p_psi):                    
-                        p = p_zf_i*p_zm_i*p_psi_i
-                        
-                        if p > trim_lvl:
-                            p_vec[ind_conv(izf,izm,ipsi)] = p    
-                            
-            assert np.any(p_vec>trim_lvl), 'Everything is zero?'              
-            p_vec = p_vec / np.sum(p_vec)
-            p_mat[:,iz] = p_vec
+            p_vec = p_zm[izm]*p_zf[izf]*p_psi[ipsi]
+            assert np.allclose(p_vec.sum(),1.0)                            
+            p_mat[iz,:] = p_vec
+        
+        a_resuling = np.clip(agrid_s[None,:,None] + va[:,None,:],0.0,self.agrid_c.max()-1e-5)
+        ia_resulting = np.clip(np.searchsorted(setup.agrid_c,a_resuling) - 1,0,setup.na-1)
+        p_resulting = pa
+        assert np.allclose(pa.sum(axis=-1),1.0)
+        # this slightly brings things down
+        
+        p_mat_ia[:,:,:] = ia_resulting[izpnext,:,:]
+        p_mat_pa[:,:] = p_resulting[izpnext,:]
             
-        return p_mat.T
+        nexo_ext = nexo*na_matches
+        p_exo_ext = np.empty((nz_single,nexo_ext),dtype=self.dtype)
+        ia_table = np.empty((setup.na,nexo_ext),dtype=np.int16) # resulting ia for each na and nexo_ext
+        
+        
+        
+        corresponding_iexo = np.empty(nexo_ext,dtype=np.int16)
+        corresponding_imatch = np.empty(nexo_ext,dtype=np.int8)
+        
+        for im in range(na_matches):
+            p_exo_ext[:,(im*nexo):((im+1)*nexo)] = p_mat*(p_mat_pa[:,im][None,:])
+            ia_table[:,(im*nexo):((im+1)*nexo)] = p_mat_ia[:,:,im].T
+            corresponding_iexo[(im*nexo):((im+1)*nexo)] = ie
+            corresponding_imatch[(im*nexo):((im+1)*nexo)] = im
+        
+        
+            
+        return {'p_mat_iexo':p_mat,
+                'p_mat_extended':p_exo_ext,
+                'ia_c_table':ia_table,
+                'corresponding_iexo':corresponding_iexo,
+                'corresponding_imatch':corresponding_imatch}
+    
+        
+        
     
     
     def build_matches(self):
@@ -639,94 +666,16 @@ class ModelSetup(object):
         # it computes probability distribution over potential matches
         # this is relevant for testing and simulations
         
-        
-        self.matches = dict()
-        
-        
-        names = ['Female meets male, no upp','Male meets female, no upp',
-                  'Female meets male, upp','Male meets female, upp',
-                  'Single mother meets male','Male meets single mother']
-        
-        isfemale = [True,False,True,False,True,False]
-        isupp = [False,False,True,True,False,False]
-        issm = [False,False,False,False,True,True]
-        
-        
-        
-        # assets matrices are to be cached
-        
-        prob_a_mat_fem_noupp, i_a_mat_fem_noupp = self._mar_mats_assets(female=True,upp=False)
-        prob_a_mat_fem_upp, i_a_mat_fem_upp = self._mar_mats_assets(female=True,upp=True)
-        prob_a_mat_mal_noupp, i_a_mat_mal_noupp = self._mar_mats_assets(female=False,upp=False)
-        prob_a_mat_mal_upp, i_a_mat_mal_upp = self._mar_mats_assets(female=False,upp=True)
-        # assume single mothers get the same thing as singles
-        
-        p_a_mats = [prob_a_mat_fem_noupp,prob_a_mat_mal_noupp,
-                    prob_a_mat_fem_upp,prob_a_mat_mal_upp,
-                    prob_a_mat_fem_noupp,prob_a_mat_mal_noupp]
-        
-        i_a_mats = [i_a_mat_fem_noupp,i_a_mat_mal_noupp,
-                    i_a_mat_fem_upp,i_a_mat_mal_upp,
-                    i_a_mat_fem_noupp,i_a_mat_mal_noupp]
-        
-        
-        for name, female, upp, sm, p_a, i_a in zip(names,isfemale,isupp,
-                                                   issm,p_a_mats,i_a_mats):
+        out_m = []
+        out_f = []
+        for t in range(self.pars['Tret'] - 1):
+            out_m.append(self._mar_mats(t,female=False))
+            out_f.append(self._mar_mats(t,female=True))
             
-            
-            
-           
-            match_matrix = list()
-            
-            
-            for t in range(self.pars['T']-1):
-                pmat_iexo = self._mar_mats_iexo(t,female=female,upp=upp)
-                # nz X nexo
-                # note that here we do not use transpose
-                
-                
-                
-                nz = pmat_iexo.shape[0]
-                
-                inds = np.where( np.any(pmat_iexo>0,axis=0) )[0]
-                inds_fem = self.all_indices(t,inds)[1]
-                
-                npos_iexo = inds.size
-                npos_a = p_a.shape[1]
-                npos = npos_iexo*npos_a
-                pmatch = np.zeros((self.na,nz,npos),dtype=self.dtype)
-                iamatch = np.zeros((self.na,nz,npos),dtype=np.int32)
-                iexomatch = np.zeros((self.na,nz,npos),dtype=np.int32)
-                ifemmatch = np.zeros((self.na,nz,npos),dtype=np.int32)
-                
-                i_conv = np.zeros((npos_iexo,npos_a),dtype=np.int32)
-                
-                for ia in range(npos_a):
-                    i_conv[:,ia] = np.arange(npos_iexo*ia,npos_iexo*(ia+1))
-                 
-                
-                for iz in range(nz):
-                    probs = pmat_iexo[iz,inds]
-                    
-                    for ia in range(npos_a):
-                        
-                        pmatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            (p_a[:,ia][:,None])*(probs[None,:])
-                        iamatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            i_a[:,ia][:,None]
-                        iexomatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            inds[None,:]
-                        ifemmatch[:,iz,(npos_iexo*ia):(npos_iexo*(ia+1))] = \
-                            inds_fem[None,:]
-                            
-                            
-                        
-                assert np.allclose(np.sum(pmatch,axis=2),1.0)
-                match_matrix.append({'p':pmatch,'ia':iamatch,'iexo':iexomatch,'iconv':i_conv,
-                                         'ifem':ifemmatch,'iexo_matrix':pmat_iexo,
-                                         'p_a_mat':p_a,'i_a_mat':i_a})
-                    
-            self.matches[name] = match_matrix
+        self.matches_fem = out_f
+        self.matches_mal = out_m
+        
+        
          
         
     
