@@ -102,7 +102,7 @@ def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_global=F
 #########################################
     
 #Write on Functionsbtach worker_run.sh
-def filer(filename,array,write=True):
+def filer(filename,array,write=True,repeat=True):
     
     while True:
         try:
@@ -119,5 +119,6 @@ def filer(filename,array,write=True):
             raise KeyboardInterrupt()
         except:
             print('Problems opening the file {}'.format(filename))
+            if not repeat: raise Exception('could not open the file')
             #sleep(0.5)
     

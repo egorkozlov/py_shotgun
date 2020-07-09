@@ -32,14 +32,24 @@ if __name__ == '__main__':
     
     high_e = True
     x, targ_mode = get_point(high_e)
-    '''
-    x.update({'pmeet_21': 0.48748331898178726,
-             'pmeet_28': 0.1675112412415896,
-             'pmeet_35': 0.4901448272323501,
-             'preg_21': 0.39984814046827155,
-             'preg_28': 0.08209777096634693,
-             'preg_35': 0.5214583896915517})
-    '''
+    x = {'sigma_psi': 0.8903998377617001,
+         'sigma_psi_mult': 5.008454375933519,
+         'pmeet_21': 0.26461668508226976,
+         'pmeet_28': 0.3808517813188633,
+         'pmeet_35': 0.3537668845748406,
+         'preg_21': 0.03301912411330818,
+         'preg_28': 0.04337421298029398,
+         'preg_35': 0.06499192886306442,
+         'u_shift_mar': 1.4329636375369272,
+         'util_alp': 0.4980641699631754,
+         'util_kap': 0.8967664551452008,
+         'util_qbar': 1.0457400305750946,
+         'disutil_marry_sm_mal_coef': 14.444200806643657,
+         'disutil_shotgun_coef': 2.117334990378265,
+         'abortion_costs_mult': 8.430713206729187,
+         'p_abortion_access': 1.0,
+         'u_lost_divorce_mult': 2.690742151483817}
+
 
 
 
@@ -50,7 +60,7 @@ if __name__ == '__main__':
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
-                                      moments_save_name = 'college no taste shocks',
+                                      moments_save_name = 'college move social stigma',
                                       moments_repeat=2)
     
     mdl[0].time_statistics()
@@ -67,16 +77,16 @@ if __name__ == '__main__':
     
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
-    '''
+    
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   base='college baseline.pkl',
+                   base='college move social stigma.pkl',
                    compare=None,
                    base_name='Model',
                    compare_name='Data',
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None)#,moments_aux=moments_aux)
-    '''
+    
     '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,

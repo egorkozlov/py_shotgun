@@ -112,7 +112,7 @@ class Model(object):
                 
                 V, c, s = v_iter_single(setup,t,EV,female,ushift)       
                 assert V.dtype == c.dtype == setup.dtype
-                return {desc: {'V':V,'c':c,'s':s}}   
+                return {desc: {'V':V,'c':c,'s':s,'x':0.0*c}}   
              
             elif desc== 'Couple and child' or desc == 'Couple, no children':
                 haschild = (desc== 'Couple and child')
@@ -120,12 +120,12 @@ class Model(object):
                 V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)  
                 assert V.dtype == VF.dtype == c.dtype == setup.dtype
                 
-                return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
+                return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}}
             elif desc == 'Female and child':
                 
                 V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
                 assert V.dtype == c.dtype == setup.dtype
-                return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls,'V_all_l':V_all_l}}
+                return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls}}
             else:
                 raise Exception('I do not know this type...')
             
@@ -135,7 +135,7 @@ class Model(object):
             
             if desc == 'Female, single' or desc == 'Male, single':
                 female = (desc == 'Female, single')
-                EV, dec = ev_single(setup,V_next,setup.agrid_s,female,t)
+                EV, dec = ev_single(setup,V_next,female,t)
                 assert EV.dtype == setup.dtype
             elif desc == 'Couple and child':
                 EV, dec = ev_couple_m_c(setup,V_next,t,True)
@@ -144,7 +144,7 @@ class Model(object):
                 EV, dec = ev_couple_m_c(setup,V_next,t,False)
                 assert EV[0].dtype == EV[1].dtype == EV[2].dtype == EV[3].dtype == setup.dtype
             elif desc == 'Female and child':
-                EV, dec = ev_single_k(setup,V_next,setup.agrid_s,t)
+                EV, dec = ev_single_k(setup,V_next,t)
                 assert EV.dtype == setup.dtype
             else:
                 raise Exception('I do not know this type...')
@@ -163,6 +163,7 @@ class Model(object):
                 if timed: self.time('Optimization for {}'.format(desc))
                 
                 self.wrap_decisions(desc,dec,vout)
+                if timed: self.time('Wrapping at iter for {}'.format(desc))
                 
                 return vout, dec
             def initialize(desc,t):
@@ -170,6 +171,8 @@ class Model(object):
                 if timed: self.time('Initialization for {}'.format(desc))
                 dec = {}
                 self.wrap_decisions(desc,dec,vout)
+                if timed: self.time('Wrapping at iter for {}'.format(desc))
+                
                 return vout, dec
         else:
             raise Exception('unsupported name')
@@ -181,34 +184,35 @@ class Model(object):
     def wrap_decisions(self,desc,dec,vout):
         # This interpolates consumption, savings and labor supply decisions
         # on fine grid for theta that is used for integration and simulations.
-        
+        pass
+        '''
         v = vout[desc]
         if desc == 'Couple and child' or desc == 'Couple, no children':
             
             #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2)
+            #sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2)
             
-            Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2)
+            #Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2)
             
-            xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2)
-            cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            assert sint.dtype == Vint.dtype == xint.dtype == self.setup.dtype
+            #xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2)
+            #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
+            #assert sint.dtype == Vint.dtype == xint.dtype == self.setup.dtype
             
-            if Vint.ndim < 4: Vint = Vint[:,:,:,None]
+            #if Vint.ndim < 4: Vint = Vint[:,:,:,None]
             
-            fls = Vint.argmax(axis=3).astype(np.int8)
+            #fls = Vint.argmax(axis=3).astype(np.int8)
             
             
             
-            dec.update({'s':sint,'fls':fls,'x':xint,'c':cint})
+            #dec.update({'s':sint,'fls':fls,'x':v['x'],'c':v['c']})
             #del sint, fls
         elif desc == 'Female and child':
-            dec.update({'s':v['s'],'fls':v['fls'],'x':v['x'],'c':v['c']})
+            #dec.update({'s':v['s'],'fls':v['fls'],'x':v['x'],'c':v['c']})
         else:
-            xx = np.broadcast_to(0.0,v['s'].shape) # this saves memory a bit
-            dec.update({'s':v['s'],'x':xx,'c':v['c']})
+            #xx = np.broadcast_to(0.0,v['s'].shape) # this saves memory a bit
+            #dec.update({'s':v['s'],'x':xx,'c':v['c']})
             del v
-        
+        '''
     
     def solve(self,save=False):
         

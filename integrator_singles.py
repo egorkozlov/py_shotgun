@@ -7,49 +7,16 @@ This contains routines for intergation for singles
 import numpy as np
 #import dill as pickle
 
-from marriage import v_mar_igrid, v_no_mar
+from marriage import v_mar
     
 
 
 
-def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
+def ev_single(setup,V,female,t):
     # expected value of single person meeting a partner with a chance pmeet
     pmeet = setup.pars['pmeet_t'][t]
     
     skip_mar = (pmeet < 1e-5)
-    
-    
-    if female:
-        cangiveabirth = setup.pars['is fertile'][t]
-    else:
-        cangiveabirth = setup.pars['is fertile'][t-2] if t>=2 else False
-    
-    
-    EV_meet_np, dec_np = ev_single_meet(setup,V,sown,female,t,
-                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
-                                      unplanned_preg=False)
-    
-    
-    
-    
-    
-    if cangiveabirth:
-        
-        ppreg0 = setup.upp_precomputed_fem[t] if female else setup.upp_precomputed_mal[t]
-        
-        ppreg = ppreg0[None,:]
-        
-        EV_meet_p, dec_p = ev_single_meet(setup,V,sown,female,t,
-                                      skip_mar=skip_mar,trim_lvl=trim_lvl,
-                                          unplanned_preg=True)
-        
-        EV_meet = EV_meet_np*(1-ppreg) + EV_meet_p*ppreg
-    else:
-        dec_p = dec_np
-        EV_meet = EV_meet_np
-    
-    
-    
     
     if female:
         M = setup.exogrid.zf_t_mat[t].T
@@ -57,17 +24,44 @@ def ev_single(setup,V,sown,female,t,trim_lvl=0.001):
     else:
         M = setup.exogrid.zm_t_mat[t].T
         EV_nomeet =  np.dot(V['Male, single']['V'],M)
+        
+    
+    if skip_mar:
+        return EV_nomeet, {}
+        
+        
+    # else do the meeting thing
+    
+    ti = t if female else (t-2 if t>=2 else -1)
+    upp_possible = setup.pars['is fertile'][ti]
+    
+    EV_meet_np, dec_np = ev_single_meet(setup,V,female,t,match_type='Regular')
+    # possible choice to have children immediately is done inside
+    
+    if upp_possible:
+        
+        ppreg0 = setup.upp_precomputed_fem[t] if female else setup.upp_precomputed_mal[t]
+        ppreg = ppreg0[None,:]
+        EV_meet_p, dec_p = ev_single_meet(setup,V,female,t,match_type='Unplanned pregnancy')
+        EV_meet = EV_meet_np*(1-ppreg) + EV_meet_p*ppreg
+    
+    else:
+        
+        dec_p = dec_np
+        EV_meet = EV_meet_np
+    
     
     
     dec = {'Not pregnant':dec_np, 'Pregnant':dec_p}
-    
-    
+
+
+        
     
     return (1-pmeet)*EV_nomeet + pmeet*EV_meet, dec
 
 
 
-def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
+def ev_single_k(setup,V,t):
     # behave as if meet & pregnant
     # expected value of single person meeting a partner with a chance pmeet
     pmeet = setup.pars['pmeet_t'][t]*setup.pars['pmeet_multiplier_fem']
@@ -75,159 +69,93 @@ def ev_single_k(setup,V,sown,t,trim_lvl=0.001):
     female = True
     
     skip_mar = (pmeet < 1e-5)
-
-    EV_meet, dec = ev_single_meet(setup,V,sown,female,t,
-                                  skip_mar=skip_mar,trim_lvl=trim_lvl,
-                                      unplanned_preg=True,single_mom=True)
         
-    
+    nz = setup.pars['n_zf_t'][t] if female else setup.pars['n_zm_t'][t]
     nl = len(setup.ls_levels['Female and child'])
     
     # FIXME: when people meet their skill depreciation stops for one period.
     # This may be minor but is a bit inconsistent
     
-    EV_stay = np.zeros(EV_meet.shape + (nl,),dtype=setup.dtype)
+    EV_stay = np.zeros((setup.na,nz) + (nl,),dtype=setup.dtype)
     
     for il in range(nl):
          M = setup.exogrid.zf_t_mat_by_l_sk[il][t]         
          EV_stay[...,il] = np.dot(V['Female and child']['V'],M.T)
     
     
+    if not skip_mar:
+        EV_meet, dec = ev_single_meet(setup,V,female,t,match_type='Single mother')
+    else:
+        EV_meet = EV_stay
+        dec = {}
+    
     dec = {'Not pregnant':dec, 'Pregnant':dec}
     
-    return (1-pmeet)*EV_stay + pmeet*EV_meet[...,None], dec
+    if not skip_mar:
+        return (1-pmeet)*EV_stay + pmeet*EV_meet[...,None], dec
+    else:
+        return EV_stay, {}
     
 
 
-def ev_single_meet(setup,V,sown,female,t,skip_mar=False,
-                   unplanned_preg=False,single_mom=False,trim_lvl=0.001):
+def ev_single_meet(setup,V,female,t,*,match_type):
     # computes expected value of single person meeting a partner
     
     # this creates potential partners and integrates over them
     # this also removes unlikely combinations of future z and partner's 
     # characteristics so we have to do less bargaining
     
-    # single_mom emulates unplanned pregnancy but add utility punishments
     
-    nexo = setup.pars['nexo_t'][t]
-    if female:
-        cangiveabirth = setup.pars['is fertile'][t]
-    else:
-        cangiveabirth = setup.pars['is fertile'][t-2] if t>=2 else False
-    ns = sown.size
-    no_kids_at_meet = setup.pars['no kids at meeting']
-    
-    
-    uloss_fem = setup.pars['disutil_marry_sm_fem'] if single_mom else 0.0
-    uloss_mal = setup.pars['disutil_marry_sm_mal'] if single_mom else 0.0
-    
-    
-    
-    uloss_fem_single = 0.0
-    uloss_mal_single = 0.0
     
         
-    V_next = np.ones((ns,nexo))*(-1e20)
+    try:
+        matches = setup.matches_fem[t] if female else setup.matches_mal[t]
+    except:
+        matches = setup.matches_fem[-1] if female else setup.matches_mal[-1]
     
+    #p_mat_iexo = matches['p_mat_iexo']
+    p_mat_ext  = matches['p_mat_extended']
+    icouple = matches['ia_c_table']
+    inds_all = matches['corresponding_iexo']
     
-    EV = 0.0
-    
-    # this is a shallow copy: it does not actually copy big matrices
-    if (female and not unplanned_preg):# or (female and single_mom):
-        matches = setup.matches['Female meets male, no upp'][t].copy()
-    elif female and unplanned_preg:
-        matches = setup.matches['Female meets male, upp'][t].copy()
-    elif female and single_mom:
-        matches = setup.matches['Single mother meets male'][t].copy()
-    else:
-        matches = setup.matches['Male meets female, no upp'][t].copy()
-    
-        
-        
-    p_mat = matches['iexo_matrix'].T # !!! transpose here 
-    i_assets_c, p_assets_c = matches['i_a_mat'], matches['p_a_mat']
-    inds = np.where( np.any(p_mat>0,axis=1 ) )[0]
-    
-    npart = i_assets_c.shape[1]
-    
-    
-    dec = np.zeros(matches['iexo'].shape,dtype=np.bool)
-    abn = np.zeros(matches['iexo'].shape,dtype=np.bool)
-    morc = np.zeros(matches['iexo'].shape,dtype=np.bool)
-    tht = -1*np.ones(matches['iexo'].shape,dtype=np.int32)
-    iconv = matches['iconv']
-    
-    for i in range(npart):
-        
-        
-        
-        if not skip_mar:
-            if not unplanned_preg and not single_mom:
-                # compare whether to give or not to give a birth
-                res_c = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                         female=female,giveabirth=False,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
-                                         uloss_fem_single=uloss_fem_single,
-                                         uloss_mal_single=uloss_mal_single)
-                
-                if cangiveabirth and (not no_kids_at_meet):
-                    # maybe cannot give a birth at all
-                    res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                         female=female,giveabirth=True,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
-                                         uloss_fem_single=uloss_fem_single,
-                                         uloss_mal_single=uloss_mal_single)
-                else:            
-                    res_m = res_c
-            else:
-                # no choices
-                if unplanned_preg and (not single_mom): assert cangiveabirth
-                res_m = v_mar_igrid(setup,t,V,i_assets_c[:,i],inds,
-                                    unplanned_pregnancy=True,
-                                         female=female,giveabirth=True,
-                                         uloss_fem=uloss_fem,uloss_mal=uloss_mal,
-                                         uloss_fem_single=uloss_fem_single,
-                                         uloss_mal_single=uloss_mal_single)
-                res_c = res_m
-                
-        else:
-            # skip
-            res_c = v_no_mar(setup,t,V,i_assets_c[:,i],inds,
-                                     female=female,giveabirth=False)
-            res_m = res_c
-            
-        
-        (vfoutc, vmoutc), nprc, decc, thtc, abnc =  res_c['Values'], res_c['NBS'], res_c['Decision'], res_c['theta'], res_c['Abortion']
-        (vfoutm,vmoutm), nprm, decm, thtm, abnm = res_m['Values'], res_m['NBS'], res_m['Decision'], res_m['theta'], res_m['Abortion']
-        
-        # choice is made based on Nash Surplus value
-        i_birth = (nprm>nprc) 
-        
-        if not cangiveabirth: assert not np.any(i_birth)
-        
-        if female:
-            vout = i_birth*vfoutm + (1-i_birth)*vfoutc
-        else:
-            vout = i_birth*vmoutm + (1-i_birth)*vmoutc
-            
-        dec[:,:,iconv[:,i]] = (i_birth*decm + (1-i_birth)*decc)[:,None,:]
-        tht[:,:,iconv[:,i]] = (i_birth*thtm + (1-i_birth)*thtc)[:,None,:]
-        abn[:,:,iconv[:,i]] = (i_birth*abnm + (1-i_birth)*abnc)[:,None,:]
-        
-        if not unplanned_preg and not single_mom:
-            morc[:,:,iconv[:,i]] = i_birth[:,None,:]
-        else:
-            morc[:,:,iconv[:,i]] = True
-        
-        V_next[:,inds] = vout
-        
-        EV += (p_assets_c[:,i][:,None])*np.dot(V_next,p_mat)
 
-    mout = matches#.copy() # this is here for reason. otherwise things get inserted into
-    mout['Decision'] = dec
-    mout['Child immediately'] = morc
-    mout['theta'] = tht
     
-    mout['Abortion'] = abn if female and unplanned_preg else False*abn
+    
+    
+    out = v_mar(setup,V,t,icouple,inds_all,match_type=match_type,female=female)
+    
+    
+    
+    
+    if (match_type=='Single mother' or match_type=='Unplanned pregnancy'):
+        pick_k = np.ones(out['Agree'].shape,dtype=np.bool_)
+    else:
+        pick_k = np.zeros(out['Agree'].shape,dtype=np.bool_)
+    
+    
+    if match_type=='Regular' and (not setup.pars['no kids at meeting']):
+        # additional choice to have kids immediately
+        out_k = v_mar(setup,V,t,icouple,inds_all,match_type='Child immediately',female=female)
+        pick_k = out_k['NBS'] > out['NBS'] # > is important as 0 are possible
+        out_nk = out.copy()
+        out = {key: np.array(out_k[key]*pick_k + out_nk[key]*(~pick_k),dtype=out_k[key].dtype) for key in out_nk}
+    
+    # parse output
+        
+    V_out = out['V_fem'] if female else out['V_mal']
+    EV = np.dot( V_out, p_mat_ext.T )
+    
+    
+    
+
+      # this is here for reason. otherwise things get inserted into
+    mout = matches.copy()
+    
+    mout['Decision'] = out['Agree']
+    mout['Child immediately'] = pick_k
+    mout['itheta'] = out['itheta']
+
+    abn = out['Abortion']
+    mout['Abortion'] = abn if female and match_type=='Unplanned pregnancy' else (False & abn)
     
     return EV, mout
