@@ -32,7 +32,24 @@ if __name__ == '__main__':
     
     high_e = True
     x, targ_mode = get_point(high_e)
-    x = None
+    x = {'sigma_psi': 0.10056612648397834,
+         'sigma_psi_init': 0.26233143570897033,
+         'pmeet_21': 0.1335781709881927,
+         'pmeet_28': 0.36676421412123034,
+         'pmeet_35': 0.6577934697353877,
+         'preg_21': 0.03405237241832415,
+         'preg_28': 0.055095768985394006,
+         'preg_35': 0.04333002738196415,
+         'u_shift_mar': 1.3054616179142995,
+         'util_alp': 0.5055633884552083,
+         'util_kap': 0.7587624279095282,
+         'util_qbar': 0.0,
+         'disutil_marry_sm_mal': 27.07777234023702,
+         'disutil_shotgun': 5.2127711833143024,
+         'abortion_costs': 0.0,
+         'p_abortion_access': 1.0,
+         'u_lost_divorce': 6.643996484294591}
+
 
 
 
@@ -49,6 +66,7 @@ if __name__ == '__main__':
     
     mdl[0].time_statistics()
                          
+    
     
 
     
@@ -69,7 +87,7 @@ if __name__ == '__main__':
                    base_name='Model',
                    compare_name='Data',
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
-                   moments_aux=None)#,moments_aux=moments_aux)
+                   moments_aux=None) #,moments_aux=moments_aux)
     
     '''
     from fit_plot import FitPlots
