@@ -79,6 +79,9 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         # adjustment for possible child support
         
+        p_awarded = setup.pars['child_support_awarded_div']
+        
+        
         izf_cs = setup.child_support_transitions[t+1]['i_this_fem'][izf,izm]
         izm_cs = setup.child_support_transitions[t+1]['i_this_mal'][izm]
         
@@ -97,8 +100,11 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
             izf_cs+1, izm_cs+1, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
         
         
-        vf_n = vf_n_0*wzf_cs[None,:] + vf_n_1*(1-wzf_cs[None,:])
-        vm_n = vm_n_0*wzm_cs[None,:] + vm_n_1*(1-wzm_cs[None,:])
+        vf_n = p_awarded*(vf_n_0*wzf_cs[None,:] + vf_n_1*(1-wzf_cs[None,:])) + \
+                (1-p_awarded)*vf_n_old
+                
+        vm_n = p_awarded*(vm_n_0*wzm_cs[None,:] + vm_n_1*(1-wzm_cs[None,:])) + \
+                (1-p_awarded)*vm_n_old
         
         if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vf_n_old,vf_n)
         if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vm_n_old,vm_n)

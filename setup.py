@@ -94,7 +94,10 @@ class ModelSetup(object):
        
         
         p['child_a_cost'] = 0.0
-        p['child_support_share'] = 0.0    
+        
+        p['child_support_share'] = 0.2  
+        p['child_support_awarded_nm'] = 0.284
+        p['child_support_awarded_div'] = 0.461
             
         
         

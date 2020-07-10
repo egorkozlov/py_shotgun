@@ -57,11 +57,13 @@ if __name__ == '__main__':
     
     tar = target_values(targ_mode)
     
+    
+    this_name = 'real child support'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
-                                      moments_save_name = 'college move social stigma',
+                                      moments_save_name = this_name,
                                       moments_repeat=2)
     
     mdl[0].time_statistics()
@@ -82,10 +84,10 @@ if __name__ == '__main__':
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   base='college move social stigma.pkl',
-                   compare=None,
-                   base_name='Model',
-                   compare_name='Data',
+                   compare='college 0 0 child support.pkl',
+                   base=this_name+'.pkl',
+                   base_name=this_name,
+                   compare_name='No child support',
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None) #,moments_aux=moments_aux)
     
