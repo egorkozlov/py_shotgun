@@ -27,7 +27,7 @@ def target_values(mode='high education'):
     
     
     keys = [
-            ('ever kids by years after marriage, ',(1,8)),
+            ('ever kids by years after marriage, ',(4,8)),
             ('k then m in population at ',(23,35)),
             ('m then k in population at ',(23,35)),
             ('k then m in sample at ',(23,35)),

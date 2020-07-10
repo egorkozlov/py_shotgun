@@ -31,7 +31,7 @@ def calibration_params(xin=None,xfix=None):
               util_alp=(0.1,1.0,0.627),
               util_kap=(0.2,1.6,0.834),
               util_qbar=(0.0,4.0,0.5),
-              disutil_marry_sm_mal = (0.0,30.0,15.5),
+              disutil_marry_sm_mal = (0.0,45.0,15.5),
               disutil_shotgun=(0.0,10.0,0.63),
               abortion_costs=(0.0,40.0,5.0),
               p_abortion_access=(0.0,1.0,0.5),
