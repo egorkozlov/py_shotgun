@@ -6,9 +6,15 @@ Created on Mon Oct 28 20:13:57 2019
 @author: egorkozlov
 """
 
-from interp_np import interp            
+        
 from aux_routines import num_to_nparray
 import numpy as np
+
+try:
+    import cupy as cp    
+    from interp_np import interp_cp as interp
+except:
+    from interp_np import interp_np as interp
 
 # this is griddend linear interpolant that uses interpolation routines from
 # interp_np. It can be applied to arrays specifying values of function to get
@@ -18,6 +24,11 @@ import numpy as np
 class VecOnGrid(object):
     def __init__(self,grid,values,iwn=None,trim=True,fix_w=True):
         # this assumes grid is strictly increasing o/w unpredictable
+        try:
+            self.np = cp.get_array_module(values)
+        except:
+            self.np = np
+        
         self.val = values
         self.val_trimmed = np.clip(values,grid[0],grid[-1])
         self.grid = grid
