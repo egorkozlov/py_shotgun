@@ -28,6 +28,14 @@ else:
     ugpu = False
     upar = False
     
+    
+try:
+    import cupy as cp
+    np = cp
+    gpu = True
+except:
+    gpu = False
+    
 
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
 from renegotiation_unilateral_gpu import v_ren_gpu_twoopt
@@ -269,6 +277,8 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
 shrs_def = [0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.40,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95]#[0.2,0.35,0.5,0.65,0.8]
 def v_div_allsplits(setup,dc,t,sc,Vmale,Vfemale,izm,izf,
                         shrs=None,cost_fem=0.0,cost_mal=0.0):
+    
+    
     if shrs is None: shrs = shrs_def # grid on possible assets divisions    
     shp  =  (sc.size,izm.size,len(shrs))  
     Vm_divorce_M = np.zeros(shp) 
@@ -335,7 +345,14 @@ def v_no_ren(setup,V,haschild,canswitch,t):
     
     # this works live v_ren_new but does not actually run renegotiation
     
-    expnd = lambda x : setup.v_thetagrid_fine.apply(x,axis=2)
+    
+    i = setup.v_thetagrid_fine.i
+    wthis = setup.v_thetagrid_fine.wthis
+    wnext = setup.v_thetagrid_fine.wnext
+    
+    if gpu: (i, wthis, wnext) = [cp.array(x) for x in (i, wthis, wnext)]
+    
+    expnd = lambda x : wthis[None,None,:]*x[:,:,i] + wnext[None,None,:]*x[:,:,i+1]
     
     
     if haschild:

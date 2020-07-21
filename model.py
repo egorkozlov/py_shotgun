@@ -29,6 +29,12 @@ from integrator_singles import ev_single, ev_single_k
 from integrator_couples import ev_couple_m_c
 
 
+try:
+    import cupy as cp
+    gpu = True
+except:
+    gpu = False
+
 class Model(object):
     def __init__(self,verbose=False,**kwargs):
         self.mstart = self.get_mem()
@@ -112,6 +118,7 @@ class Model(object):
             
             haschild = (desc== 'Couple and child')
            
+            '''
             EV, dec = ev_couple_m_c(setup,V_next,t,haschild) if V_next else (None, {})
             if EV is not None: assert EV[0].dtype == EV[1].dtype == EV[2].dtype ==  EV[3].dtype ==setup.dtype
             self.time('Integration, {}'.format(desc))
@@ -121,7 +128,18 @@ class Model(object):
             self.time('Optimization, {}'.format(desc))
             
             del EV
+            '''
+            if gpu and (V_next is not None):
+                V_next = {d: {k: cp.array(V_next[d][k]) for k in V_next[d]} 
+                                                            for d in V_next}
             
+            from couples import solve_couples
+            (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
+            
+            if gpu:
+                V, VF, VM, c, x, s, fls = [np.array(x) for x in (V, VF, VM, c, x, s, fls)]
+                dec = {d: np.array(dec[d]) for d in dec}
+                
             return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}},\
                    {desc: dec}
         

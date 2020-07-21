@@ -50,7 +50,7 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
     b_exo = ceil(ne/threadsperblock[1])
     
     blockspergrid = (b_a, b_exo)
-    
+    '''
     v_y, vf_y, vm_y = [cuda.to_device(
                             np.ascontiguousarray(x)
                                         ) for x in (v_y_ni, vf_y_ni, vm_y_ni)]
@@ -59,7 +59,9 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
                                     np.ascontiguousarray(x)
                                   ) for x in (vf_n_ni,vm_n_ni)]
     
+    '''
     
+    v_y, vf_y, vm_y, vf_n, vm_n = (v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni)
     #itht, wntht = (cuda.const.array_like(x) for x in (itht, wntht))
     
     
@@ -227,6 +229,7 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
     b_exo = ceil(ne/threadsperblock[1])
     
     blockspergrid = (b_a, b_exo)
+    '''
     
     v_y0, vf_y0, vm_y0 = [cuda.to_device(
                             np.ascontiguousarray(x)
@@ -240,7 +243,10 @@ def v_ren_gpu_twoopt(v_y_ni0, v_y_ni1, vf_y_ni0, vf_y_ni1, vm_y_ni0, vm_y_ni1, v
                                     np.ascontiguousarray(x)
                                   ) for x in (vf_n_ni,vm_n_ni)]
     
+    '''
     
+    v_y0, vf_y0, vm_y0, v_y1, vf_y1, vm_y1, vf_n, vm_n = \
+        v_y_ni0, vf_y_ni0, vm_y_ni0, v_y_ni1, vf_y_ni1, vm_y_ni1, vf_n_ni,vm_n_ni
     
     
     
