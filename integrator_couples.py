@@ -8,6 +8,14 @@ This is integrator for couples
 import numpy as np
 #from renegotiation import v_last_period_renegotiated, v_renegotiated_loop
     
+
+try:
+    import cupy as cp
+    gpu = True
+except:
+    gpu = False
+
+
 from renegotiation_unilateral import v_ren_uni, v_no_ren
 
 def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
@@ -25,10 +33,7 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
         out = v_no_ren(setup,Vpostren,haschild,canswitch,t)
         
         
-        
-        
     _Vren2 = out.pop('Values') 
-    #_Vren2=out['Values']
     dec = out
     
     
@@ -38,18 +43,7 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
             'SF':Vpostren['Female, single'],
             'SM':Vpostren['Male, single']}
     
-    '''
-    # this is false: instead of V0.min should be minimum of many things
-    V0 = Vpostren['Couple and child']['V']
-    V1 = _Vren2[1]
     
-    if haschild:
-        assert V1.max() <= V0.max() + 1e-4
-        assert V1.min() >= V0.min() - 1e-4
-        
-    '''
-    
-        
     # accounts for exogenous transitions
     
     EVr, EVc, EVf, EVm = ev_couple_exo(setup,Vren['M'],t,haschild,use_sparse,down=False)
@@ -60,6 +54,7 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
 
 def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
+    op = cp if gpu else np
  
     # this does dot product along 3rd dimension
     # this takes V that already accounts for renegotiation (so that is e
@@ -70,7 +65,7 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
         if use_sparse:
             return a*b
         else:
-            return np.dot(a,b.T)
+            return op.dot(a,b.T)
         
         
     if haschild:
@@ -87,7 +82,7 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
     
     Vr, Vc, Vf, Vm = Vren['VR'], Vren['VC'], Vren['VF'], Vren['VM']
-    EVr, EVc, EVf, EVm = np.empty((4,na,nexo,ntheta,nl),dtype=setup.dtype)
+    EVr, EVc, EVf, EVm = op.empty((4,na,nexo,ntheta,nl),dtype=setup.dtype)
     
     
     for il in range(nl):

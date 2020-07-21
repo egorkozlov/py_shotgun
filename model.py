@@ -29,6 +29,13 @@ from integrator_singles import ev_single, ev_single_k
 from integrator_couples import ev_couple_m_c
 
 
+try:
+    import cupy as cp
+    gpu = True
+except:
+    gpu = False
+
+
 class Model(object):
     def __init__(self,verbose=False,**kwargs):
         self.mstart = self.get_mem()
@@ -110,6 +117,13 @@ class Model(object):
         
         elif desc== 'Couple and child' or desc == 'Couple, no children':
             
+            
+            if gpu and (V_next is not None):
+                # this keeps all next period V on the GPU
+                V_next = {desc: {key: cp.asarray(V_next[desc][key])
+                                for key in V_next[desc]} for desc in V_next}
+            
+            
             haschild = (desc== 'Couple and child')
            
             EV, dec = ev_couple_m_c(setup,V_next,t,haschild) if V_next else (None, {})
@@ -159,6 +173,7 @@ class Model(object):
             decnow = dict()
             
             Vnext = self.V[0] if t<T-1 else None
+            
             
             for desc in self.setup.state_names:
                 V_d, dec = self.v_next(desc,t,Vnext)   

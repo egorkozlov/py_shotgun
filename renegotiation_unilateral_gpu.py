@@ -10,6 +10,7 @@ Created on Thu Mar 26 19:56:40 2020
 
 from numba import cuda, f4, f8, i2, b1
 import numpy as np
+import cupy as cp
 
 use_f32 = False
 
@@ -50,7 +51,7 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
     b_exo = ceil(ne/threadsperblock[1])
     
     blockspergrid = (b_a, b_exo)
-    
+    '''
     v_y, vf_y, vm_y = [cuda.to_device(
                             np.ascontiguousarray(x)
                                         ) for x in (v_y_ni, vf_y_ni, vm_y_ni)]
@@ -58,7 +59,10 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
     vf_n, vm_n = [cuda.to_device(
                                     np.ascontiguousarray(x)
                                   ) for x in (vf_n_ni,vm_n_ni)]
+    '''
+    v_y, vf_y, vm_y = v_y_ni, vf_y_ni, vm_y_ni
     
+    vf_n, vm_n = vf_n_ni, vm_n_ni
     
     #itht, wntht = (cuda.const.array_like(x) for x in (itht, wntht))
     
@@ -67,7 +71,12 @@ def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, th
                                     itht, wntht, thtgrid,  
                                     v_out, vm_out, vf_out, itheta_out)
     
+    '''
     v_out, vm_out, vf_out, itheta_out = (x.copy_to_host() 
+                            for x in (v_out, vm_out, vf_out, itheta_out))
+    '''
+    
+    v_out, vm_out, vf_out, itheta_out = (cp.asarray(x) 
                             for x in (v_out, vm_out, vf_out, itheta_out))
     
     return v_out, vf_out, vm_out, itheta_out
