@@ -86,7 +86,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     V_couple, c_opt, s_opt, x_opt = np.empty((4,)+shp,dtype)
     i_opt, il_opt = np.empty(shp,np.int16), np.empty(shp,np.int16)
     
-    V_all_l = np.empty(shp+(nls,),dtype=dtype)
+    #V_all_l = np.empty(shp+(nls,),dtype=dtype)
     
     theta_val = dtype(setup.thetagrid)
     
@@ -125,7 +125,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         i_opt[:,istart:ifinish,:] = i_opt_i
         x_opt[:,istart:ifinish,:] = x_opt_i
         il_opt[:,istart:ifinish,:] = il_opt_i
-        V_all_l[:,istart:ifinish,:,:] = V_all_l_i # we need this for l choice so it is ok
+        #V_all_l[:,istart:ifinish,:,:] = V_all_l_i # we need this for l choice so it is ok
         
         
         istart = ifinish
@@ -150,27 +150,10 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     V_all = uc + beta*np.take_along_axis(np.take_along_axis(EVc_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     def r(x): return x
     
-    '''
-    if V_all.shape[-1] > 1:
-        V_weighted = V_fem*setup.thetagrid[None,None,:] + V_mal*(1-setup.thetagrid[None,None,:])
-        vd_max = np.max(np.abs(V_weighted - V_all))
-        vd_mean = np.mean(np.abs(V_weighted - V_all))
-        print('max diff is {}, mean diff is {}'.format(vd_max,vd_mean))
-    '''
     assert V_all.dtype==EVc_all.dtype==V_couple.dtype
     
     
-    '''
-    if uf.shape[-1] > 1:
-        assert np.all(np.diff(uf,axis=-1)>0), 'Monotonicity is violated for females in u'
-        assert np.all(np.diff(um,axis=-1)<0), 'Monotonicity is violated for males in u'
-    
-    if V_fem.shape[-1] > 1:
-        assert np.all(np.diff(V_fem,axis=-1)>0), 'Monotonicity is violated for females in V'
-        assert np.all(np.diff(V_mal,axis=-1)<0), 'Monotonicity is violated for males in V'
-        
-    '''
-    return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt, r(V_all_l)
+    return r(V_all), r(V_fem), r(V_mal), r(c_opt), r(x_opt), r(s_opt), il_opt
 
 
 

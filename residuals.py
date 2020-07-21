@@ -62,7 +62,6 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     
     
-    iter_name = 'default' if not verbose else 'default-timed'
     
     
     def join_path(name,path):
@@ -87,7 +86,7 @@ def mdl_resid(x=None,targets=None,weights=w,
                 
     if load_from is None:
         
-        mdl = Model(iterator_name=iter_name,**kwords)
+        mdl = Model(**kwords)
         mdl_list = [mdl]
         
     else:       

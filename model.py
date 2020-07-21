@@ -30,13 +30,12 @@ from integrator_couples import ev_couple_m_c
 
 
 class Model(object):
-    def __init__(self,iterator_name='default',verbose=False,**kwargs):
+    def __init__(self,verbose=False,**kwargs):
         self.mstart = self.get_mem()
         self.mlast = self.get_mem()
         self.verbose = verbose
         self.setup = ModelSetup(**kwargs)
         self.dtype = self.setup.dtype
-        self.iterator, self.initializer = self._get_iterator(iterator_name)
         self.start = default_timer()
         self.last = default_timer()        
         self.time_dict = dict()        
@@ -83,140 +82,72 @@ class Model(object):
                 
             av_time = round(np.mean(time_arr),2) 
             tot_time = round(np.sum(np.array(timelist)),2) 
-            print('On average {} took {}, total {} sec'.format(what,av_time,tot_time,extra))
+            print('On average {} took {}, total {} sec{}'.format(what,av_time,tot_time,extra))
             
     
-    def _get_iterator(self,name='default'):
-        # this thing returns two functions: iterate and initialize
-        # it can put a timer inside of them
-        # it can also do many other things potentially
+     
+    def v_next(self,desc,t,V_next):
+        # This comptues next period value function.
+        # V_next can be None, in this case this is an initial iteration
+        setup = self.setup
+        ushift = setup.utility_shifters[desc]
         
+        if desc == 'Female, single' or desc == 'Male, single':
+            
+            female = (desc == 'Female, single')
+            
+            EV, dec = ev_single(setup,V_next,female,t) if V_next else (None, {})
+            if EV is not None: assert EV.dtype == setup.dtype
+            self.time('Integration, {}'.format(desc))
+            
+            V, c, s = v_iter_single(setup,t,EV,female,ushift)       
+            assert V.dtype == c.dtype == setup.dtype
+            self.time('Optimization, {}'.format(desc))
+            
+            del EV
+            
+            return {desc: {'V':V,'c':c,'s':s,'x':0.0*c}}, {desc: dec}
         
-        # this is not the best organization but kind of works
-        # this allows to use different methods for iteration/initialization
-        # as long as they all are specified here or imported
+        elif desc== 'Couple and child' or desc == 'Couple, no children':
+            
+            haschild = (desc== 'Couple and child')
+           
+            EV, dec = ev_couple_m_c(setup,V_next,t,haschild) if V_next else (None, {})
+            if EV is not None: assert EV[0].dtype == EV[1].dtype == EV[2].dtype ==  EV[3].dtype ==setup.dtype
+            self.time('Integration, {}'.format(desc))
+            
+            V, VF, VM, c, x, s, fls = v_iter_couple(setup,t,EV,ushift,haschild)  
+            assert V.dtype == VF.dtype == c.dtype == setup.dtype
+            self.time('Optimization, {}'.format(desc))
+            
+            del EV
+            
+            return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}},\
+                   {desc: dec}
         
-        # first we define the iterator
-         
-        def v_iterator(setup,desc,t,EV=None):
-            # this takes integrated future type-specific value function and returns
-            # this period value function. Integration is done separately.
-            # If None is feeded for EV this assumes that we are in the last period
-            # and returns last period value
-            #get_ipython().magic('reset -sf')
-            
-            ushift = self.setup.utility_shifters[desc]
-            
-            if desc == 'Female, single' or desc == 'Male, single':
-                female = (desc == 'Female, single')
-                
-                V, c, s = v_iter_single(setup,t,EV,female,ushift)       
-                assert V.dtype == c.dtype == setup.dtype
-                return {desc: {'V':V,'c':c,'s':s,'x':0.0*c}}   
-             
-            elif desc== 'Couple and child' or desc == 'Couple, no children':
-                haschild = (desc== 'Couple and child')
-                
-                V, VF, VM, c, x, s, fls, V_all_l = v_iter_couple(setup,t,EV,ushift,haschild)  
-                assert V.dtype == VF.dtype == c.dtype == setup.dtype
-                
-                return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}}
-            elif desc == 'Female and child':
-                
-                V, c, x, s, fls, V_all_l = v_iter_single_mom(setup,t,EV,ushift)
-                assert V.dtype == c.dtype == setup.dtype
-                return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls}}
-            else:
-                raise Exception('I do not know this type...')
-            
-        # and the integrator   
-        
-        def v_integrator(setup,desc,t,V_next):
-            
-            if desc == 'Female, single' or desc == 'Male, single':
-                female = (desc == 'Female, single')
-                EV, dec = ev_single(setup,V_next,female,t)
-                assert EV.dtype == setup.dtype
-            elif desc == 'Couple and child':
-                EV, dec = ev_couple_m_c(setup,V_next,t,True)
-                assert EV[0].dtype == EV[1].dtype == EV[2].dtype ==  EV[3].dtype ==setup.dtype
-            elif desc == 'Couple, no children':
-                EV, dec = ev_couple_m_c(setup,V_next,t,False)
-                assert EV[0].dtype == EV[1].dtype == EV[2].dtype == EV[3].dtype == setup.dtype
-            elif desc == 'Female and child':
-                EV, dec = ev_single_k(setup,V_next,t)
-                assert EV.dtype == setup.dtype
-            else:
-                raise Exception('I do not know this type...')
-            return EV, dec
-            
-        
-        
-        # then we wrap them into two routines  
-        
-        if name == 'default' or name == 'default-timed':
-            timed = (name == 'default-timed')
-            def iterate(desc,t,Vnext):
-                EV, dec = v_integrator(self.setup,desc,t,Vnext)
-                if timed: self.time('Integration for {}'.format(desc))
-                vout = v_iterator(self.setup,desc,t,EV)
-                if timed: self.time('Optimization for {}'.format(desc))
-                
-                self.wrap_decisions(desc,dec,vout)
-                if timed: self.time('Wrapping at iter for {}'.format(desc))
-                
-                return vout, dec
-            def initialize(desc,t):
-                vout = v_iterator(self.setup,desc,t,None)
-                if timed: self.time('Initialization for {}'.format(desc))
-                dec = {}
-                self.wrap_decisions(desc,dec,vout)
-                if timed: self.time('Wrapping at iter for {}'.format(desc))
-                
-                return vout, dec
-        else:
-            raise Exception('unsupported name')
-            
-            
-            
-        return iterate, initialize
-    
-    def wrap_decisions(self,desc,dec,vout):
-        # This interpolates consumption, savings and labor supply decisions
-        # on fine grid for theta that is used for integration and simulations.
-        pass
-        '''
-        v = vout[desc]
-        if desc == 'Couple and child' or desc == 'Couple, no children':
-            
-            #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            #sint = self.setup.v_thetagrid_fine.apply(v['s'],axis=2)
-            
-            #Vint = self.setup.v_thetagrid_fine.apply(v['V_all_l'],axis=2)
-            
-            #xint = self.setup.v_thetagrid_fine.apply(v['x'],axis=2)
-            #cint = self.setup.v_thetagrid_fine.apply(v['c'],axis=2)
-            #assert sint.dtype == Vint.dtype == xint.dtype == self.setup.dtype
-            
-            #if Vint.ndim < 4: Vint = Vint[:,:,:,None]
-            
-            #fls = Vint.argmax(axis=3).astype(np.int8)
-            
-            
-            
-            #dec.update({'s':sint,'fls':fls,'x':v['x'],'c':v['c']})
-            #del sint, fls
         elif desc == 'Female and child':
-            #dec.update({'s':v['s'],'fls':v['fls'],'x':v['x'],'c':v['c']})
+            
+            EV, dec = ev_single_k(setup,V_next,t) if V_next else (None, {})
+            if EV is not None: assert EV.dtype == setup.dtype
+            self.time('Integration, {}'.format(desc))
+            
+            V, c, x, s, fls = v_iter_single_mom(setup,t,EV,ushift)
+            assert V.dtype == c.dtype == setup.dtype
+            self.time('Optimization, {}'.format(desc))
+            
+            del EV
+            
+            return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls}},\
+                   {desc: dec}
+                
+        
         else:
-            #xx = np.broadcast_to(0.0,v['s'].shape) # this saves memory a bit
-            #dec.update({'s':v['s'],'x':xx,'c':v['c']})
-            del v
-        '''
+            raise Exception('I do not know this type...')
+    
+            
     
     def solve(self,save=False):
         
-        show_mem = self.verbose
         
         T = self.setup.pars['T']
         self.V = list()
@@ -230,22 +161,19 @@ class Model(object):
             Vnext = self.V[0] if t<T-1 else None
             
             for desc in self.setup.state_names:
-                if t == T-1:
-                    V_d, dec = self.initializer(desc,t)
-                else:
-                    V_d, dec = self.iterator(desc,t,Vnext)   
+                V_d, dec = self.v_next(desc,t,Vnext)   
                    
                 Vnow.update(V_d)
-                decnow.update({desc:dec})
+                decnow.update(dec)
                 
             self.V = [Vnow] + self.V
             self.decisions = [decnow] + self.decisions
             
-
             
-            if show_mem:
-                print('The size of V is {} giga'.format(asizeof(self.V)/1000000000))
-                print('The size of decisions is {} giga'.format(asizeof(self.decisions)/1000000000))
+            
+            #if show_mem:
+            #    print('The size of V is {} giga'.format(asizeof(self.V)/1000000000))
+            #    print('The size of decisions is {} giga'.format(asizeof(self.decisions)/1000000000))
         if save:
             import pickle
             pickle.dump(self,open('model_save.pkl','wb+'))

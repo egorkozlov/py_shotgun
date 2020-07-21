@@ -87,7 +87,7 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
     
     Vr, Vc, Vf, Vm = Vren['VR'], Vren['VC'], Vren['VF'], Vren['VM']
-    EVr, EVc, EVf, EVm = np.zeros((4,na,nexo,ntheta,nl),dtype=setup.dtype)
+    EVr, EVc, EVf, EVm = np.empty((4,na,nexo,ntheta,nl),dtype=setup.dtype)
     
     
     for il in range(nl):
