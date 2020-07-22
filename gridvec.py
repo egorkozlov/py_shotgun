@@ -9,6 +9,7 @@ Created on Mon Oct 28 20:13:57 2019
 from interp_np import interp_np, interp_cp
 from aux_routines import num_to_nparray
 import numpy as np
+
 try:
     import cupy as cp
 except:
@@ -20,16 +21,17 @@ except:
 
 # TODO: this should have nan-like values and throw errors
 class VecOnGrid(object):
-    def __init__(self,grid,values,iwn=None,trim=True,fix_w=True):
+    def __init__(self,grid,values,iwn=None,trim=True,fix_w=True,force_cupy=False):
         # this assumes grid is strictly increasing o/w unpredictable
         try:
             self.np = cp.get_array_module(values)
         except:
             self.np = np
             
+        if force_cupy: self.np = cp        
+            
         interp = interp_np if (self.np == np) else interp_cp
         
-            
         
         
         self.val = self.np.array(values)

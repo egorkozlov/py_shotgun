@@ -18,10 +18,21 @@ from nopar_assets_dist import get_estimates
 
 from scipy import sparse
 
+try:
+    import cupy as cp
+    q = cp.array([1,2,3])
+    assert cp.allclose(q.mean(),2.0)
+    print('using cupy!')
+    cupy = True
+except:
+    print('using cpu!')
+    cupy = False
+
 
 
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
+        
         p = dict()       
         T = 55
         Tret = 45 # first period when the agent is retired
@@ -550,6 +561,8 @@ class ModelSetup(object):
         self.unplanned_pregnancy_probability()
         self.compute_taxes()
         
+        self.cupyfy()
+        
         
     
     def _mar_mats(self,t,female=True):
@@ -975,6 +988,36 @@ class ModelSetup(object):
             transitions.append(trans_t)
         
         self.child_support_transitions = transitions
+    
+    def cupyfy(self):
+        # this sends copies of important objects to cupy
+        # only things that are going to be reused are worth storing
+        
+        
+        if not cupy:
+            self.cupy = None
+            return
+        
+        stuff = dict()
+        
+        stuff['theta_orig_on_fine'] = cp.array(self.theta_orig_on_fine,dtype=self.dtype)
+        stuff['thetagrid'] = cp.array(self.thetagrid,dtype=self.dtype)
+        
+        stuff['agrid_c'] = cp.array(self.agrid_c,dtype=self.dtype)
+        stuff['agrid_s'] = cp.array(self.agrid_s,dtype=self.dtype)
+        stuff['sgrid_c'] = cp.array(self.sgrid_c,dtype=self.dtype)
+        stuff['sgrid_s'] = cp.array(self.sgrid_s,dtype=self.dtype)
+        stuff['vsgrid_c'] = VecOnGrid(self.agrid_c,self.sgrid_c,force_cupy=True)
+        stuff['vsgrid_s'] = VecOnGrid(self.agrid_s,self.sgrid_s,force_cupy=True)
+        stuff['mgrid_c'] = cp.array(self.mgrid_c,dtype=self.dtype)
+        stuff['mgrid_s'] = cp.array(self.mgrid_s,dtype=self.dtype)
+        
+        uu = self.u_precomputed
+        upc = {key : {e: cp.array(uu[key][e]) for e in uu[key]} for key in uu}
+        stuff['u_precomputed'] = upc
+        
+        self.cupy = namedtuple('cupy',stuff.keys())
+        
         
         
         

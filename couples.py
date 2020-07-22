@@ -9,12 +9,12 @@ Created on Tue Jul 21 17:03:01 2020
 # this is a joined routine obitaining things for couples
 
 
-import numpy as np
+import numpy as onp
 from timeit import default_timer
 
 try:
     import cupy as cp
-    import cupyx
+    #import cupyx
     gpu = True
 except:
     gpu = False
@@ -91,7 +91,11 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
 
 def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
 
-    if gpu: np = cp
+    if gpu:
+        np = cp
+        use_sparse = False # cupy-sparse is bad somehow
+    else:
+        np = onp
  
     # this does dot product along 3rd dimension
     # this takes V that already accounts for renegotiation (so that is e
@@ -100,25 +104,26 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
     def mmult(a,b):
         if use_sparse:
-            if not gpu:
-                return a*b
-            else:
-                return cp.matmul(a,b)
+            return a*b
         else:
             return np.dot(a,b.T)
         
         
     if haschild:
-        mat_sp = setup.exogrid.all_t_mat_by_l_spt_k
-        mat_nsp = setup.exogrid.all_t_mat_by_l_k
+        if use_sparse:
+            mat = setup.exogrid.all_t_mat_by_l_spt_k
+        elif gpu:
+            mat = setup.exogrid.all_t_mat_by_l_k
     else:
-        mat_sp = setup.exogrid.all_t_mat_by_l_spt_nk
-        mat_nsp = setup.exogrid.all_t_mat_by_l_nk
+        if use_sparse:
+            mat = setup.exogrid.all_t_mat_by_l_spt_nk
+        else:
+            mat = setup.exogrid.all_t_mat_by_l_nk
         
         
     
     
-    nl = len(mat_sp)
+    nl = len(mat)
     
     
     
@@ -131,15 +136,10 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
     for il in range(nl):
         
-        M = mat_sp[il][t] if use_sparse else mat_nsp[il][t]
-        
-        
-        if gpu and use_sparse: M = cupyx.scipy.sparse.csc_matrix(M).toarray()
-        
-        print(type(M))
-        print(M.shape)
-        print(type(Vr))
-        print(Vr.shape)
+        M = np.array(mat[il][t],copy=False)
+        # when np is cp this puts stuff onto device
+        # there is no point in doing it in advance unless you compute all of
+        # them on gpu
         
         for itheta in range(ntheta):            
             EVr[...,itheta,il]  = mmult(Vr[...,itheta],M)
@@ -147,8 +147,8 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
             EVf[...,itheta,il] = mmult(Vf[...,itheta],M)             
             EVm[...,itheta,il] = mmult(Vm[...,itheta],M)             
             
-
-    #assert not np.allclose( EV[...,0], EV[...,1])
+        del M
+        
     
     
     return EVr, EVc, EVf, EVm
@@ -161,11 +161,17 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     if verbose: start = default_timer()
     
-    agrid = setup.agrid_c
-    sgrid = setup.sgrid_c
+    if gpu:
+        np = cp
+    else:
+        np = onp
+        
+    nogpu = not gpu
+    
+    agrid = setup.agrid_c if nogpu else setup.cupy.agrid_c
+    sgrid = setup.sgrid_c if nogpu else setup.cupy.sgrid_c
     
     dtype = setup.dtype
-    
     
     
     
@@ -176,7 +182,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     taxfun = setup.taxes[key] if t < setup.pars['Tret'] else lambda x : 0.0*x
     
     ls = setup.ls_levels[key]
-    uu, ux = setup.u_precomputed[key]['u'],setup.u_precomputed[key]['x']
+    uu, ux = setup.u_precomputed[key]['u'], setup.u_precomputed[key]['x']
     upart, ucouple = (setup.u_part_k, setup.u_couple_k) if haschild else (setup.u_part_nk, setup.u_couple_nk)
 
     nls = len(ls)
@@ -184,12 +190,15 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     # type conversion is here
     
-    zf  = setup.exogrid.all_t[t][:,0]
-    zm  = setup.exogrid.all_t[t][:,1]
+    all_t = np.array(setup.exogrid.all_t[t],copy=False)
+    
+    
+    zf  = all_t[t][:,0]
+    zm  = all_t[t][:,1]
     zftrend = setup.pars['f_wage_trend'][t]
     zmtrend = setup.pars['m_wage_trend'][t]
 
-    psi = setup.exogrid.all_t[t][:,2]
+    psi = all_t[t][:,2]
     beta = setup.pars['beta_t'][t]
     sigma = setup.pars['crra_power']
     R = setup.pars['R_t'][t]
@@ -198,10 +207,6 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     wf = np.exp(zf + zftrend)
     wm = np.exp(zm + zmtrend)
-    
-    #labor_income = np.exp(zf) + np.exp(zm)
-    
-    #money = R*agrid[:,None] + wf[None,:] 
     
     
     nexo = setup.pars['nexo_t'][t]
@@ -213,14 +218,13 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         EVr_by_l, EVc_by_l, EV_fem_by_l, EV_mal_by_l = EV_tuple    
     
     # type conversion
-    sgrid,sigma,beta = (dtype(x) for x in (sgrid,sigma,beta))
+    sigma,beta = (dtype(x) for x in (sigma,beta))
     
     V_couple, c_opt, s_opt, x_opt = np.empty((4,)+shp,dtype)
     i_opt, il_opt = np.empty(shp,np.int16), np.empty(shp,np.int16)
     
-    #V_all_l = np.empty(shp+(nls,),dtype=dtype)
-    
-    theta_val = dtype(setup.thetagrid)
+    sgrid = dtype(sgrid)
+    theta_val = dtype(setup.thetagrid) if nogpu else setup.cupy.thetagrid
     
     # the original problem is max{umult*u(c) + beta*EV}
     # we need to rescale the problem to max{u(c) + beta*EV_resc}
@@ -230,12 +234,16 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     
     # this natually splits everything onto slices
     
+    
+    
+    vs = setup.vsgrid_c if nogpu else setup.cupy.vsgrid_c
+    
     for ibatch in range(int(np.ceil(nexo/nbatch))):
         #money_i = money[:,istart:ifinish]
         assert ifinish > istart
         
         money_t = (R*agrid, wf[istart:ifinish], wm[istart:ifinish])
-        EV_t = (setup.vsgrid_c,EVr_by_l[:,istart:ifinish,:,:])
+        EV_t = (vs,EVr_by_l[:,istart:ifinish,:,:])
         
         
         
