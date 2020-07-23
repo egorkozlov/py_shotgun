@@ -10,7 +10,10 @@ Created on Thu Mar 26 19:56:40 2020
 
 from numba import cuda, f4, f8, i2, b1
 import numpy as np
-import cupy as cp
+try:
+    import cupy as cp
+except:
+    pass
 
 use_f32 = False
 
@@ -22,6 +25,7 @@ else:
     cpu_type = np.float64
 
 from math import ceil
+
 
 def v_ren_gpu_oneopt(v_y_ni, vf_y_ni, vm_y_ni, vf_n_ni, vm_n_ni, itht, wntht, thtgrid):
     

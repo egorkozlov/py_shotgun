@@ -11,10 +11,11 @@ Both versions are needed as it is not clear whether we'll actually use cuda
 
 
 
-import numpy as np
+import numpy as onp
 from numba import njit, prange, cuda
 from platform import system
 
+np = onp
 
 
 
@@ -36,13 +37,16 @@ else:
     ugpu = False
     upar = True
     
+    
 def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun=lambda x : 0.0*x,
-                              use_gpu=ugpu,dtype=np.float32):
+                              use_gpu=ugpu,dtype=onp.float64):
     
     # This optimizer avoids creating big arrays and uses parallel-CPU on 
     # machines without NUMBA-CUDA codes otherwise
     if ugpu:
         np = cp.get_array_module(EV[1])
+    else:
+        np = onp
 
     nls = len(ls)
     

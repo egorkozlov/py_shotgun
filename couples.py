@@ -136,7 +136,7 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
     
     for il in range(nl):
         
-        M = np.array(mat[il][t],copy=False)
+        M = np.array(mat[il][t],copy=False) if gpu else mat[il][t]
         # when np is cp this puts stuff onto device
         # there is no point in doing it in advance unless you compute all of
         # them on gpu

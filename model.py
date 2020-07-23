@@ -136,10 +136,14 @@ class Model(object):
             from couples import solve_couples
             (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
             
+            print(desc,V.mean(),c.mean(),s.mean(),x.mean(),fls.mean())
+            
             if gpu:
                 V, VF, VM, c, x, s, fls = [cp.asnumpy(x) for x in (V, VF, VM, c, x, s, fls)]
                 dec = {d: cp.asnumpy(dec[d]) for d in dec}
-                
+            
+            print(desc,t,V.mean(),c.mean(),s.mean(),x.mean(),fls.mean())
+            
             return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}},\
                    {desc: dec}
         
