@@ -464,8 +464,9 @@ class ModelSetup(object):
         self.child_a_cost_single = np.minimum(self.agrid_s,self.pars['child_a_cost'])
         self.child_a_cost_couple = np.minimum(self.agrid_c,self.pars['child_a_cost'])
         
-        self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
-        self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
+        assert self.pars['child_a_cost']<1e-3, 'not implemented'
+        #self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
+        #self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
         
         
         # construct finer grid for bargaining
@@ -1017,7 +1018,8 @@ class ModelSetup(object):
         
         stuff['theta_orig_on_fine'] = cp.array(self.theta_orig_on_fine,dtype=self.dtype)
         stuff['thetagrid'] = cp.array(self.thetagrid,dtype=self.dtype)
-        
+        stuff['thetagrid_fine'] = cp.array(self.thetagrid_fine,dtype=self.dtype)
+        stuff['v_thetagrid_fine'] = VecOnGrid(stuff['thetagrid_fine'],stuff['thetagrid'],force_cupy=True) 
         stuff['agrid_c'] = cp.array(self.agrid_c,dtype=self.dtype)
         stuff['agrid_s'] = cp.array(self.agrid_s,dtype=self.dtype)
         stuff['sgrid_c'] = cp.array(self.sgrid_c,dtype=self.dtype)

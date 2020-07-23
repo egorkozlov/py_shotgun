@@ -60,11 +60,19 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
     assert is_unil
     
-    ind, izf, izm, ipsi = setup.all_indices(t+1)
     
-    zfgrid = setup.exo_grids['Female, single'][t+1]
-    zmgrid = setup.exo_grids['Male, single'][t+1]
+   
+
+    def cpa(x):
+        if gpu:
+            return cp.asarray(x)
+        else:
+            return x
+ 
+    zfgrid = cpa(setup.exo_grids['Female, single'][t+1])
+    zmgrid = cpa(setup.exo_grids['Male, single'][t+1])
     
+    ind, izf, izm, ipsi = [cpa(x) for x in setup.all_indices(t+1)]
     
     share=(np.exp(zfgrid[izf]) / ( np.exp(zmgrid[izm]) + np.exp(zfgrid[izf]) ) )
     relat=np.ones(share.shape)*0.5
@@ -90,11 +98,11 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         p_awarded = setup.pars['child_support_awarded_div']
         
         
-        izf_cs = setup.child_support_transitions[t+1]['i_this_fem'][izf,izm]
-        izm_cs = setup.child_support_transitions[t+1]['i_this_mal'][izm]
+        izf_cs = cpa(setup.child_support_transitions[t+1]['i_this_fem'])[izf,izm]
+        izm_cs = cpa(setup.child_support_transitions[t+1]['i_this_mal'])[izm]
         
-        wzf_cs = setup.child_support_transitions[t+1]['w_this_fem'][izf,izm]
-        wzm_cs = setup.child_support_transitions[t+1]['w_this_mal'][izm]
+        wzf_cs = cpa(setup.child_support_transitions[t+1]['w_this_fem'])[izf,izm]
+        wzm_cs = cpa(setup.child_support_transitions[t+1]['w_this_mal'])[izm]
         
         
         vf_n_0, vm_n_0 = v_div_byshare(
@@ -131,10 +139,14 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
                 'Value of Divorce, female': vf_n}
     
 
-    
-    itht = setup.v_thetagrid_fine.i
-    wntht = setup.v_thetagrid_fine.wnext
-    thtgrid = setup.thetagrid_fine
+    if not gpu: 
+       itht = setup.v_thetagrid_fine.i
+       wntht = setup.v_thetagrid_fine.wnext
+       thtgrid = setup.thetagrid_fine
+    else:
+       itht = setup.cupy.v_thetagrid_fine.i
+       wntht = setup.cupy.v_thetagrid_fine.wnext
+       thtgrid = setup.cupy.thetagrid_fine
 
     
     
@@ -162,9 +174,10 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
          
     else:
         if canswitch:
-            vcc_v, vcc_vf, vcc_vm = \
-            [setup.vagrid_child_couple.apply_preserve_shape(x)
-                for x in [V['Couple and child'][y] for y in ['V','VF','VM']]]
+            #vcc_v, vcc_vf, vcc_vm = \
+            #[setup.vagrid_child_couple.apply_preserve_shape(x)
+            #    for x in [V['Couple and child'][y] for y in ['V','VF','VM']]]
+            vcc_v, vcc_vf, vcc_vm = [V['Couple and child'][y] for y in ['V','VF','VM']]
                 
             if not ugpu:                
                 
@@ -206,7 +219,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
                                        V['Couple, no children']['VM'], 
                                         vf_n, vm_n,
                                         itht, wntht, thtgrid)  
-                switch = np.zeros_like(itheta_out,dtype=np.bool)              
+                switch = np.zeros(itheta_out.shape,dtype=np.bool)              
                 
         assert v_out.dtype == setup.dtype
         
@@ -286,8 +299,8 @@ def v_div_allsplits(setup,dc,t,sc,Vmale,Vfemale,izm,izf,
     
     # find utilities of divorce for different divisions of assets
     for i, shr in enumerate(shrs):
-        sv_m = VecOnGrid(setup.agrid_s,shr*sc - cost_mal)
-        sv_f = VecOnGrid(setup.agrid_s,shr*sc - cost_fem)
+        sv_m = VecOnGrid(setup.agrid_s,shr*sc - cost_mal,force_cupy=gpu)
+        sv_f = VecOnGrid(setup.agrid_s,shr*sc - cost_fem,force_cupy=gpu)
         
         Vm_divorce_M[...,i] = sv_m.apply(Vmale,    axis=0,take=(1,izm),reshape_i=True) - dc.u_lost_m
         Vf_divorce_M[...,i] = sv_f.apply(Vfemale,  axis=0,take=(1,izf),reshape_i=True) - dc.u_lost_f
@@ -316,8 +329,8 @@ def v_div_byshare(setup,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,
     
     
     
-    fem_gets = VecOnGrid(np.array(shrs),share_fem)
-    mal_gets = VecOnGrid(np.array(shrs),share_mal)
+    fem_gets = VecOnGrid(np.array(shrs),share_fem,force_cupy=gpu)
+    mal_gets = VecOnGrid(np.array(shrs),share_mal,force_cupy=gpu)
     
     i_fem = fem_gets.i
     wn_fem = fem_gets.wnext
