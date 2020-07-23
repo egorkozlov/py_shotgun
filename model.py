@@ -137,8 +137,8 @@ class Model(object):
             (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
             
             if gpu:
-                V, VF, VM, c, x, s, fls = [np.array(x) for x in (V, VF, VM, c, x, s, fls)]
-                dec = {d: np.array(dec[d]) for d in dec}
+                V, VF, VM, c, x, s, fls = [cp.asnumpy(x) for x in (V, VF, VM, c, x, s, fls)]
+                dec = {d: cp.asnumpy(dec[d]) for d in dec}
                 
             return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}},\
                    {desc: dec}

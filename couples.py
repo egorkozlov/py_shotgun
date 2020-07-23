@@ -182,7 +182,11 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     taxfun = setup.taxes[key] if t < setup.pars['Tret'] else lambda x : 0.0*x
     
     ls = setup.ls_levels[key]
-    uu, ux = setup.u_precomputed[key]['u'], setup.u_precomputed[key]['x']
+    if nogpu:
+        uu, ux, mgrid  = setup.u_precomputed[key]['u'], setup.u_precomputed[key]['x'], setup.mgrid_c
+    else:
+        uu, ux, mgrid  = setup.cupy.u_precomputed[key]['u'], setup.cupy.u_precomputed[key]['x'], setup.cupy.mgrid_c
+    
     upart, ucouple = (setup.u_part_k, setup.u_couple_k) if haschild else (setup.u_part_nk, setup.u_couple_nk)
 
     nls = len(ls)
@@ -193,12 +197,12 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     all_t = np.array(setup.exogrid.all_t[t],copy=False)
     
     
-    zf  = all_t[t][:,0]
-    zm  = all_t[t][:,1]
+    zf  = all_t[:,0]
+    zm  = all_t[:,1]
     zftrend = setup.pars['f_wage_trend'][t]
     zmtrend = setup.pars['m_wage_trend'][t]
 
-    psi = all_t[t][:,2]
+    psi = all_t[:,2]
     beta = setup.pars['beta_t'][t]
     sigma = setup.pars['crra_power']
     R = setup.pars['R_t'][t]
@@ -223,7 +227,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     V_couple, c_opt, s_opt, x_opt = np.empty((4,)+shp,dtype)
     i_opt, il_opt = np.empty(shp,np.int16), np.empty(shp,np.int16)
     
-    sgrid = dtype(sgrid)
+    sgrid = sgrid.astype(dtype,copy=False)
     theta_val = dtype(setup.thetagrid) if nogpu else setup.cupy.thetagrid
     
     # the original problem is max{umult*u(c) + beta*EV}
@@ -250,7 +254,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
         
         
         V_pure_i, c_opt_i, x_opt_i, s_opt_i, i_opt_i, il_opt_i, V_all_l_i = \
-           v_optimize_couple(money_t,sgrid,EV_t,setup.mgrid_c,uu,ux,
+           v_optimize_couple(money_t,sgrid,EV_t,mgrid,uu,ux,
                                  ls,beta,ushift,taxfun=taxfun,dtype=dtype)
            
         V_ret_i = V_pure_i + psi[None,istart:ifinish,None]
@@ -283,7 +287,7 @@ def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=Fal
     uc = ucouple(c_opt,x_opt,il_opt,theta_val[None,None,:],ushift,psi_r)
     
     
-    EVf_all, EVm_all, EVc_all  = (setup.vsgrid_c.apply_preserve_shape(x) for x in (EV_fem_by_l, EV_mal_by_l,EVc_by_l))
+    EVf_all, EVm_all, EVc_all  = (vs.apply_preserve_shape(x) for x in (EV_fem_by_l, EV_mal_by_l,EVc_by_l))
     
     V_fem = uf + beta*np.take_along_axis(np.take_along_axis(EVf_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)
     V_mal = um + beta*np.take_along_axis(np.take_along_axis(EVm_all,i_opt[...,None],0),il_opt[...,None],3).squeeze(axis=3)

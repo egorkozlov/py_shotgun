@@ -753,17 +753,18 @@ class ModelSetup(object):
     
     def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
-        l = self.ls_levels['Couple and child'][il]
-        us = self.ls_ushift['Couple and child'][il]
+        #l = self.ls_levels['Couple and child'][il]
+        #us = self.ls_ushift['Couple and child'][il]
+        l, us = self._get_l_and_us('Couple and child',il)
         upub = self.u_pub(x,l) + ushift + psi
         return self.u(kf*c) + upub + us, self.u(km*c) + upub
     
     def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
-        l = self.ls_levels['Couple and child'][il]
-        us = theta*self.ls_ushift['Couple and child'][il] 
-        return umult*self.u(c) + self.u_pub(x,l) + us + ushift + psi
-    
+        l, us = self._get_l_and_us('Couple and child',il)
+        tus = theta*us
+        return umult*self.u(c) + self.u_pub(x,l) + tus + ushift + psi
+        
     def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
         upub = ushift + psi
@@ -775,10 +776,24 @@ class ModelSetup(object):
     
     def u_single_k(self,c,x,il,ushift):
         umult = 1.0
-        l = self.ls_levels['Female and child'][il]
-        us = self.ls_ushift['Female and child'][il]
+        #l = self.ls_levels['Female and child'][il]
+        #us = self.ls_ushift['Female and child'][il]
+        l, us = self._get_l_and_us('Female and child',il)
         return umult*self.u(c) + self.u_pub(x,l) + us + ushift
     
+    def _get_l_and_us(self,key,il):
+        try:
+            l = self.ls_levels[key][il]
+            us = self.ls_ushift[key][il] 
+        except:
+            l = 0.0*il
+            us = 0.0*il
+            for i, (li, usi) in enumerate(zip(self.ls_levels[key],self.ls_ushift[key])):
+                mask = (il==i)
+                l += mask*li
+                us += mask*usi
+        return l, us
+
     def u_precompute(self):
         
         
@@ -1016,7 +1031,7 @@ class ModelSetup(object):
         upc = {key : {e: cp.array(uu[key][e]) for e in uu[key]} for key in uu}
         stuff['u_precomputed'] = upc
         
-        self.cupy = namedtuple('cupy',stuff.keys())
+        self.cupy = namedtuple('cupy',stuff.keys())(**stuff)
         
         
         

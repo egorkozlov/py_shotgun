@@ -33,10 +33,11 @@ class VecOnGrid(object):
         interp = interp_np if (self.np == np) else interp_cp
         
         
-        
-        self.val = self.np.array(values)
+        values = self.np.array(values,copy=False) 
+        grid = self.np.array(grid,copy=False)  
+        self.val = values
         self.val_trimmed = self.np.clip(values,grid[0],grid[-1])
-        self.grid = self.np.array(grid)
+        self.grid = grid
         
         if iwn is None:
             self.i, self.wnext = interp(self.grid,self.val,return_wnext=True,trim=trim)

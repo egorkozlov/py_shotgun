@@ -41,7 +41,8 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun
     
     # This optimizer avoids creating big arrays and uses parallel-CPU on 
     # machines without NUMBA-CUDA codes otherwise
-    if ugpu: np = cp
+    if ugpu:
+        np = cp.get_array_module(EV[1])
 
     nls = len(ls)
     
@@ -264,9 +265,11 @@ def v_couple_gpu(money,sgrid,EV,mgrid,util,xvals,beta,uadd,use_kernel_pool=False
     
     bEV = beta*EV
     
-    
-    #money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (cuda.to_device(np.ascontiguousarray(x)) for x in (money, sgrid, bEV, mgrid, util, xvals))
-    money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (money, sgrid, bEV, mgrid, util, xvals)
+    convert = (cp.get_array_module(EV)==np)
+    if convert: 
+        money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (cuda.to_device(np.ascontiguousarray(x)) for x in (money, sgrid, bEV, mgrid, util, xvals))
+    else:
+        money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (money, sgrid, bEV, mgrid, util, xvals)
     
     threadsperblock = (8, 16, 8)
     # this is a tunning parameter. 8*16*8=1024 is the number of threads per 
@@ -282,10 +285,10 @@ def v_couple_gpu(money,sgrid,EV,mgrid,util,xvals,beta,uadd,use_kernel_pool=False
                                                 V_opt_g,i_opt_g,x_opt_g)
     
     
-    
-    #V_opt, i_opt, x_opt = (x.copy_to_host() for x in (V_opt_g,i_opt_g,x_opt_g))
-    
-    V_opt, i_opt, x_opt = (cp.asarray(x) for x in (V_opt_g,i_opt_g,x_opt_g))
+    if convert: 
+        V_opt, i_opt, x_opt = (x.copy_to_host() for x in (V_opt_g,i_opt_g,x_opt_g))
+    else:
+        V_opt, i_opt, x_opt = (cp.asarray(x) for x in (V_opt_g,i_opt_g,x_opt_g))
     
     
     s_opt = sgrid[i_opt]
