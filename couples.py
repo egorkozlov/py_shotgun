@@ -21,31 +21,15 @@ except:
 
 
 from optimizers import v_optimize_couple
-
-from platform import system
-
-if system() != 'Darwin' and system() != 'Windows':    
-    nbatch_def = 500
-    use_cp = True
-    
-elif system() == 'Windows':
-    
-    nbatch_def = 17
-    use_cp = True
-    
-else:
-    
-    nbatch_def = 17
-    use_cp = False
     
     
 def solve_couples(model,t,Vnext,ushift,haschild,verbose=False):
     setup = model.setup
-    if Vnext is not None:
-        EV_tuple, dec = ev_couple_m_c(setup,Vnext,t,haschild,use_sparse=True)
-    else:
-        EV_tuple, dec = None, {}
+    
+    EV_tuple, dec = ev_couple_m_c(setup,Vnext,t,haschild,use_sparse=True)
+    model.time('Integration (c)')
     V_tuple = v_iter_couple(setup,t,EV_tuple,ushift,haschild)
+    model.time('Optimization (c)')
     return V_tuple, dec
     
 
@@ -55,6 +39,8 @@ from renegotiation_unilateral import v_ren_uni, v_no_ren
 def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     # computes expected value of couple entering the next period with an option
     # to renegotiate or to break up
+    
+    if Vpostren is None: return None, {}
     
     canswitch = setup.pars['is fertile'][t]
     can_divorce = setup.pars['can divorce'][t] # !! no divorce = no fertility here
@@ -157,7 +143,7 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
 
 
 
-def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=nbatch_def,verbose=False):
+def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=500,verbose=False):
     
     if verbose: start = default_timer()
     

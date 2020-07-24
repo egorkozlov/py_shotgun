@@ -56,13 +56,13 @@ class Model(object):
         total_time = default_timer() - self.start
         last_time = default_timer() - self.last
         
-        total_mem = self.get_mem()
+        total_mem = self.get_mem() / 1000
         last_mem  = self.get_mem() - self.mlast
         
         def r(x): return round(x,2)
         
         if last_time > time_lb:
-            if verbose: print('{} is done in {} sec, total {} sec, memory used is {} Mb'.format(whatisdone,r(last_time),r(total_time),r(total_mem)))
+            if verbose: print('{} took {}, total {}, mem {}G'.format(whatisdone,r(last_time),r(total_time),r(total_mem)))
         self.last = default_timer()
         self.mlast = self.get_mem()
         
@@ -98,40 +98,36 @@ class Model(object):
         setup = self.setup
         ushift = setup.utility_shifters[desc]
         
+        
+        if gpu and (V_next is not None):
+            V_next_g = {d: {k: cp.array(V_next[d][k]) for k in V_next[d]} 
+                                                        for d in V_next}
+        
+        if gpu and (V_next is not None): V_next_g = None
+        
         if desc == 'Female, single' or desc == 'Male, single':
             
+            
+            from singles import solve_singles
+            
+            if gpu: V_next = V_next_g
+
             female = (desc == 'Female, single')
             
-            EV, dec = ev_single(setup,V_next,female,t) if V_next else (None, {})
-            if EV is not None: assert EV.dtype == setup.dtype
-            self.time('Integration, {}'.format(desc))
             
-            V, c, s = v_iter_single(setup,t,EV,female,ushift)       
-            assert V.dtype == c.dtype == setup.dtype
-            self.time('Optimization, {}'.format(desc))
+            (V, c, s), dec = solve_singles(self,t,V_next,ushift,female)      
             
-            del EV
+            if gpu:
+                V, c, s = [cp.asnumpy(x) for x in (V, c, s)]
+                dec = {k : {d: cp.asnumpy(dec[d]) for d in dec[k]} for k in dec}
             
             return {desc: {'V':V,'c':c,'s':s,'x':0.0*c}}, {desc: dec}
         
         elif desc== 'Couple and child' or desc == 'Couple, no children':
             
+            
             haschild = (desc== 'Couple and child')
-           
-            '''
-            EV, dec = ev_couple_m_c(setup,V_next,t,haschild) if V_next else (None, {})
-            if EV is not None: assert EV[0].dtype == EV[1].dtype == EV[2].dtype ==  EV[3].dtype ==setup.dtype
-            self.time('Integration, {}'.format(desc))
-            
-            V, VF, VM, c, x, s, fls = v_iter_couple(setup,t,EV,ushift,haschild)  
-            assert V.dtype == VF.dtype == c.dtype == setup.dtype
-            self.time('Optimization, {}'.format(desc))
-            
-            del EV
-            '''
-            if gpu and (V_next is not None):
-                V_next = {d: {k: cp.array(V_next[d][k]) for k in V_next[d]} 
-                                                            for d in V_next}
+            if gpu: V_next = V_next_g
             
             from couples import solve_couples
             (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
@@ -147,15 +143,16 @@ class Model(object):
         
         elif desc == 'Female and child':
             
-            EV, dec = ev_single_k(setup,V_next,t) if V_next else (None, {})
-            if EV is not None: assert EV.dtype == setup.dtype
-            self.time('Integration, {}'.format(desc))
             
-            V, c, x, s, fls = v_iter_single_mom(setup,t,EV,ushift)
-            assert V.dtype == c.dtype == setup.dtype
-            self.time('Optimization, {}'.format(desc))
+            from single_moms import solve_single_mom
             
-            del EV
+            if gpu: V_next = V_next_g
+            
+            (V, c, x, s, fls), dec = solve_single_mom(self,t,V_next,ushift)
+            
+            if gpu:
+                V, c, s = [cp.asnumpy(x) for x in (V, c, s)]
+                dec = {k : {d: cp.asnumpy(dec[d]) for d in dec[k]} for k in dec}
             
             return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls}},\
                    {desc: dec}
