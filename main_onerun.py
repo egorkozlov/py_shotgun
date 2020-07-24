@@ -83,7 +83,7 @@ if __name__ == '__main__':
     
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
-    
+    '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
                    compare='baseline.pkl',
@@ -92,7 +92,7 @@ if __name__ == '__main__':
                    base_name=this_name,
                    #graphs_title_add="Experiment: Removing Subsistence Constraint",
                    moments_aux=None) #,moments_aux=moments_aux)
-    
+    '''
     '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,

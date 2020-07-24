@@ -1019,7 +1019,7 @@ class ModelSetup(object):
         stuff['theta_orig_on_fine'] = cp.array(self.theta_orig_on_fine,dtype=self.dtype)
         stuff['thetagrid'] = cp.array(self.thetagrid,dtype=self.dtype)
         stuff['thetagrid_fine'] = cp.array(self.thetagrid_fine,dtype=self.dtype)
-        stuff['v_thetagrid_fine'] = VecOnGrid(stuff['thetagrid_fine'],stuff['thetagrid'],force_cupy=True) 
+        stuff['v_thetagrid_fine'] = VecOnGrid(stuff['thetagrid'],stuff['thetagrid_fine'],force_cupy=True) 
         stuff['agrid_c'] = cp.array(self.agrid_c,dtype=self.dtype)
         stuff['agrid_s'] = cp.array(self.agrid_s,dtype=self.dtype)
         stuff['sgrid_c'] = cp.array(self.sgrid_c,dtype=self.dtype)
