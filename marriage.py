@@ -247,11 +247,11 @@ def get_upp_disagreement_values(setup,t,V_fem,V_mal,izf,izm,female,v_assets_part
     # no child support --- just get izf, izm
     
     izf_t_cs = cst['i_this_fem'][izf,izm]
-    wzf_t_cs = cst['i_this_fem'][izf,izm]
+    wzf_t_cs = cst['w_this_fem'][izf,izm]
     wzf_tp_cs = 1-wzf_t_cs
     
     izm_t_cs = cst['i_this_mal'][izm]
-    wzm_t_cs = cst['i_this_mal'][izm]
+    wzm_t_cs = cst['w_this_mal'][izm]
     wzm_tp_cs = 1-wzm_t_cs
     
     
