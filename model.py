@@ -45,8 +45,8 @@ class Model(object):
         return psutil.Process(os.getpid()).memory_info().rss/1e6
         
         
-    def time(self,whatisdone,verbose=True,time_lb=0.5):
-        
+    def time(self,whatisdone,time_lb=0.5):
+        verbose = self.verbose
         total_time = default_timer() - self.start
         last_time = default_timer() - self.last
         
