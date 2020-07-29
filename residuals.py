@@ -86,7 +86,7 @@ def mdl_resid(x=None,targets=None,weights=w,
                 
     if load_from is None:
         
-        mdl = Model(**kwords)
+        mdl = Model(verbose=verbose,**kwords)
         mdl_list = [mdl]
         
     else:       

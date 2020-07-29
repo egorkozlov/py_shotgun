@@ -93,6 +93,9 @@ class FitPlots(object):
             except:
                 print('failed to plot men')
         
+        self.plot_single_moms()
+            
+        
         
         try:
             self.plot_kfmf_ref()
@@ -414,6 +417,68 @@ class FitPlots(object):
         ax.set_xticks(yval)
         plt.savefig('div_kfmf_ref.pdf')
         
+    
+    def plot_single_moms(self):
+        # graph 1: hazard of any marriage
+        
+        moments,targets,setup = self.moments,self.targets,self.setup
+        
+        tval = np.arange(23,36)
+        
+        
+        nm_sm_model = np.zeros_like(tval,dtype=np.float64)
+        div_sm_model = np.zeros_like(tval,dtype=np.float64)
+        all_sm_model = np.zeros_like(tval,dtype=np.float64)
+        
+        nm_sm_data = np.zeros_like(tval,dtype=np.float64)
+        div_sm_data = np.zeros_like(tval,dtype=np.float64)
+        all_sm_data = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        for i,t in enumerate(tval):
+            
+            nm_sm_model[i] = moments['never married and kids in population at {}'.format(t)]
+            div_sm_model[i] = moments['divorced and kids in population at {}'.format(t)]
+            all_sm_model[i] = nm_sm_model[i] + div_sm_model[i]
+            
+            nm_sm_data[i] = targets['never married and kids in population at {}'.format(t)][0]
+            div_sm_data[i] = targets['divorced and kids in population at {}'.format(t)][0]
+            all_sm_data[i] = nm_sm_data[i] + div_sm_data[i]
+            
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*all_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*all_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers all.pdf')
+        
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*div_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*div_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Divorced mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers div.pdf')
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*nm_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*nm_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Never married mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers nm.pdf')
         
         
         

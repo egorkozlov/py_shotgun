@@ -33,23 +33,23 @@ if __name__ == '__main__':
     high_e = True
     x, targ_mode = get_point(high_e)
     
-    x = {'sigma_psi': 0.06883045907429694,
-         'sigma_psi_init': 0.08943321614503934,
-         'pmeet_21': 0.14245350436785614,
-         'pmeet_28': 0.35351576474635815,
-         'pmeet_35': 0.5803847682254825,
-         'preg_21': 0.020712755871815328,
-         'preg_28': 0.06153082169980899,
-         'preg_35': 0.03295250149252342,
-         'u_shift_mar': 1.3469652448502023,
-         'util_alp': 0.5643002665831136,
-         'util_kap': 0.7267898392026289,
-         'util_qbar': 0.11114171525939373,
-         'disutil_marry_sm_mal': 18.850868358463234,
-         'disutil_shotgun': 0.011217472786367675,
-         'abortion_costs': 4.138337665129658,
-         'p_abortion_access': 0.9992984327036426,
-         'u_lost_divorce': 5.912838282187521}
+    x = {'sigma_psi': 0.17547979922272952,
+         'sigma_psi_init': 0.2935764995685123,
+         'pmeet_21': 0.1375957154357594,
+         'pmeet_28': 0.3577852762275396,
+         'pmeet_35': 0.7015588540881759,
+         'preg_21': 0.044896015921624136,
+         'preg_28': 0.05190356560351397,
+         'preg_35': 0.039391507653039434,
+         'u_shift_mar': 1.0763146779858002,
+         'util_alp': 0.10000192022650033,
+         'util_kap': 0.9050768407157648,
+         'util_qbar': 1.8065820813416464,
+         'disutil_marry_sm_mal': 40.54954577056158,
+         'disutil_shotgun': 7.734445729198316,
+         'abortion_costs': 0.7995715430427783,
+         'p_abortion_access': 0.9970209421052573,
+         'u_lost_divorce': 10.00156200327671}
 
 
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     tar = target_values(targ_mode)
     
     
-    this_name = 'full child support'
+    this_name = 'baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
@@ -86,11 +86,10 @@ if __name__ == '__main__':
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare='baseline.pkl',
+                   compare=None,
                    base=this_name+'.pkl',
-                   compare_name='baseline',
-                   base_name=this_name,
-                   #graphs_title_add="Experiment: Removing Subsistence Constraint",
+                   compare_name='data',
+                   base_name='baseline',#this_name,
                    moments_aux=None) #,moments_aux=moments_aux)
     
     '''
