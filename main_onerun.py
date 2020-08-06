@@ -33,26 +33,25 @@ if __name__ == '__main__':
     high_e = True
     x, targ_mode = get_point(high_e)
     
-    x = {'sigma_psi': 0.17547979922272952,
-         'sigma_psi_init': 0.2935764995685123,
-         'pmeet_21': 0.1375957154357594,
-         'pmeet_28': 0.3577852762275396,
-         'pmeet_35': 0.7015588540881759,
-         'preg_21': 0.044896015921624136,
-         'preg_28': 0.05190356560351397,
-         'preg_35': 0.039391507653039434,
-         'u_shift_mar': 1.0763146779858002,
-         'util_alp': 0.10000192022650033,
-         'util_kap': 0.9050768407157648,
-         'util_qbar': 1.8065820813416464,
-         'disutil_marry_sm_mal': 40.54954577056158,
-         'disutil_shotgun': 7.734445729198316,
-         'abortion_costs': 0.7995715430427783,
-         'p_abortion_access': 0.9970209421052573,
-         'u_lost_divorce': 10.00156200327671}
-
-
-
+    
+    
+    x = {'sigma_psi': 0.1853324578327308,
+         'sigma_psi_init': 0.9399973974581646,
+         'pmeet_21': 0.23057044853525627, 
+         'pmeet_28': 0.6302582022794753,
+         'pmeet_35': 1.0,
+         'preg_21': 0.004632574153187789,
+         'preg_28': 0.030915854690938757,
+         'preg_35': -0.03835926491296945,
+         'u_shift_mar': 1.1634888476823635,
+         'util_alp': 0.21921319884901105,
+         'util_kap': 0.8304799413261448,
+         'util_qbar': 1.5124778292649947,
+         'disutil_marry_sm_mal': 48.78355862063415,
+         'disutil_shotgun': 4.611347004670638,
+         'abortion_costs': 39.894265116705,
+         'p_abortion_access': 0.990470993900194,
+         'u_lost_divorce': 8.788992431309284}
 
 
 
@@ -60,7 +59,7 @@ if __name__ == '__main__':
     tar = target_values(targ_mode)
     
     
-    this_name = 'baseline'
+    this_name = 'full child support'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
@@ -86,10 +85,10 @@ if __name__ == '__main__':
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare=None,
+                   compare='baseline.pkl',
                    base=this_name+'.pkl',
-                   compare_name='data',
-                   base_name='baseline',#this_name,
+                   compare_name='baseline',
+                   base_name=this_name,
                    moments_aux=None) #,moments_aux=moments_aux)
     
     '''

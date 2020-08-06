@@ -5,9 +5,9 @@
 # you need to multiply it by transpose of Pi produced by these routines:
 # EV = V*Pi.transpose(). Failure to do so produces wrong numbers w/o error
 
+import numpy as np
 
 def sd_rw(T,sigma_persistent,sigma_init):
-    import numpy as np
     return np.sqrt(sigma_init**2 + np.arange(0,T)*(sigma_persistent**2))
     
 def sd_rw_trans(T,sigma_persistent,sigma_init,sigma_transitory):
@@ -16,9 +16,11 @@ def sd_rw_trans(T,sigma_persistent,sigma_init,sigma_transitory):
     
     
 def normcdf_tr(z,nsd=5):
-        import numpy as np
+        #import numpy as np
         from scipy import stats as st
+        return st.norm.cdf(z)
         
+        '''
         z = np.minimum(z, nsd*np.ones_like(z))
         z = np.maximum(z,-nsd*np.ones_like(z))
             
@@ -27,8 +29,27 @@ def normcdf_tr(z,nsd=5):
         const = pup - pdown
         
         return (st.norm.cdf(z)-pdown)/const
+        '''
+from mc_tools import int_prob
         
-def tauchen_nonst(T=40,sigma_persistent=0.05,sigma_init=0.2,npts=50,nsd=3):
+def nonuniform_centered_grid(npt,bound,share_below=1/3,pwr=0.75):
+    from math import floor
+    include_zero = (npt%2 == 1)
+    n_below = np.maximum(floor(share_below*npt),2)
+    grid_below = -(np.linspace(0.0,bound**pwr,n_below+1)**(1/pwr))[::-1]
+    
+    if include_zero:
+        grid_above = np.linspace(0.0,bound**pwr,npt-n_below)**(1/pwr)
+        grid = np.concatenate((grid_below[:-1],grid_above))
+    else:
+        grid_above = np.linspace(0.0,bound**pwr,npt-n_below+1)**(1/pwr)
+        grid = np.concatenate((grid_below[:-1],grid_above[1:]))
+    assert grid.size == npt
+    return grid
+        
+    
+    
+def tauchen_nonst(T=40,sigma_persistent=0.05,sigma_init=0.2,npts=50,*,nsd=3,fix_0=False):
     import numpy as np
 
     # start with creating list of points
@@ -37,17 +58,22 @@ def tauchen_nonst(T=40,sigma_persistent=0.05,sigma_init=0.2,npts=50,nsd=3):
     Pi = list()
 
     for t in range(0,T):
-        X = X + [np.linspace(-nsd*sd_z[t],nsd*sd_z[t],num=npts)]
+        s = t if not fix_0 else 0
+        #X = X + [np.linspace(-nsd*sd_z[s],nsd*sd_z[s],num=npts)]
+        X = X + [nonuniform_centered_grid(npts,nsd*sd_z[s])]
 
     # then define a list transition matrices
     # note that Pi[t] is transition matrix from X[t] to X[t+1]
 
     for t in range(1,T):
+        
+        '''
         h = 2*nsd*sd_z[t]/(npts-1) # step size
         Pi_here = np.zeros([npts,npts])
+        Pi_here_2 = np.zeros([npts,npts])
 
         Pi_here[:,0] = normcdf_tr( (X[t][0] - X[t-1][:] + h/2) / sigma_persistent)
-        Pi_here[:,-1] = 1 - normcdf_tr( (X[t][-1] - X[t-1][:] - h/2) / sigma_persistent)
+        Pi_here[:,-1] = 1.0 - normcdf_tr( (X[t][-1] - X[t-1][:] - h/2) / sigma_persistent)
 
         for i in range(1,npts-1):
             Pi_here[:,i] = normcdf_tr( (X[t][i] - X[t-1][:] + h/2) / sigma_persistent) - normcdf_tr( (X[t][i] - X[t-1][:] - h/2) / sigma_persistent)
@@ -55,8 +81,14 @@ def tauchen_nonst(T=40,sigma_persistent=0.05,sigma_init=0.2,npts=50,nsd=3):
         #print(Pi_here)
         #print(np.sum(Pi_here,axis=1))
         #assert(np.all( abs( np.sum(Pi_here,axis=1) -np.ones(npts) ) < 1e-6 ))
-
+        '''
+        
+        Pi_here = np.zeros((npts,npts))
+        for i in range(npts):
+            Pi_here[i,:] = int_prob(X[t],X[t-1][i],sigma_persistent,trim=False)
+        
         Pi = Pi + [Pi_here]
+        assert np.allclose(Pi_here.sum(axis=1),1.0)
         
         
     Pi = Pi + [None] # last matrix is not defined
