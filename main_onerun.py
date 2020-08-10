@@ -35,23 +35,23 @@ if __name__ == '__main__':
     
     
     
-    x = {'sigma_psi': 0.1853324578327308,
-         'sigma_psi_init': 0.9399973974581646,
-         'pmeet_21': 0.23057044853525627, 
-         'pmeet_28': 0.6302582022794753,
+    x = {'sigma_psi': 0.23571313928571477,
+         'sigma_psi_init': 2.123636664878597,
+         'pmeet_21': 0.2873647689783723,
+         'pmeet_28': 0.7553774259051128,
          'pmeet_35': 1.0,
-         'preg_21': 0.004632574153187789,
-         'preg_28': 0.030915854690938757,
-         'preg_35': -0.03835926491296945,
-         'u_shift_mar': 1.1634888476823635,
-         'util_alp': 0.21921319884901105,
-         'util_kap': 0.8304799413261448,
-         'util_qbar': 1.5124778292649947,
-         'disutil_marry_sm_mal': 48.78355862063415,
-         'disutil_shotgun': 4.611347004670638,
-         'abortion_costs': 39.894265116705,
-         'p_abortion_access': 0.990470993900194,
-         'u_lost_divorce': 8.788992431309284}
+         'preg_21': 0.017461033039670462,
+         'preg_28': 0.024901095174551184,
+         'preg_35': -0.015475818457370151, 
+         'u_shift_mar': 1.2306521824428305,
+         'util_alp': 0.3854997739795115,
+         'util_kap': 0.8103116344047732,
+         'util_qbar': 1.0505842569863009,
+         'disutil_marry_sm_mal': 60.0,
+         'disutil_shotgun': 5.581480022921534,
+         'abortion_costs': 30.940624456940288,
+         'p_abortion_access': 0.1799031427804904,
+         'u_lost_divorce': 6.673691715831503}
 
 
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
     tar = target_values(targ_mode)
     
     
-    this_name = 'full child support'
+    this_name = 'out mar child support'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',
