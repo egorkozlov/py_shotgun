@@ -18,10 +18,21 @@ from nopar_assets_dist import get_estimates
 
 from scipy import sparse
 
+try:
+    import cupy as cp
+    q = cp.array([1,2,3])
+    assert cp.allclose(q.mean(),2.0)
+    print('using cupy!')
+    cupy = True
+except:
+    print('using cpu!')
+    cupy = False
+
 
 
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
+        
         p = dict()       
         T = 55
         Tret = 45 # first period when the agent is retired
@@ -456,8 +467,9 @@ class ModelSetup(object):
         self.child_a_cost_single = np.minimum(self.agrid_s,self.pars['child_a_cost'])
         self.child_a_cost_couple = np.minimum(self.agrid_c,self.pars['child_a_cost'])
         
-        self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
-        self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
+        assert self.pars['child_a_cost']<1e-3, 'not implemented'
+        #self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
+        #self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
         
         
         # construct finer grid for bargaining
@@ -551,6 +563,8 @@ class ModelSetup(object):
         self.u_precompute()
         self.unplanned_pregnancy_probability()
         self.compute_taxes()
+        
+        self.cupyfy()
         
         
     
@@ -742,17 +756,18 @@ class ModelSetup(object):
     
     def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
-        l = self.ls_levels['Couple and child'][il]
-        us = self.ls_ushift['Couple and child'][il]
+        #l = self.ls_levels['Couple and child'][il]
+        #us = self.ls_ushift['Couple and child'][il]
+        l, us = self._get_l_and_us('Couple and child',il)
         upub = self.u_pub(x,l) + ushift + psi
         return self.u(kf*c) + upub + us, self.u(km*c) + upub
     
     def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
-        l = self.ls_levels['Couple and child'][il]
-        us = theta*self.ls_ushift['Couple and child'][il] 
-        return umult*self.u(c) + self.u_pub(x,l) + us + ushift + psi
-    
+        l, us = self._get_l_and_us('Couple and child',il)
+        tus = theta*us
+        return umult*self.u(c) + self.u_pub(x,l) + tus + ushift + psi
+        
     def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
         upub = ushift + psi
@@ -764,10 +779,24 @@ class ModelSetup(object):
     
     def u_single_k(self,c,x,il,ushift):
         umult = 1.0
-        l = self.ls_levels['Female and child'][il]
-        us = self.ls_ushift['Female and child'][il]
+        #l = self.ls_levels['Female and child'][il]
+        #us = self.ls_ushift['Female and child'][il]
+        l, us = self._get_l_and_us('Female and child',il)
         return umult*self.u(c) + self.u_pub(x,l) + us + ushift
     
+    def _get_l_and_us(self,key,il):
+        try:
+            l = self.ls_levels[key][il]
+            us = self.ls_ushift[key][il] 
+        except:
+            l = 0.0*il
+            us = 0.0*il
+            for i, (li, usi) in enumerate(zip(self.ls_levels[key],self.ls_ushift[key])):
+                mask = (il==i)
+                l += mask*li
+                us += mask*usi
+        return l, us
+
     def u_precompute(self):
         
         
@@ -977,6 +1006,37 @@ class ModelSetup(object):
             transitions.append(trans_t)
         
         self.child_support_transitions = transitions
+    
+    def cupyfy(self):
+        # this sends copies of important objects to cupy
+        # only things that are going to be reused are worth storing
+        
+        
+        if not cupy:
+            self.cupy = None
+            return
+        
+        stuff = dict()
+        
+        stuff['theta_orig_on_fine'] = cp.array(self.theta_orig_on_fine,dtype=self.dtype)
+        stuff['thetagrid'] = cp.array(self.thetagrid,dtype=self.dtype)
+        stuff['thetagrid_fine'] = cp.array(self.thetagrid_fine,dtype=self.dtype)
+        stuff['v_thetagrid_fine'] = VecOnGrid(stuff['thetagrid'],stuff['thetagrid_fine'],force_cupy=True) 
+        stuff['agrid_c'] = cp.array(self.agrid_c,dtype=self.dtype)
+        stuff['agrid_s'] = cp.array(self.agrid_s,dtype=self.dtype)
+        stuff['sgrid_c'] = cp.array(self.sgrid_c,dtype=self.dtype)
+        stuff['sgrid_s'] = cp.array(self.sgrid_s,dtype=self.dtype)
+        stuff['vsgrid_c'] = VecOnGrid(self.agrid_c,self.sgrid_c,force_cupy=True)
+        stuff['vsgrid_s'] = VecOnGrid(self.agrid_s,self.sgrid_s,force_cupy=True)
+        stuff['mgrid_c'] = cp.array(self.mgrid_c,dtype=self.dtype)
+        stuff['mgrid_s'] = cp.array(self.mgrid_s,dtype=self.dtype)
+        
+        uu = self.u_precomputed
+        upc = {key : {e: cp.array(uu[key][e]) for e in uu[key]} for key in uu}
+        stuff['u_precomputed'] = upc
+        
+        self.cupy = namedtuple('cupy',stuff.keys())(**stuff)
+        
         
         
         

@@ -109,7 +109,7 @@ def mdl_resid(x=None,targets=None,weights=w,
         moments_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False).compute_moments() for _ in range(moments_repeat)]
     
     
-    mom = {key : np.mean([m[key] for m in moments_list]) for key in moments_list[0].keys()}
+    mom = {key : np.mean([m[key] for m in moments_list],axis=0) for key in moments_list[0].keys()}
     
     
     mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()

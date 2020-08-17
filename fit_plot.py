@@ -93,9 +93,15 @@ class FitPlots(object):
             except:
                 print('failed to plot men')
         
-        self.plot_single_moms()
+        try:
+            self.plot_single_moms()
+        except:
+            print('failed to plot single moms')
             
-        
+        try:
+            self.plot_welfare()
+        except:
+            print('failed to plot welfare')
         
         try:
             self.plot_kfmf_ref()
@@ -480,7 +486,32 @@ class FitPlots(object):
         ax.grid(True)
         plt.savefig('single mothers nm.pdf')
         
+    
+    def plot_welfare(self):
+        # 
+        z_fem = self.setup.exogrid.zf_t[0]
+        w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
         
+        z_mal = self.setup.exogrid.zf_t[0]
+        w_mal = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
+        
+        moments,targets = self.moments, self.targets
+        v_fem_base_val = moments['value function: female, single, no assets']
+        try:
+            v_fem_compare_val = targets['value function: female, single, no assets'][0]
+        except:
+            v_fem_compare_val = None
+            
+        fig, ax = plt.subplots()
+        plt.plot(z_fem,v_fem_base_val,'o-b',label=self.base_name)
+        if v_fem_compare_val is not None: plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
+        ax.grid(True)
+        xticks = z_fem#[i for i in range(24,36)]
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare comparison: females, single, no assets') 
+        plt.xlabel('female productivity')
+        plt.ylabel('value function')
         
     def plot_men(self):
         

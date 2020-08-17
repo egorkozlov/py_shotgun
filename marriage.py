@@ -6,7 +6,7 @@ Created on Fri Jul  3 10:59:28 2020
 @author: egorkozlov
 """
 
-import numpy as np
+import numpy as onp
 from gridvec import VecOnGrid
 from numba import jit, prange
 
@@ -21,6 +21,7 @@ if system() != 'Darwin':
         del(g)
         ugpu = True
         upar = True
+        import cupy as cp
     except:
         print('no gpu mode')
         ugpu = False
@@ -29,21 +30,36 @@ else:
     ugpu = False
     upar = False
 
+nogpu = not ugpu
+np = onp if nogpu else cp
+
+
+
+def co(x):
+    if nogpu:
+        return x
+    else:
+        return cp.asarray(x)
+
 
 def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     
     # this builds matrix for all matches specified by grid positions
     # iassets_couple (na X nmatches) and iexo_couple (nmatches)
     
-    iexo, izf, izm, ipsi = setup.all_indices(t,iexo_couple)
+    iexo, izf, izm, ipsi = [co(x) for x in setup.all_indices(t,iexo_couple)]
     
     vals = pick_values(setup,V,match_type=match_type)
     V_fem, V_mal = vals['V_fem'], vals['V_mal']
     
+    agrid_c = setup.agrid_c if nogpu else setup.cupy.agrid_c
+    agrid_s = setup.agrid_s if nogpu else setup.cupy.agrid_s
+    
     # obtain partner's value
-    assets_partner = np.clip(setup.agrid_c[iassets_couple] - setup.agrid_s[:,None],0.0,setup.agrid_s.max())
+    
+    assets_partner = np.clip(agrid_c[iassets_couple] - agrid_s[:,None],0.0,agrid_s.max())
     # this can be fastened by going over repeated values of ipsi
-    v_assets_partner = VecOnGrid(setup.agrid_s,assets_partner)
+    v_assets_partner = VecOnGrid(agrid_s,assets_partner)
     i, wnext, wthis = v_assets_partner.i, v_assets_partner.wnext, v_assets_partner.wthis
     
     
@@ -77,12 +93,14 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     else:
         do_abortion = np.zeros(V_f_no.shape,dtype=np.bool_)
     
-    
-    it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
+    if nogpu:
+        it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
+    else:
+        it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     
     from marriage_gpu import v_mar_gpu
     
-    if not ugpu:
+    if nogpu:
         v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     else:
         v_f, v_m, agree, nbs, itheta = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
@@ -192,10 +210,6 @@ def pick_values(setup,V,*,match_type):
         
         i_abortion = (V['Female, single']['V'] - u_costs) >= V['Female and child']['V']
         
-        
-        #V_fem = (1-p_access)*V['Female and child']['V'] + \
-        #           p_access *(np.maximum( V['Female, single']['V'] - u_costs,V['Female and child']['V'] )) \
-        #           - setup.pars['disutil_shotgun']
           
         V_fem = (V['Female and child']['V'] - setup.pars['disutil_shotgun'],
                  V['Female, single']['V'] - u_costs- setup.pars['disutil_shotgun'],
@@ -246,12 +260,12 @@ def get_upp_disagreement_values(setup,t,V_fem,V_mal,izf,izm,female,v_assets_part
     
     # no child support --- just get izf, izm
     
-    izf_t_cs = cst['i_this_fem'][izf,izm]
-    wzf_t_cs = cst['w_this_fem'][izf,izm]
+    izf_t_cs = co(cst['i_this_fem'])[izf,izm]
+    wzf_t_cs = co(cst['w_this_fem'])[izf,izm]
     wzf_tp_cs = 1-wzf_t_cs
     
-    izm_t_cs = cst['i_this_mal'][izm]
-    wzm_t_cs = cst['w_this_mal'][izm]
+    izm_t_cs = co(cst['i_this_mal'])[izm]
+    wzm_t_cs = co(cst['w_this_mal'])[izm]
     wzm_tp_cs = 1-wzm_t_cs
     
     
