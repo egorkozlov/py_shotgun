@@ -40,94 +40,91 @@ class Model(object):
         self.mstart = self.get_mem()
         self.mlast = self.get_mem()
         self.verbose = verbose
+        self.start = default_timer()
+        self.last = default_timer()
+        self.time_dict = dict()
+        
         self.setup = ModelSetup(**kwargs)
         self.dtype = self.setup.dtype
-        self.start = default_timer()
-        self.last = default_timer()        
-        self.time_dict = dict()        
-        self.solve()
+        self.time('Creation of setup')
         
+        self.solve()
+
     def get_mem(self):
         return psutil.Process(os.getpid()).memory_info().rss/1e6
-        
-        
+
+
     def time(self,whatisdone,verbose=True,time_lb=0.5):
-        
+
         total_time = default_timer() - self.start
         last_time = default_timer() - self.last
-        
+
         total_mem = self.get_mem() / 1000
         last_mem  = self.get_mem() - self.mlast
-        
+
         def r(x): return round(x,2)
-        
+
         if last_time > time_lb:
             if verbose: print('{} took {}, total {}, mem {}G'.format(whatisdone,r(last_time),r(total_time),r(total_mem)))
         self.last = default_timer()
         self.mlast = self.get_mem()
-        
+
         if whatisdone in self.time_dict:
             self.time_dict[whatisdone] = self.time_dict[whatisdone] + [last_time]
         else:
             self.time_dict[whatisdone] = [last_time]
-        
+
     def time_statistics(self,remove_worst=True,remove_single=False):
-        
+
         print('Total time is {}'.format(default_timer() - self.start))
         for what, timelist in self.time_dict.items():
-            
+
             if remove_single and len(timelist) == 1: continue
-            
+
             time_arr = np.array(timelist)
-            
+
             extra = ''
             if remove_worst and time_arr.size > 1:
                 time_worst = time_arr.max()
                 time_arr = time_arr[time_arr<time_worst]
                 extra = ' (excl the worst)'
-                
+
             av_time = round(np.mean(time_arr),2) 
             tot_time = round(np.sum(np.array(timelist)),2) 
             print('On average {} took {}, total {} sec{}'.format(what,av_time,tot_time,extra))
-            
-    
-     
+
+
+
     def v_next(self,desc,t,V_next):
         # This comptues next period value function.
         # V_next can be None, in this case this is an initial iteration
         setup = self.setup
         ushift = setup.utility_shifters[desc]
-        
-        
-        if gpu and (V_next is not None):
-            V_next_g = {d: {k: cp.array(V_next[d][k]) for k in V_next[d]} 
-                                                        for d in V_next}
-        
-        if gpu and (V_next is not None): V_next_g = None
-        
+
+
+
         if desc == 'Female, single' or desc == 'Male, single':
-            
-            
+
+
             from singles import solve_singles
-            
-            if gpu: V_next = V_next_g
 
             female = (desc == 'Female, single')
-            
+
             
             (V, c, s), dec = solve_singles(self,t,V_next,ushift,female)      
             
             if gpu:
                 V, c, s = [cp.asnumpy(x) for x in (V, c, s)]
-                dec = {k : {d: cp.asnumpy(dec[d]) for d in dec[k]} for k in dec}
-            
+                dec = {k : {d: cp.asnumpy(dec[k][d]) for d in dec[k]} for k in dec}
+                self.time('Transfer from gpu')
+
+
             return {desc: {'V':V,'c':c,'s':s,'x':0.0*c}}, {desc: dec}
         
         elif desc== 'Couple and child' or desc == 'Couple, no children':
             
             
             haschild = (desc== 'Couple and child')
-            if gpu: V_next = V_next_g
             
             from couples import solve_couples
             (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
@@ -136,6 +133,7 @@ class Model(object):
             if gpu:
                 V, VF, VM, c, x, s, fls = [cp.asnumpy(x) for x in (V, VF, VM, c, x, s, fls)]
                 dec = {d: cp.asnumpy(dec[d]) for d in dec}
+                self.time('Transfer from gpu')
             
             
             return {desc: {'V':V,'VF':VF,'VM':VM,'c':c,'x':x,'s':s,'fls':fls}},\
@@ -145,14 +143,13 @@ class Model(object):
             
             
             from single_moms import solve_single_mom
-            
-            if gpu: V_next = V_next_g
-            
+                        
             (V, c, x, s, fls), dec = solve_single_mom(self,t,V_next,ushift)
             
             if gpu:
-                V, c, s = [cp.asnumpy(x) for x in (V, c, s)]
-                dec = {k : {d: cp.asnumpy(dec[d]) for d in dec[k]} for k in dec}
+                (V, c, x, s, fls) = [cp.asnumpy(x) for x in (V, c, x, s, fls)]
+                dec = {k : {d: cp.asnumpy(dec[k][d]) for d in dec[k]} for k in dec}
+                self.time('Transfer from gpu')
             
             return {desc: {'V':V,'c':c,'x':x,'s':s,'fls':fls}},\
                    {desc: dec}
@@ -177,9 +174,13 @@ class Model(object):
             
             Vnext = self.V[0] if t<T-1 else None
             
+            if gpu and (Vnext is not None):
+                Vnext = {d: {k: cp.array(Vnext[d][k]) for k in Vnext[d]} 
+                                                        for d in Vnext}    
+                self.time('Transfer to gpu')
+            
             for desc in self.setup.state_names:
-                V_d, dec = self.v_next(desc,t,Vnext)   
-                   
+                V_d, dec = self.v_next(desc,t,Vnext)                   
                 Vnow.update(V_d)
                 decnow.update(dec)
                 

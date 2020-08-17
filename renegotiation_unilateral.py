@@ -40,14 +40,17 @@ except:
 from renegotiation_unilateral_gpu import v_ren_gpu_oneopt
 from renegotiation_unilateral_gpu import v_ren_gpu_twoopt
 
-def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rebuild=True,rescale=True):
+def v_ren_uni(model,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=False,rebuild=True,rescale=True):
     # this returns value functions for couple that entered the period with
     # (s,Z,theta) from the grid and is allowed to renegotiate them or breakup
     # 
     # combine = True creates matrix (n_sc-by-n_inds)
     # combine = False assumed that n_sc is the same shape as n_inds and creates
     # a flat array.
-     
+    
+    
+    setup = model.setup
+    
     #Get Divorce or Separation Costs
     if haschild:
         dc = setup.divorce_costs_k
@@ -80,14 +83,14 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     #income_share_f =(np.exp(zfgrid[izf]+setup.pars['f_wage_trend'][t+1]) / ( np.exp(zmgrid[izm]+setup.pars['m_wage_trend'][t+1]) + np.exp(zfgrid[izf]+setup.pars['f_wage_trend'][t+1]) ) ).squeeze()
     
     share_f, share_m = dc.shares_if_split(income_share_f)
-   
     
-    sc = setup.agrid_c
+    sc = setup.agrid_c if not gpu else setup.cupy.agrid_c
+    
     
     
     
     vf_n_old, vm_n_old = v_div_byshare(
-            setup, dc, t, sc, share_f, share_m,
+            model, dc, t, sc, share_f, share_m,
             V['Male, single']['V'], V_fem,
             izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
     
@@ -106,12 +109,12 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         
         vf_n_0, vm_n_0 = v_div_byshare(
-            setup, dc, t, sc, share_f, share_m,
+            model, dc, t, sc, share_f, share_m,
             V['Male, single']['V'], V_fem,
             izf_cs, izm_cs, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
         
         vf_n_1, vm_n_1 = v_div_byshare(
-            setup, dc, t, sc, share_f, share_m,
+            model, dc, t, sc, share_f, share_m,
             V['Male, single']['V'], V_fem,
             izf_cs+1, izm_cs+1, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
         
@@ -124,19 +127,21 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vf_n_old,vf_n)
         if setup.pars['child_support_share'] < 1e-5: assert np.allclose(vm_n_old,vm_n)
-    
+        
+        
     else:
         # values of divorce
         vf_n, vm_n = v_div_byshare(
-            setup, dc, t, sc, share_f, share_m,
+            model, dc, t, sc, share_f, share_m,
             V['Male, single']['V'], V_fem,
             izf, izm, cost_fem=dc.money_lost_f, cost_mal=dc.money_lost_m)
-    
+        
     assert vf_n.dtype == vm_n.dtype
     
     if return_vdiv_only:
         return {'Value of Divorce, male': vm_n,
                 'Value of Divorce, female': vf_n}
+    
     
 
     if not gpu: 
@@ -223,7 +228,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
                 
         assert v_out.dtype == setup.dtype
         
-        
+    
     # optional rescale
     def v_rescale(v,it_out):
     
@@ -265,7 +270,7 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     
     decision = np.any((itheta_out>=0),axis=2)
     result =  {'Decision': decision, 'thetas': itheta_out,
-                'Values': (r(v_resc), r(v_out), r(vf_out), r(vm_out)),'Divorce':(vf_n,vm_n)}
+                'Values': (r(v_resc), r(v_out), r(vf_out), r(vm_out))} #,'Divorce':(vf_n,vm_n)}
     
     
     if not haschild:
@@ -277,6 +282,8 @@ def v_ren_uni(setup,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
     
     extra = {'Values':result['Values'],
              'Value of Divorce, male': vm_n, 'Value of Divorce, female': vf_n}
+    
+    
     
     
     if not return_extra:
@@ -297,6 +304,8 @@ def v_div_allsplits(setup,dc,t,sc,Vmale,Vfemale,izm,izf,
     Vm_divorce_M = np.zeros(shp) 
     Vf_divorce_M = np.zeros(shp)
     
+    # !!! potential problem is that when cupy is forced grids get converted many times
+    
     # find utilities of divorce for different divisions of assets
     for i, shr in enumerate(shrs):
         sv_m = VecOnGrid(setup.agrid_s,shr*sc - cost_mal,force_cupy=gpu)
@@ -309,15 +318,67 @@ def v_div_allsplits(setup,dc,t,sc,Vmale,Vfemale,izm,izf,
     
 
 
-def v_div_byshare(setup,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,
+def v_div_byshare(model,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,
                   shrs=None,cost_fem=0.0,cost_mal=0.0):
     # this produces value of divorce for gridpoints given possibly different
     # shares of how assets are divided. 
     # Returns Vf_divorce, Vm_divorce -- values of singles in case of divorce
     # matched to the gridpionts for couples
     
+    
+    
+    
+    
+    
+    setup = model.setup
+    
+    
+    
     # optional cost_fem and cost_mal are monetary costs of divorce
     if shrs is None: shrs = shrs_def
+        
+    # there is simpler protocol if shares are fixed
+    
+    def ptp(x): # not implemented in cupy somehow
+        return x.max() - x.min()
+    
+    
+    simple = False
+    if (ptp(share_fem) < 1e-4) and (ptp(share_mal) < 1e-4):
+        simple = True
+        
+        shr_m = share_mal[0]
+        
+        agrid_s = setup.agrid_s if not gpu else setup.cupy.agrid_s
+        
+        sv_m = VecOnGrid(agrid_s,shr_m*sc - cost_mal,force_cupy=gpu)
+        
+        shr_f = share_fem[0]
+        
+        if np.abs(shr_f - shr_m) < 1e-4:
+            sv_f = sv_m
+        else:
+            sv_f = VecOnGrid(agrid_s,shr_f*sc - cost_fem,force_cupy=gpu)
+            
+                
+        def apply(v,sv,iexo):
+            i = sv.i[:,None]
+            ip = i+1
+            wt = sv.wthis[:,None]
+            wn = sv.wnext[:,None]
+            ie = iexo[None,:]
+            return v[i,ie]*wt + v[ip,ie]*wn
+        
+        Vf_divorce = apply(Vfemale,sv_f,izf)  - dc.u_lost_f
+        Vm_divorce = apply(Vmale,sv_m,izm)  - dc.u_lost_m
+        
+        return Vf_divorce, Vm_divorce
+        
+        
+    
+        
+        
+    
     
     Vm_divorce_M, Vf_divorce_M = v_div_allsplits(setup,dc,t,sc,
                                                  Vmale,Vfemale,izm,izf,
@@ -349,15 +410,16 @@ def v_div_byshare(setup,dc,t,sc,share_fem,share_mal,Vmale,Vfemale,izf,izm,
                 wn_mal[None,:]*Vm_divorce_M[:,inds_exo,i_mal+1]
                 
     
-                
+
     return Vf_divorce, Vm_divorce
 
 
 
-def v_no_ren(setup,V,haschild,canswitch,t):
+def v_no_ren(model,V,haschild,canswitch,t):
+    
+    setup = model.setup
     
     # this works live v_ren_new but does not actually run renegotiation
-    
     
     i = setup.v_thetagrid_fine.i
     wthis = setup.v_thetagrid_fine.wthis
@@ -399,6 +461,7 @@ def v_no_ren(setup,V,haschild,canswitch,t):
         
     def r(x): return x
     
+    
     shape_notheta = v_y.shape[:-1]
     yes = np.full(shape_notheta,True)
     ntheta = setup.ntheta_fine
@@ -408,11 +471,10 @@ def v_no_ren(setup,V,haschild,canswitch,t):
     
         
     result =  {'Decision': yes, 'thetas': i_theta_out,
-            'Values': (r(v_y), r(v_y), r(vf_y), r(vm_y)),'Divorce':(vf_n,vm_n)}
+            'Values': (r(v_y), r(v_y), r(vf_y), r(vm_y))}#,'Divorce':(vf_n,vm_n)}
     
     if not haschild:
         result['Give a birth'] = switch
-        
         
     return result
 

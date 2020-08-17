@@ -69,7 +69,14 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun
     if isinstance(EV,tuple):
         assert len(EV) == 2
         vsgrid,EVin = EV
-        EV_by_l = vsgrid.apply_preserve_shape(EVin)
+        try:
+            EV_by_l = vsgrid.apply_preserve_shape(EVin)
+        except:
+            print(type(vsgrid.i))
+            print(type(vsgrid.wnext))
+            print(type(EVin))
+            assert False
+            
         assert EVin.shape[1:] == EV_by_l.shape[1:]
         assert EVin.dtype == EV_by_l.dtype
 

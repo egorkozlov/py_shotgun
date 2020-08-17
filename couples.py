@@ -25,10 +25,9 @@ from optimizers import v_optimize_couple
     
 def solve_couples(model,t,Vnext,ushift,haschild,verbose=False):
     setup = model.setup
-    
-    EV_tuple, dec = ev_couple_m_c(setup,Vnext,t,haschild,use_sparse=True)
+    EV_tuple, dec = ev_couple_m_c(model,Vnext,t,haschild,use_sparse=True)
     model.time('Integration (c)')
-    V_tuple = v_iter_couple(setup,t,EV_tuple,ushift,haschild)
+    V_tuple = v_iter_couple(model,t,EV_tuple,ushift,haschild)
     model.time('Optimization (c)')
     return V_tuple, dec
     
@@ -36,9 +35,11 @@ def solve_couples(model,t,Vnext,ushift,haschild,verbose=False):
 
 from renegotiation_unilateral import v_ren_uni, v_no_ren
 
-def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
+def ev_couple_m_c(model,Vpostren,t,haschild,use_sparse=True):
     # computes expected value of couple entering the next period with an option
     # to renegotiate or to break up
+    
+    setup = model.setup
     
     if Vpostren is None: return None, {}
     
@@ -47,10 +48,10 @@ def ev_couple_m_c(setup,Vpostren,t,haschild,use_sparse=True):
     
     
     if can_divorce:
-        out = v_ren_uni(setup,Vpostren,haschild,canswitch,t)
+        out = v_ren_uni(model,Vpostren,haschild,canswitch,t)
         
     else:
-        out = v_no_ren(setup,Vpostren,haschild,canswitch,t)
+        out = v_no_ren(model,Vpostren,haschild,canswitch,t)
         
         
         
@@ -143,7 +144,10 @@ def ev_couple_exo(setup,Vren,t,haschild,use_sparse=True,down=False):
 
 
 
-def v_iter_couple(setup,t,EV_tuple,ushift,haschild,nbatch=500,verbose=False):
+def v_iter_couple(model,t,EV_tuple,ushift,haschild,nbatch=500,verbose=False):
+    
+    
+    setup = model.setup
     
     if verbose: start = default_timer()
     

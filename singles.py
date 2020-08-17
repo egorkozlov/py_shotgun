@@ -36,6 +36,8 @@ def co(x):
 def solve_singles(model,t,Vnext,ushift,female,verbose=False):
     setup = model.setup
     
+    if Vnext is None: assert t > model.setup.pars['T'] - 3
+        
     EV, dec = ev_single(setup,Vnext,female,t) # Vnext can be None
     model.time('Integration (s)')
     
@@ -75,9 +77,11 @@ def v_iter_single(setup,t,EV,female,ushift):
     mgrid = setup.mgrid_s if nogpu else setup.cupy.mgrid_s
     ls = setup.ls_levels[sname]
     
+    vsgrid = setup.vsgrid_s if nogpu else setup.cupy.vsgrid_s
+    
     
     V, c, x, s, i_opt, ils, V_all_l = \
-        v_optimize_couple(money_t,sgrid_s,(setup.vsgrid_s,EV[...,None,None]),mgrid,uu,ux,
+        v_optimize_couple(money_t,sgrid_s,(vsgrid,EV[...,None,None]),mgrid,uu,ux,
                               ls,beta,ushift,dtype=dtype,taxfun=taxfun)
     
     
