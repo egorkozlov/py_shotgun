@@ -61,7 +61,7 @@ def main():
     this_name = 'baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      save_to='mdl.pkl',
+                                      #save_to='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=2)
@@ -84,10 +84,10 @@ def main():
 
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare='baseline.pkl', #None,
-                   base='no divorce costs.pkl',#this_name+'.pkl',
-                   compare_name='baseline', #'Data',
-                   base_name='no divorce costs',
+                   compare=None,
+                   base=this_name+'.pkl',
+                   compare_name='Data',
+                   base_name='baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
 
     '''

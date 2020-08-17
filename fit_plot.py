@@ -93,9 +93,15 @@ class FitPlots(object):
             except:
                 print('failed to plot men')
         
-        self.plot_single_moms()
+        try:
+            self.plot_single_moms()
+        except:
+            print('failed to plot single moms')
             
-        self.plot_welfare()
+        try:
+            self.plot_welfare()
+        except:
+            print('failed to plot welfare')
         
         try:
             self.plot_kfmf_ref()
@@ -498,7 +504,7 @@ class FitPlots(object):
             
         fig, ax = plt.subplots()
         plt.plot(z_fem,v_fem_base_val,'o-b',label=self.base_name)
-        plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
+        if v_fem_compare_val is not None: plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
         ax.grid(True)
         xticks = z_fem#[i for i in range(24,36)]
         ax.set_xticks(xticks)
