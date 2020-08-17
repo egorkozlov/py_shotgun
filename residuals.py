@@ -112,9 +112,9 @@ def mdl_resid(x=None,targets=None,weights=w,
     mom = {key : np.mean([m[key] for m in moments_list],axis=0) for key in moments_list[0].keys()}
     
     
-    mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
+    #mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
     #mom_men = agents_extra.compute_moments()
-    mom.update(mom_join)
+    #mom.update(mom_join)
     
     
     

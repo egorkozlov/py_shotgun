@@ -31,7 +31,7 @@ class FitPlots(object):
         
         
         if type(base) is str:
-            self.moments = filer(base,0,0)
+            self.moments = filer(base,0,0,repeat=False)
         else:
             self.moments = base
             
@@ -49,7 +49,7 @@ class FitPlots(object):
         
             
         if type(compare) is str:
-            targ_load = filer(compare,0,0)
+            targ_load = filer(compare,0,0,repeat=False)
             # emulating targets
             self.targets = {key: (targ_load[key],0.0) for key in targ_load}
         else:
