@@ -75,6 +75,9 @@ class Model(object):
         else:
             self.time_dict[whatisdone] = [last_time]
 
+    def get_total_time(self):
+        return round(default_timer() - self.start,2)
+    
     def time_statistics(self,remove_worst=True,remove_single=False):
 
         print('Total time is {}'.format(default_timer() - self.start))

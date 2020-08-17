@@ -141,8 +141,8 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     
 
-
-    print('Distance is {}'.format(dist))
+    tt = mdl_list[0].get_total_time()
+    print('Distance {}, time {}'.format(dist,tt))
     
     
     
