@@ -281,8 +281,8 @@ def all_targets(pick=None):
     
     
     
-    targets['abortion ratio'] = (0.41*0.85*186,0.1)
-    targets['abortion 30s over 20s'] = (25/65,0.001)
+    targets['abortion ratio'] = (0.41*0.85*186,1.0)
+    targets['abortion 30s over 20s'] = (25/65,0.1)
         
     all_targets['high education'] = targets.copy()
     
@@ -510,7 +510,7 @@ def all_targets(pick=None):
     
     
     targets['abortion ratio'] = (0.41*0.85*186,1.0)
-    targets['abortion 30s over 20s'] = (25/65,0.001)
+    targets['abortion 30s over 20s'] = (25/65,0.1)
     
     all_targets['low education'] = targets.copy()
         
