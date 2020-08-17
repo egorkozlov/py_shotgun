@@ -9,6 +9,10 @@ import numpy as np
 from numba import cuda, f4, f8, b1, i2
 from math import ceil
 
+try:
+    import cupy as cp
+except:
+    pass
 
 
 use_f32 = False
@@ -39,8 +43,8 @@ def v_mar_gpu(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     
     
     
-    ithtgrid = cuda.to_device(ithtgrid)
-    wnthtgrid = cuda.to_device(wnthtgrid)
+    #ithtgrid = cuda.to_device(ithtgrid)
+    #wnthtgrid = cuda.to_device(wnthtgrid)
     
 
     threadsperblock = (16, 64)
@@ -50,6 +54,7 @@ def v_mar_gpu(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     
     blockspergrid = (b_a, b_exo)
     
+    '''
     vfy_, vmy_ = [cuda.to_device(
                             np.ascontiguousarray(x)
                                         ) for x in (vfy, vmy)]
@@ -57,7 +62,8 @@ def v_mar_gpu(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
     vfn_, vmn_ = [cuda.to_device(
                                     np.ascontiguousarray(x)
                                   ) for x in (vfn,vmn)]
-    
+    '''
+    vfy_, vmy_, vfn_, vmn_ = (vfy, vmy, vfn, vmn)
     
     #itht, wntht = (cuda.const.array_like(x) for x in (itht, wntht))
     
@@ -66,7 +72,12 @@ def v_mar_gpu(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
                                                 ithtgrid,wnthtgrid,
                                                     v_f,v_m,agree,nbs,itheta)
     
+    '''
     v_f, v_m, agree, nbs, itheta = (x.copy_to_host() 
+                            for x in (v_f, v_m, agree, nbs, itheta))
+    '''
+    
+    v_f, v_m, agree, nbs, itheta = (cp.asarray(x) #.copy_to_host() 
                             for x in (v_f, v_m, agree, nbs, itheta))
     
     return v_f, v_m, agree, nbs, itheta

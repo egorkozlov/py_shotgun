@@ -379,7 +379,14 @@ class Agents:
                     
                     
                     if not 'Not pregnant' in matches or (pmeet<1e-5):
-                        assert pmeet<1e-5
+                        try:
+                            assert pmeet<1e-5
+                        except:
+                            print(t)
+                            print(pmeet)
+                            print(sname)
+                            print(matches.keys())
+                            assert False
                         # propagate yaftmar
                         # !!! this needs to be verified
                         

@@ -28,7 +28,7 @@ import os
 os.environ['MKL_CBWR']='AUTO'
 from estimates import get_point
  
-if __name__ == '__main__':
+def main():
     
     high_e = True
     x, targ_mode = get_point(high_e)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
     
     #from simulations import Agents
     #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
-    
+    '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
                    compare='baseline.pkl',
@@ -90,7 +90,7 @@ if __name__ == '__main__':
                    compare_name='baseline',
                    base_name=this_name,
                    moments_aux=None) #,moments_aux=moments_aux)
-    
+    '''
     '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
@@ -104,3 +104,5 @@ if __name__ == '__main__':
     mdl[0].mar_graphs()
     '''
     
+if __name__ == '__main__':
+    main()
