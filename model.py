@@ -23,10 +23,11 @@ import psutil
 
 #if system() != 'Darwin':
 from setup import ModelSetup
-from solver_couples import v_iter_couple
-from solver_singles import v_iter_single, v_iter_single_mom
-from integrator_singles import ev_single, ev_single_k
-from integrator_couples import ev_couple_m_c
+from couples import solve_couples
+from singles import solve_singles
+from single_moms import solve_single_mom
+
+
 
 
 try:
@@ -106,7 +107,6 @@ class Model(object):
         if desc == 'Female, single' or desc == 'Male, single':
 
 
-            from singles import solve_singles
 
             female = (desc == 'Female, single')
 
@@ -126,7 +126,6 @@ class Model(object):
             
             haschild = (desc== 'Couple and child')
             
-            from couples import solve_couples
             (V, VF, VM, c, x, s, fls), dec = solve_couples(self,t,V_next,ushift,haschild)
             
             
@@ -141,9 +140,7 @@ class Model(object):
         
         elif desc == 'Female and child':
             
-            
-            from single_moms import solve_single_mom
-                        
+                                    
             (V, c, x, s, fls), dec = solve_single_mom(self,t,V_next,ushift)
             
             if gpu:
