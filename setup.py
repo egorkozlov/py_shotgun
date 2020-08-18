@@ -522,18 +522,25 @@ class ModelSetup(object):
         # this pre-computes transition matrices for meeting a partner
        
         
+        name_fem_pkl = 'az_dist_fem.pkl' if p['high education'] else 'az_dist_fem_noc.pkl'
+        name_mal_pkl = 'az_dist_mal.pkl' if p['high education'] else 'az_dist_mal_noc.pkl'
+        name_fem_csv = 'income_assets_distribution_male.csv' if p['high education'] else 'ia_male_noc.csv'
+        name_mal_csv = 'income_assets_distribution_female.pkl' if p['high education'] else 'ia_female_noc.csv'
+        # this is not an error, things are switched
+        
         
         try:
-            self.partners_distribution_fem = filer('az_dist_fem.pkl',0,0,repeat=False)
-            self.partners_distribution_mal = filer('az_dist_mal.pkl',0,0,repeat=False)
+            self.partners_distribution_fem = filer(name_fem_pkl,0,0,repeat=False)
+            self.partners_distribution_mal = filer(name_mal_pkl,0,0,repeat=False)
         except:
             print('recreating estimates...')
-            est_fem = get_estimates(fname='income_assets_distribution_male.csv',
+            
+            est_fem = get_estimates(fname=name_fem_csv,
                                     age_start=23,age_stop=42,
                                     zlist=self.exogrid.zm_t[2:])
             filer('az_dist_fem.pkl',est_fem,True,repeat=False)
             self.partners_distribution_fem = est_fem
-            est_mal = get_estimates(fname='income_assets_distribution_female.csv',
+            est_mal = get_estimates(fname=name_mal_csv,
                                     age_start=21,age_stop=40,
                                     zlist=self.exogrid.zf_t[0:])
             filer('az_dist_mal.pkl',est_mal,True,repeat=False)
