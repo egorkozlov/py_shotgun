@@ -73,7 +73,7 @@ class ModelSetup(object):
         
         p['z_drift'] = -0.09
         p['no kids at meeting'] = True
-        p['high education'] = True # what trend to pick
+        p['high education'] = False # what trend to pick
         p['any kids'] = True
         
         p['wret'] = 0.8
@@ -139,16 +139,15 @@ class ModelSetup(object):
             p['sig_zm']    = p['income_sd_mult']*0.16138593
             p['sig_zm_0']  = p['income_sd_mult']*0.41966813 
             
-            # FIXME: I need guidance how to pin these down
             p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.19571624
             p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.43351219
         else:
-            p['sig_zm']    = p['income_sd_mult']*0.2033373
-            p['sig_zm_0']  = p['income_sd_mult']*0.40317171
+            p['sig_zm']    = p['income_sd_mult']*0.17195085
+            p['sig_zm_0']  = p['income_sd_mult']*0.2268650
             
             
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.14586778
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.62761052
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.1762148
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.1762148
             
         
         
@@ -187,25 +186,32 @@ class ModelSetup(object):
             
         else:
         # no college
-        
-        
-        
-        
+            m_trend_data = [0.0,0.03824801,.13410532,.1663402,.18535393,.20804419,.22880115,.23963687,.26544877,.27445022,.28828461,.29908889,.3242355,.34399191,.35703786,.36160155,.37354454,.37365049,.38967079,.39410233,.40492857,.40538787,.42001778,.43326506,.43527713]
+            
+            
+            f_trend_data = [0.0,0.03709545,.07178513,.09427489,.18766845,.20733048,.21432513,.22962527,.24421213,.25502674,.26330492,.26669114,.271962,.2775313,.29847667,.29413686,.30664712,.30294726,.31538057,.31768117,.32177537,.32804634,.32827188,.33866797,.34713842]
+            
+            
+            nm = len(m_trend_data)-1
+            nf = len(f_trend_data)-1
+            
+            t0 = 4
+            gap = 2.5449782 - 2.3597982 # male - female
+            
+            c_female = -f_trend_data[t0]
+            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [-0.2424105 + 0.037659*(min(t+2,30)-5)  
-                                             -0.0015337*((min(t+2,30)-5)**2) 
-                                             + 0.000026*((min(t+2,30)-5)**3)
+                                        [c_male + m_trend_data[min(t,nm)]
                                              for t in range(T)]
                                         )
             p['f_wage_trend'] = np.array(
-                                [-0.3668214 + 
-                                 0.0264887*(min(t,30) - 5)
-                                 -0.0012464*((min(t,30)-5)**2)
-                                 +0.0000251*((min(t,30)-5)**3)
+                                [c_female + f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
+        
+        
         if not p['pay_gap']:
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
             p['f_wage_trend'] = p['m_wage_trend']
