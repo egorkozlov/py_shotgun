@@ -122,7 +122,6 @@ class ModelSetup(object):
         
         
         
-        
         p['preg_21'] = 0.01
         p['preg_28'] = 0.5
         p['preg_35'] = 0.3
@@ -149,6 +148,8 @@ class ModelSetup(object):
             p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.1762148
             p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.1762148
             
+        
+        p['sm_init'] = 0.02 if p['high education'] else 0.2 # initial share of single moms
         
         
         # college

@@ -78,6 +78,7 @@ class Agents:
         self._shocks_child_support_mal = np.random.random_sample((N,T))
         self._shocks_child_support_award = np.random.random_sample((N,T))
         
+        self._shocks_init_sm = np.random.random_sample((N,))
 
         # no randomnes past this line please
         
@@ -145,11 +146,28 @@ class Agents:
         
         
         self.state = np.zeros((N,T),dtype=np.int8)       
-        self.state[:,0] = self.state_codes[self.single_state]  # everyone starts as female
+        self.state[:,0] = self.state_codes[self.single_state]  
+        
+        # initial single mothers:
+        i_sm_init = (self._shocks_init_sm <= self.setup.pars['sm_init'])
+        self.state[i_sm_init,0] = (self.state_codes['Female and child'] \
+                                        if self.female else \
+                                        self.state_codes['Male, single'])
+        
+                                        
+                                                
         
         self.timer('Simulations, creation',verbose=self.verbose)
         self.ils_def = 0#self.setup.nls - 1
             
+        
+        
+        # replace fls to optimal values
+        fls_policy = self.Mlist[0].V[0]['Female and child']['fls'] 
+        self.ils_i[i_sm_init,0] = fls_policy[self.iassets[i_sm_init,0],iexoinit[i_sm_init]]
+        
+        
+        
         #Create a file with the age of the change foreach person
         
         self.policy_ind = np.zeros((N,T),dtype=np.int8)
