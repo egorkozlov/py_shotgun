@@ -89,13 +89,22 @@ def generate_counterfactuals(resume=True):
                 
            
                 print('done, doing fit plots')
-                try:                    
-                    fp = FitPlots(targ_mode=targ_mode,
-                                   compare='{} baseline.pkl'.format(name),
-                                   base=fname,
-                                   compare_name='baseline',
-                                   base_name=adj_name,
-                                   moments_aux=None)
+                
+                try:                 
+                    if adj_name == 'baseline':
+                        fp = FitPlots(targ_mode=targ_mode,
+                                       compare=None,
+                                       base='{} baseline.pkl'.format(name),
+                                       compare_name='Data',
+                                       base_name='baseline',
+                                       moments_aux=None)
+                    else:
+                        fp = FitPlots(targ_mode=targ_mode,
+                                       compare='{} baseline.pkl'.format(name),
+                                       base=fname,
+                                       compare_name='baseline',
+                                       base_name=adj_name,
+                                       moments_aux=None)
                 except:
                     print('something wrong with fit plots...')
                 
