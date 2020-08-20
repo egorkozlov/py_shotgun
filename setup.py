@@ -149,7 +149,7 @@ class ModelSetup(object):
             p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.1762148
             
         
-        p['sm_init'] = 0.02 if p['high education'] else 0.2 # initial share of single moms
+        p['sm_init'] = 0.00 if p['high education'] else 0.25 # initial share of single moms
         
         
         # college
