@@ -34,11 +34,6 @@ def main():
     x, targ_mode = get_point(high_e)
 
 
-
-    x = {'sigma_psi': 0.39953601382428866, 'sigma_psi_init': 3.0725683838557276, 'pmeet_21': 0.432991116061913, 'pmeet_28': 0.26180839230577446, 'pmeet_35': 0.5691992566974007, 'preg_21': 0.170975611759682, 'preg_28': 0.21779042931083295, 'preg_35': 0.17575004499028102, 'u_shift_mar': 1.4998917495906658, 'util_alp': 0.4179831829995812, 'util_kap': 1.3061403769026076, 'util_qbar': 0.003578373701123387, 'disutil_marry_sm_mal': 51.48144648331411, 'disutil_shotgun': 0.15849135146243648, 'abortion_costs': 40.05274285709042, 'p_abortion_access': 0.9759747406920513, 'u_lost_divorce': 0.5704761664715526}
-
-
-
     tar = target_values(targ_mode)
 
 

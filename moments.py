@@ -240,7 +240,18 @@ def compute_moments(self):
 
     for i in range(1,15):
         moments['never married and no kids in population at {}'.format(21+i)] = (~ever_mar & ~ever_kid)[:,i].mean()
-
+    
+    
+    for i in range(1,15):
+        i_above = self.female_z > 0
+        i_below = self.female_z < 0
+        try:
+            pick_a = (i_above[:,i] & one_mar[:,i])
+            pick_b = (i_below[:,i] & one_mar[:,i])
+            moments['divorced ratio above over below at {}'.format(21+i)] = np.clip((div_now)[pick_a,i].mean() / np.fmax( (div_now)[pick_b,i].mean(), 1e-3) , 0.25, 4.0)     
+        except:
+            moments['divorced ratio above over below at {}'.format(21+i)] = 1.0
+            
 
 
     pick = age_pick & in_sample

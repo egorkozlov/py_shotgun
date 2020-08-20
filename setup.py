@@ -65,8 +65,8 @@ class ModelSetup(object):
         
         
         p['pmeet_21'] = 0.1
-        p['pmeet_28'] = 0.2
-        p['pmeet_35'] = 0.1
+        p['pmeet_30'] = 0.2
+        p['pmeet_40'] = 0.1
         
         p['m_zf'] = 0.9
         p['m_zf0'] = 1.0
@@ -149,7 +149,7 @@ class ModelSetup(object):
             p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.1762148
             
         
-        p['sm_init'] = 0.00 if p['high education'] else 0.25 # initial share of single moms
+        p['sm_init'] = (0.02 if p['high education'] else 0.25) if p['any kids'] else 0.0 # initial share of single moms
         
         
         # college
@@ -233,7 +233,7 @@ class ModelSetup(object):
         
         
         p['pmeet_0'],  p['pmeet_t'], p['pmeet_t2'] = prob_polyfit(
-                    (p['pmeet_21'],0),(p['pmeet_28'],7),(p['pmeet_35'],14),
+                    (p['pmeet_21'],0),(p['pmeet_30'],7),(p['pmeet_40'],14),
                                                                    max_power=2)
         
         p['preg_a0'],  p['preg_at'], p['preg_at2'] = prob_polyfit(
