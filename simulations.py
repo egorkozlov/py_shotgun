@@ -898,6 +898,8 @@ class Agents:
         
         
         self.female_wage = -np.ones((self.N,self.T),dtype=np.float32)
+        self.female_z = -1000*np.ones((self.N,self.T),dtype=np.float32)
+        self.male_z = -1000*np.ones((self.N,self.T),dtype=np.float32)
         self.male_wage = -np.ones((self.N,self.T),dtype=np.float32)
         self.female_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.male_earnings = -np.ones((self.N,self.T),dtype=np.float32)
@@ -942,12 +944,14 @@ class Agents:
                 if state == 'Female, single' or state == 'Female and child':
                     wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + tf)
                     self.female_wage[pick,t] = wage
+                    self.female_z[pick,t] = self.setup.exogrid.zf_t[t][iexo]
                     self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.female_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Male, single':                    
                     wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + tm)
                     self.male_wage[pick,t] = wage
+                    self.male_z[pick,t] = self.setup.exogrid.zm_t[t][iexo]
                     self.male_earnings[pick,t] = wage # !!!
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.male_earnings[pick,t]
                     assert np.all(wage>0)
@@ -957,6 +961,8 @@ class Agents:
                     wage_m = np.exp(self.setup.exogrid.zm_t[t][izm] + tm)
                     self.female_wage[pick,t] = wage_f
                     self.male_wage[pick,t] = wage_m
+                    self.male_z[pick,t] = self.setup.exogrid.zm_t[t][izm]
+                    self.female_z[pick,t] = self.setup.exogrid.zf_t[t][izf]                    
                     self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
                     self.male_earnings[pick,t] = wage_m
                     self.couple_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]
