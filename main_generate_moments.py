@@ -22,6 +22,9 @@ def generate_counterfactuals(resume=True):
         
         
         adjustments = [('baseline',{}),
+                       ('abortions and no stigma',{'disutil_shotgun':0.0,
+                                                  'p_abortion_access':1.0,
+                                                  'abortion_costs':0.0}),
                        ('no child support',{'child_support_awarded_nm':0.0,
                                             'child_support_awarded_div':0.0}),
                        ('full child support',{'child_support_awarded_nm':1.0,
@@ -36,9 +39,9 @@ def generate_counterfactuals(resume=True):
                        ('no abortions',{'p_abortion_access':0.0}),
                        ('costless abortion',{'p_abortion_access':1.0,
                                              'abortion_costs':0.0}),
-                       ('no social stigma',{'disutil_shotgun_coef':0.0}),
-                       ('no remar penalty',{'disutil_marry_sm_mal_coef':0.0}),
-                       ('no remarriage',{'disutil_marry_sm_mal_coef':500.0}),
+                       ('no social stigma',{'disutil_shotgun':0.0}),
+                       ('no remar penalty',{'disutil_marry_sm_mal':0.0}),
+                       ('no remarriage',{'disutil_marry_sm_mal':500.0}),
                        ('no qbar',{'util_qbar':0.0}),
                        ('no unplanned pregnancy',{'preg_21': 0.0,
                                                   'preg_28': 0.0,
@@ -88,10 +91,10 @@ def generate_counterfactuals(resume=True):
                 print('done, doing fit plots')
                 try:                    
                     fp = FitPlots(targ_mode=targ_mode,
-                                   compare=fname,
-                                   base='{} baseline.pkl'.format(name),
-                                   compare_name=adj_name,
-                                   base_name='baseline',
+                                   compare='{} baseline.pkl'.format(name),
+                                   base=fname,
+                                   compare_name='baseline',
+                                   base_name=adj_name,
                                    moments_aux=None)
                 except:
                     print('something wrong with fit plots...')

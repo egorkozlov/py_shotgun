@@ -26,7 +26,6 @@ class FitPlots(object):
                  moments_aux=None):
         
         
-        
         if setup is None: self.setup = ModelSetup()
         
         
@@ -54,8 +53,6 @@ class FitPlots(object):
             self.targets = {key: (targ_load[key],0.0) for key in targ_load}
         else:
             self.targets = all_targets(targ_mode)
-        
-        
         
         try:
             self.print_things()
@@ -107,6 +104,8 @@ class FitPlots(object):
             self.plot_kfmf_ref()
         except:
             print('failed to plot ref')
+            
+        plt.show()
         
     
     def print_things(self):
