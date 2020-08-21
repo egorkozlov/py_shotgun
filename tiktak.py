@@ -23,6 +23,8 @@ def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_global=F
     
     assert N>=N_st
     
+    x0 = np.array(x0)
+    
     
     ############################################
     #1 INITIALIZATION
