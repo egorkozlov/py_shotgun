@@ -30,14 +30,14 @@ from estimates import get_point
  
 def main():
     
-    high_e = True
+    high_e = False
     x, targ_mode = get_point(high_e)
 
 
     tar = target_values(targ_mode)
 
 
-    this_name = 'baseline'
+    this_name = 'no college baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #save_to='mdl.pkl',

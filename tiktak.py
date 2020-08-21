@@ -55,8 +55,15 @@ def tiktak(*,N,N_st,xfix=None,skip_global=False,skip_local=False,resume_global=F
         
         filer('sobol_results.pkl',(fx_init,x_init),True)
         print('saved the results succesfully')
-    else:
-        (fx_init,x_init) = filer('sobol_results.pkl',None,False)
+    else:        
+        (fx_init,x_init0) = filer('sobol_results.pkl',None,False)
+        
+        # this block appends variables if too little are specified in sobol_results
+        x_init = np.zeros((x0.size,x_init0.shape[1]),dtype=x_init0.dtype)
+        x_init[:,:] = x0[:,None]
+        x_init[0:(x_init0.shape[0]),:] = x_init0        
+        
+        
         print('loaded the results from the file')
         
         
