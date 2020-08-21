@@ -46,6 +46,8 @@ def target_values(mode='low education'):
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
             ('divorced ratio above over below at ',(28,35),1/4),
+            ('above median among never married mothers at ',(28,35),1/4),
+            ('above median among divorced mothers at ',(28,35),1/4),
             #('remarriage chance if kids, 26-30',),  
             #('remarriage chance if kids, 31-35',),
             #('remarriage chance if no kids, 26-30',),  
@@ -300,8 +302,36 @@ def all_targets(pick=None):
     targets['divorced ratio above over below at 35'] = (.7753022, .0235935)
     
     
+    targets['above median among divorced mothers at 23'] = (.6155104, .091935)
+    targets['above median among divorced mothers at 24'] = (.5464597, .0750517)
+    targets['above median among divorced mothers at 25'] = (.4653033, .0482203)
+    targets['above median among divorced mothers at 26'] = (.4200451, .0363862)
+    targets['above median among divorced mothers at 27'] = (.4381934, .028839)
+    targets['above median among divorced mothers at 28'] = (.4157751, .0230296)
+    targets['above median among divorced mothers at 29'] = (.3484932, .0193085)
+    targets['above median among divorced mothers at 30'] = (.3504218, .0165505)
+    targets['above median among divorced mothers at 31'] = (.4178161, .0149386)
+    targets['above median among divorced mothers at 32'] = (.4334456, .0135022)
+    targets['above median among divorced mothers at 33'] = (.3986076, .0125915)
+    targets['above median among divorced mothers at 34'] = (.4037833, .0113524)
+    targets['above median among divorced mothers at 35'] = (.4348327, .0106641)
     
-    targets['abortion ratio'] = (0.41*0.85*186,1.0)
+    
+    targets['above median among never married mothers at 23'] = (.479423, .0199036)
+    targets['above median among never married mothers at 24'] = (.3803031, .0155953)
+    targets['above median among never married mothers at 25'] = (.3823566, .013396)
+    targets['above median among never married mothers at 26'] = (.3689366, .0124172)
+    targets['above median among never married mothers at 27'] = (.3326871, .0111305)
+    targets['above median among never married mothers at 28'] = (.3921138, .011011)
+    targets['above median among never married mothers at 29'] = (.3314707, .0103466)
+    targets['above median among never married mothers at 30'] = (.3582643, .0101812)
+    targets['above median among never married mothers at 31'] = (.3751338, .0104006)
+    targets['above median among never married mothers at 32'] = (.3536149, .0102537)
+    targets['above median among never married mothers at 33'] = (.3700371, .0102495)
+    targets['above median among never married mothers at 34'] = (.3538409, .0103363)
+    targets['above median among never married mothers at 35'] = (.4144861, .0110767)
+    
+    targets['abortion ratio'] = (0.41*0.85*186,0.2)
     targets['abortion 30s over 20s'] = (25/65,0.1)
         
     all_targets['high education'] = targets.copy()
@@ -544,7 +574,37 @@ def all_targets(pick=None):
     targets['divorced ratio above over below at 35'] = (1.078097, .0299674)
     
     
-    targets['abortion ratio'] = (0.41*0.85*186,1.0)
+    targets['above median among divorced mothers at 23'] = (.5301601, .0253048)
+    targets['above median among divorced mothers at 24'] = (.4818047, .0213643)
+    targets['above median among divorced mothers at 25'] = (.4950256, .017925)
+    targets['above median among divorced mothers at 26'] = (.4604572, .0165411)
+    targets['above median among divorced mothers at 27'] = (.4860508, .0144643)
+    targets['above median among divorced mothers at 28'] = (.5381645, .0136395)
+    targets['above median among divorced mothers at 29'] = (.5232977, .0126617)
+    targets['above median among divorced mothers at 30'] = (.5277151, .0116606)
+    targets['above median among divorced mothers at 31'] = (.5202228, .0107895)
+    targets['above median among divorced mothers at 32'] = (.5374461, .0103028)
+    targets['above median among divorced mothers at 33'] = (.5158849, .0100985)
+    targets['above median among divorced mothers at 34'] = (.508917, .0095279)
+    targets['above median among divorced mothers at 35'] = (.5268524, .008963)
+    
+    
+    targets['above median among never married mothers at 23'] = (.4899995, .006338)
+    targets['above median among never married mothers at 24'] = (.4665557, .0061399)
+    targets['above median among never married mothers at 25'] = (.4362643, .0060104)
+    targets['above median among never married mothers at 26'] = (.4412364, .0060289)
+    targets['above median among never married mothers at 27'] = (.4515305, .0061302)
+    targets['above median among never married mothers at 28'] = (.4488592, .0061409)
+    targets['above median among never married mothers at 29'] = (.4697128, .006266)
+    targets['above median among never married mothers at 30'] = (.4841722, .0063757)
+    targets['above median among never married mothers at 31'] = (.4392147, .0065432)
+    targets['above median among never married mothers at 32'] = (.4400828, .0065726)
+    targets['above median among never married mothers at 33'] = (.4438823, .0067927)
+    targets['above median among never married mothers at 34'] = (.4294347, .0068816)
+    targets['above median among never married mothers at 35'] = (.4517876, .0069976)
+    
+    
+    targets['abortion ratio'] = (0.41*0.85*186,0.2)
     targets['abortion 30s over 20s'] = (25/65,0.1)
     
     all_targets['low education'] = targets.copy()

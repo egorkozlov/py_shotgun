@@ -230,13 +230,15 @@ def compute_moments(self):
         moments['m then k in population at {}'.format(21+i)] = obs_m_k[:,i].mean()
 
     for i in range(1,15):
-        moments['divorced and kids in population at {}'.format(21+i)] = (div_now & ever_kid)[:,i].mean()
-
+        pick = (div_now & ever_kid)[:,i]
+        moments['divorced and kids in population at {}'.format(21+i)] = pick.mean()
+        moments['above median among divorced mothers at {}'.format(21+i)] = (self.female_z >= 0)[pick,i].mean() if np.any(pick) else 0.5
     for i in range(1,15):
         moments['divorced and no kids in population at {}'.format(21+i)] = (div_now & ~ever_kid)[:,i].mean()
-
     for i in range(1,15):
-        moments['never married and kids in population at {}'.format(21+i)] = (~ever_mar & ever_kid)[:,i].mean()
+        pick = (~ever_mar & ever_kid)[:,i]
+        moments['never married and kids in population at {}'.format(21+i)] = pick.mean()
+        moments['above median among never married mothers at {}'.format(21+i)] = (self.female_z >= 0)[pick,i].mean() if np.any(pick) else 0.5
 
     for i in range(1,15):
         moments['never married and no kids in population at {}'.format(21+i)] = (~ever_mar & ~ever_kid)[:,i].mean()
