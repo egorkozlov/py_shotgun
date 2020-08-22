@@ -33,9 +33,9 @@ def target_values(mode='low education'):
     
     keys = [
             ('ever kids by years after marriage, ',(4,8),1),
-            ('k then m in population at ',(23,35),1/4),
-            ('m then k in population at ',(23,35),1/4),
-            ('k then m in sample at ',(23,35),1/4),
+            ('k then m in population at ',(23,35),1),
+            ('m then k in population at ',(23,35),1),
+            ('k then m in sample at ',(23,35),1),
             ('divorced by years after marriage if kids first, ',(1,10),1/4),
             ('divorced by years after marriage if marriage first, ',(1,10),1/4),
             ('mean x share',),
@@ -46,12 +46,6 @@ def target_values(mode='low education'):
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
             ('divorced ratio above over below at ',(28,35),1/4),
-            ('above median among never married mothers at ',(28,35),1/4),
-            ('above median among divorced mothers at ',(28,35),1/4),
-            #('remarriage chance if kids, 26-30',),  
-            #('remarriage chance if kids, 31-35',),
-            #('remarriage chance if no kids, 26-30',),  
-            #('remarriage chance if no kids, 31-35',),
             ('abortion ratio',),
             ('abortion 30s over 20s',)
            ]
