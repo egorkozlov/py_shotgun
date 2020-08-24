@@ -248,6 +248,7 @@ def compute_moments(self):
     for i in range(1,15):
         moments['single mothers in total at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean()
         moments['single mothers among mothers at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean() / np.maximum((have_kid)[:,i].mean(),0.01)
+        moments['aborted unplanned pregnancies at {}'.format(21+i)] = self.share_aborted[i]
     
     
     for i in range(1,15):
@@ -479,7 +480,10 @@ def compute_moments(self):
         moments['spouse log coef 1 year after'] = 0.0
 
     moments['relative income at 30 if childless'] = np.mean(self.female_earnings[pick_top,9])/np.mean(self.female_earnings[pick_bottom,9])
-
+    
+    
+    
+    
 
     moments['abortion ratio'] = 1000*(self.aborted.sum())/(self.new_child + self.aborted).sum()
     moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)

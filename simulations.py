@@ -121,6 +121,8 @@ class Agents:
         self.m_k = np.zeros((N,T),dtype=np.bool)
         self.nmar = np.zeros((N,T),dtype=np.int8)
         
+        self.share_aborted = np.zeros((T,),dtype=np.float64)
+        
         self.ub_hit_single = False
         self.ub_hit_couple = False
         
@@ -541,6 +543,7 @@ class Agents:
                     n_abortions = i_abortion.sum()
                     n_kept = i_kept.sum()
                     
+                    if sname == 'Female, single': self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
                     
                     if n_abortions>0 and self.verbose: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
                     if n_kept>0 and self.verbose: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
