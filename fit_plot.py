@@ -102,13 +102,20 @@ class FitPlots(object):
             self.plot_single_moms()
         except:
             print('failed to plot single moms')
-        self.plot_welfare()
-        '''
+            
+            
+        try:
+            self.plot_single_moms_new()
+        except:
+            print('failed to plot single moms (new)')
+            
+        #self.plot_welfare()
+        
         try:
             self.plot_welfare()
         except:
             print('failed to plot welfare')
-        '''
+        
         try:
             self.plot_kfmf_ref()
         except:
@@ -496,40 +503,108 @@ class FitPlots(object):
         
         
         
+    def plot_single_moms_new(self):
+        # graph 1: hazard of any marriage
+        
+        moments,targets,setup = self.moments,self.targets,self.setup
+        
+        tval = np.arange(23,36)
+        
+        
+        
+        all_sm_model = np.zeros_like(tval,dtype=np.float64)
+        rel_sm_model = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        
+        all_sm_data = np.zeros_like(tval,dtype=np.float64)
+        rel_sm_data = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        for i,t in enumerate(tval):
+            
+            all_sm_model[i] = moments['single mothers in total at {}'.format(t)]
+            all_sm_data[i] = targets['single mothers in total at {}'.format(t)][0]
+            
+            rel_sm_model[i] = moments['single mothers among mothers at {}'.format(t)]
+            rel_sm_data[i] = targets['single mothers among mothers at {}'.format(t)][0]
+            
+            
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*all_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*all_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers among mothers')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True) 
+        
     
-    def plot_welfare(self):
+    def plot_welfare(self,a_mult=35):
         # singles
         z_fem = self.setup.exogrid.zf_t[0]
         w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
         
-        z_mal = self.setup.exogrid.zf_t[0]
-        w_mal = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
+        z_mal = self.setup.exogrid.zm_t[0]
+        w_mal = np.exp(z_mal + self.setup.pars['f_wage_trend'][0])
         
         moments,targets = self.moments, self.targets
-        v_fem_base_val = moments['value function: female, single, no assets']
-        try:
-            v_fem_compare_val = targets['value function: female, single, no assets'][0]
-        except:
-            v_fem_compare_val = v_fem_base_val
-            
+        
+        
+        
+        # males and females
+        a_female = \
+                  v_compare(self.setup.agrid_s,
+                            moments['value function: female, single, all assets'],
+                            targets['value function: female, single, all assets'][0],
+                            a_mult=a_mult)
+        
+        
+        a_male = \
+                  v_compare(self.setup.agrid_s,
+                  moments['value function: male, single, all assets'],
+                  targets['value function: male, single, all assets'][0],
+                  a_mult=a_mult)
+                  
+        
+        
         fig, ax = plt.subplots()
-        #plt.plot(z_fem,v_fem_base_val,'o-b',label=self.base_name)
-        #if v_fem_compare_val is not None: plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
-        plt.plot(z_fem,v_fem_compare_val - v_fem_base_val,'o-b',label='{} - {}'.format(self.compare_name,self.base_name))
+        plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
         ax.grid(True)
-        xticks = z_fem#[i for i in range(24,36)]
+        xticks = z_fem
         ax.set_xticks(xticks)
         plt.legend()
-        plt.title('Welfare comparison: females, single, no assets') 
+        plt.title('Welfare differences: female, 21, no kids, no assets') 
         plt.xlabel('female productivity')
-        plt.ylabel('value function')    
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
         
         
-        
+        fig, ax = plt.subplots()        
+        plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        ax.grid(True)
+        xticks = z_mal
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare differences: male, 23, no kids, no assets') 
+        plt.xlabel('male productivity')
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
         
         
         # couples 
-        
+        # transofrm the state
         ipsi = np.arange(self.setup.pars['n_psi'])
         imal = 2*np.ones_like(ipsi)
         ifem = 3*np.ones_like(ipsi)
@@ -537,30 +612,28 @@ class FitPlots(object):
         iexo, _, _, _ = self.setup.all_indices(0,(ifem,imal,ipsi))
         
         
+        a_couple = \
+                  v_compare(self.setup.agrid_c,
+                            moments['value function: couple, no children, all assets'][:,iexo],
+                            targets['value function: couple, no children, all assets'][0][:,iexo],
+                            a_mult=a_mult)
+        
+        
+        
         psi = self.setup.exogrid.psi_t[0]
         
-       
-        moments,targets = self.moments, self.targets
-        v_couple_base_val = moments['value function: couple, no children, no assets']
-        try:
-            v_couple_compare_val = targets['value function: couple, no children, no assets'][0]
-        except BaseException as a:
-            print(a)
-            v_couple_compare_val = v_couple_base_val
-            
-            
+        
         fig, ax = plt.subplots()
         #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
         #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
-        plt.plot(psi,v_couple_compare_val[iexo] - v_couple_base_val[iexo],'o-b',label='{} - {}'.format(self.compare_name,self.base_name))
+        plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
         ax.grid(True)
-        xticks = np.linspace(psi.min(),psi.max(),10)
+        xticks = np.linspace(psi.min(),psi.max(),7)
         ax.set_xticks(xticks)
         plt.legend()
-        plt.title('Welfare comparison: females, single, no assets') 
-        plt.xlabel('female productivity')
-        plt.ylabel('value function')    
-        
+        plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
+        plt.xlabel('love shock')
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)')  
         
     
         
@@ -601,5 +674,47 @@ class FitPlots(object):
             plt.xlabel('age')
             plt.ylabel('ratio (%)')
             plt.savefig('{}.pdf'.format(fname))
+    
+    
+    
+from interp_np import interp
+def v_compare(agrid,v_base,v_compare,*,a_mult):
+    
+    ia0 = 0
+    
+    names = ['extra assets in base to reach 0 in compare',
+             'extra assets in compare to reach 0 in base']
+    
+    i = 0
+    
+    aall = list()
+    
+    for (v0, v1), name in zip([(v_base, v_compare),(v_compare, v_base)],
+                                names):
         
+        print('')
+        print(name)
+        print('')
+        print('v0 is larger in {} cases'.format(np.sum(v0>v1)))
+        print('v0 is smaller in {} cases'.format(np.sum(v0<v1)))
+        
+        alist = list()
+        
+        for iz in range(v0.shape[1]):
+            
+            
+            j, wn = interp(v0[:,iz],v1[ia0,iz],return_wnext=True)
+            
+            if j <= -1:
+                a = 0.0
+            else:
+                a = agrid[j]*(1-wn) + agrid[j+1]*wn
+            
+            alist.append(a_mult*a)
+            
+        
+        i += 1
+        
+        aall.append(np.array(alist))
+    return aall[1] - aall[0]
     

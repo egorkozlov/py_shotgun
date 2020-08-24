@@ -244,6 +244,12 @@ def compute_moments(self):
         moments['never married and no kids in population at {}'.format(21+i)] = (~ever_mar & ~ever_kid)[:,i].mean()
     
     
+    
+    for i in range(1,15):
+        moments['single mothers in total at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean()
+        moments['single mothers among mothers at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean() / np.maximum((have_kid)[:,i].mean(),0.01)
+    
+    
     for i in range(1,15):
         i_above = self.female_z > 0
         i_below = self.female_z < 0
@@ -254,7 +260,7 @@ def compute_moments(self):
         except:
             moments['divorced ratio above over below at {}'.format(21+i)] = 1.0
             
-
+    
 
     pick = age_pick & in_sample
 
