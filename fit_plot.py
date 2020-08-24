@@ -533,7 +533,7 @@ class FitPlots(object):
         imal = 2*np.ones_like(ipsi)
         ifem = 3*np.ones_like(ipsi)
         
-        iexo, _, _, _ = self.setup.all_indices(0,(ipsi,imal,ifem))
+        iexo, _, _, _ = self.setup.all_indices(0,(ifem,imal,ipsi))
         
         
         psi = self.setup.exogrid.psi_t[0]
@@ -548,10 +548,10 @@ class FitPlots(object):
             
             
         fig, ax = plt.subplots()
-        plt.plot(z_fem,v_couple_base_val[iexo],'o-b',label=self.base_name)
+        plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
         if v_couple_compare_val is not None: plt.plot(z_fem,v_couple_compare_val,'o-k',label=self.compare_name)
         ax.grid(True)
-        xticks = psi
+        xticks = np.linspace(psi.min(),psi.max(),10)
         ax.set_xticks(xticks)
         plt.legend()
         plt.title('Welfare comparison: females, single, no assets') 
