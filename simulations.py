@@ -543,7 +543,7 @@ class Agents:
                     n_abortions = i_abortion.sum()
                     n_kept = i_kept.sum()
                     
-                    if sname == 'Female, single': self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
+                    if sname == 'Female, single': self.share_aborted[t] = 100*n_abortions / np.maximum((n_abortions + n_kept),1.0)
                     
                     if n_abortions>0 and self.verbose: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
                     if n_kept>0 and self.verbose: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
