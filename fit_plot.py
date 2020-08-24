@@ -510,11 +510,12 @@ class FitPlots(object):
         try:
             v_fem_compare_val = targets['value function: female, single, no assets'][0]
         except:
-            v_fem_compare_val = None
+            v_fem_compare_val = v_fem_base_val
             
         fig, ax = plt.subplots()
-        plt.plot(z_fem,v_fem_base_val,'o-b',label=self.base_name)
-        if v_fem_compare_val is not None: plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
+        #plt.plot(z_fem,v_fem_base_val,'o-b',label=self.base_name)
+        #if v_fem_compare_val is not None: plt.plot(z_fem,v_fem_compare_val,'o-k',label=self.compare_name)
+        plt.plot(z_fem,v_fem_compare_val - v_fem_base_val,'o-b',label='{} - {}'.format(self.compare_name,self.base_name))
         ax.grid(True)
         xticks = z_fem#[i for i in range(24,36)]
         ax.set_xticks(xticks)
@@ -542,14 +543,16 @@ class FitPlots(object):
         moments,targets = self.moments, self.targets
         v_couple_base_val = moments['value function: couple, no children, no assets']
         try:
-            v_couple_compare_val = targets['value function: couple, no children'][0]
-        except:
-            v_couple_compare_val = None
+            v_couple_compare_val = targets['value function: couple, no children, no assets'][0]
+        except BaseException as a:
+            print(a)
+            v_couple_compare_val = v_couple_base_val
             
             
         fig, ax = plt.subplots()
-        plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
-        if v_couple_compare_val is not None: plt.plot(z_fem,v_couple_compare_val,'o-k',label=self.compare_name)
+        #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
+        #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
+        plt.plot(psi,v_couple_compare_val[iexo] - v_couple_base_val[iexo],'o-b',label='{} - {}'.format(self.compare_name,self.base_name))
         ax.grid(True)
         xticks = np.linspace(psi.min(),psi.max(),10)
         ax.set_xticks(xticks)
