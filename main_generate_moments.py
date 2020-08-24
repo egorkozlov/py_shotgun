@@ -60,6 +60,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
             out,  mom = mdl_resid(x=x_new,targets=tar,
                                           return_format=['distance','moments'],
                                           verbose=False,draw=False,cs_moments=False,
+                                          #save_to ='mdl for {}'.format(fname),
                                           moments_save_name = name,
                                           moments_repeat=5)
             print("file {} saved".format(fname))
