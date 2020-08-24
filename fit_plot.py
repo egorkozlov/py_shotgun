@@ -23,7 +23,8 @@ class FitPlots(object):
                  base_name='Model',
                  compare_name='Data',
                  graphs_title_add=None,
-                 moments_aux=None):
+                 moments_aux=None,
+                 noplot=False):
         
         
         if setup is None: self.setup = ModelSetup()
@@ -58,7 +59,13 @@ class FitPlots(object):
             self.print_things()
         except:
             print('failed to print')
+            
+        self.moments_aux = moments_aux
         
+        if not noplot: self.plot()
+    
+    def plot(self):
+        '''
         try:
             self.plot_estimates()
         except:
@@ -68,7 +75,8 @@ class FitPlots(object):
             self.plot_hazards()
         except:
             print('failed to plot hazards')
-            
+        '''
+        
         try:
             self.plot_cumulative()
         except:
@@ -84,7 +92,7 @@ class FitPlots(object):
         except:
             print('failed to plot kfmf')
             
-        if moments_aux is not None: 
+        if self.moments_aux is not None: 
             try:
                 self.plot_men()
             except:
@@ -94,12 +102,13 @@ class FitPlots(object):
             self.plot_single_moms()
         except:
             print('failed to plot single moms')
-            
+        self.plot_welfare()
+        '''
         try:
             self.plot_welfare()
         except:
             print('failed to plot welfare')
-        
+        '''
         try:
             self.plot_kfmf_ref()
         except:
@@ -485,9 +494,11 @@ class FitPlots(object):
         ax.grid(True)
         plt.savefig('single mothers nm.pdf')
         
+        
+        
     
     def plot_welfare(self):
-        # 
+        # singles
         z_fem = self.setup.exogrid.zf_t[0]
         w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
         
@@ -510,7 +521,45 @@ class FitPlots(object):
         plt.legend()
         plt.title('Welfare comparison: females, single, no assets') 
         plt.xlabel('female productivity')
-        plt.ylabel('value function')
+        plt.ylabel('value function')    
+        
+        
+        
+        
+        
+        # couples 
+        
+        ipsi = np.arange(self.setup.pars['n_psi'])
+        imal = 2*np.ones_like(ipsi)
+        ifem = 3*np.ones_like(ipsi)
+        
+        iexo, _, _, _ = self.setup.all_indices(0,(ipsi,imal,ifem))
+        
+        
+        psi = self.setup.exogrid.psi_t[0]
+        
+       
+        moments,targets = self.moments, self.targets
+        v_couple_base_val = moments['value function: couple, no children, no assets']
+        try:
+            v_couple_compare_val = targets['value function: couple, no children'][0]
+        except:
+            v_couple_compare_val = None
+            
+            
+        fig, ax = plt.subplots()
+        plt.plot(z_fem,v_couple_base_val[iexo],'o-b',label=self.base_name)
+        if v_couple_compare_val is not None: plt.plot(z_fem,v_couple_compare_val,'o-k',label=self.compare_name)
+        ax.grid(True)
+        xticks = psi
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare comparison: females, single, no assets') 
+        plt.xlabel('female productivity')
+        plt.ylabel('value function')    
+        
+        
+    
         
     def plot_men(self):
         

@@ -504,6 +504,7 @@ def compute_moments(self):
 
     moments['value function: female, single, no assets'] = self.Mlist[0].V[0]['Female, single']['V'][0,:]
     moments['value function: male, single, no assets'] = self.Mlist[0].V[0]['Male, single']['V'][0,:]
+    moments['value function: couple, no children, no assets'] = self.Mlist[0].V[0]['Couple, no children']['V'][0,:,5]
 
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
