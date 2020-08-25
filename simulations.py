@@ -549,6 +549,7 @@ class Agents:
                         self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
                         self.n_kept[t] = n_kept
                         self.n_aborted[t] = n_abortions
+                    
                     if n_abortions>0 and self.verbose: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
                     if n_kept>0 and self.verbose: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
                     
