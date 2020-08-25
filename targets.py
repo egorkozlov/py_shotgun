@@ -603,7 +603,6 @@ def all_targets(pick=None):
     targets['abortion 30s over 20s'] = (25/65,0.1)
     
     targets['unplanned pregnancies aborted'] = (0.4,0.01)
-    all_targets['high education'] = targets.copy()
     all_targets['low education'] = targets.copy()
         
     if pick is None:
