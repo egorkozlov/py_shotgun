@@ -45,8 +45,8 @@ def target_values(mode='high education'):
             ('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
-            ('divorced ratio above over below at ',(28,35),1/4),
-            ('abortion ratio',),
+            #('divorced ratio above over below at ',(28,35),1/4),
+            ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',)
            ]
     
@@ -325,9 +325,10 @@ def all_targets(pick=None):
     targets['above median among never married mothers at 34'] = (.3538409, .0103363)
     targets['above median among never married mothers at 35'] = (.4144861, .0110767)
     
-    targets['abortion ratio'] = (0.41*0.85*186,0.2)
     targets['abortion 30s over 20s'] = (25/65,0.1)
+    targets['abortion ratio'] = (0.41*0.85*186,0.2)
         
+    targets['unplanned pregnancies aborted'] = (0.4,0.01)
     all_targets['high education'] = targets.copy()
     
     
@@ -601,6 +602,8 @@ def all_targets(pick=None):
     targets['abortion ratio'] = (0.41*0.85*186,0.2)
     targets['abortion 30s over 20s'] = (25/65,0.1)
     
+    targets['unplanned pregnancies aborted'] = (0.4,0.01)
+    all_targets['high education'] = targets.copy()
     all_targets['low education'] = targets.copy()
         
     if pick is None:

@@ -60,7 +60,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
             out,  mom = mdl_resid(x=x_new,targets=tar,
                                           return_format=['distance','moments'],
                                           verbose=False,draw=False,cs_moments=False,
-                                          #save_to ='mdl for {}'.format(fname),
+                                          save_to ='mdl for {}'.format(fname),
                                           moments_save_name = name,
                                           moments_repeat=5)
             print("file {} saved".format(fname))
@@ -147,14 +147,14 @@ def generate_counterfactuals(resume=True):
     # produce baseline
     
     
-    
+    '''
     # runs baseline first
     run(*adjustments[0],'col')
     run(*adjustments[0],'hs')
+    '''
     
-    
-    for adj_name, fix in adjustments:
-        for educ_name in ['hs','col']:
+    for educ_name in ['col','hs']:
+        for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
     

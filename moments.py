@@ -483,7 +483,7 @@ def compute_moments(self):
     
     
     
-    
+    moments['unplanned pregnancies aborted'] = self.n_aborted.sum() / (1e-4 + self.n_aborted.sum() + self.n_kept.sum())
 
     moments['abortion ratio'] = 1000*(self.aborted.sum())/(self.new_child + self.aborted).sum()
     moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)
