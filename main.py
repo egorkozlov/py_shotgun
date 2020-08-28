@@ -42,14 +42,14 @@ if __name__ == '__main__':
     #config.NUMBA_NUM_THREADS = 2
 
     
-    fix_values = False
+    fix_values = True
     if fix_values:
-        xfix = {'sigma_psi': 0.2476722655689144,
-                'sigma_psi_mult': 5.125801752198881,
-                'u_shift_mar': 1.7329041070973545,
-                 'util_alp': 0.6182672481649074,
-                 'util_kap': 0.8081836080864513,
-                 'taste_shock_mult': 4.116448914683272
+        xfix = {'sigma_psi': 0.2798538779149558,
+                'sigma_psi_init': 1.6916827480353398,
+                'u_shift_mar': 1.1207829780316174,
+                'util_alp': 0.33532441265560753,
+                'util_kap': 0.8617581929517057, 
+                'couple_rts': 2.80540188195949
                 }
     else:
         xfix = None
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     
     
     #Tik Tak Optimization
-    param=tiktak(xfix=xfix,N=10000,N_st=250,skip_local=False,skip_global=False,
+    param=tiktak(xfix=xfix,N=6000,N_st=250,skip_local=False,skip_global=False,
                              resume_global=False,resume_local=False)
     
     print('f is {} and x is {}'.format(param[0],param[1]))

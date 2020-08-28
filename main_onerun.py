@@ -30,7 +30,7 @@ from estimates import get_point
  
 def main():
     
-    high_e = True
+    high_e = False
     x, targ_mode = get_point(high_e)
 
     tar = target_values(targ_mode)
