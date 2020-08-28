@@ -244,6 +244,13 @@ def compute_moments(self):
         moments['never married and no kids in population at {}'.format(21+i)] = (~ever_mar & ~ever_kid)[:,i].mean()
     
     
+    
+    for i in range(1,15):
+        moments['single mothers in total at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean()
+        moments['single mothers among mothers at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean() / np.maximum((have_kid)[:,i].mean(),0.01)
+        moments['aborted unplanned pregnancies at {}'.format(21+i)] = self.share_aborted[i]
+    
+    
     for i in range(1,15):
         i_above = self.female_z > 0
         i_below = self.female_z < 0
@@ -254,7 +261,7 @@ def compute_moments(self):
         except:
             moments['divorced ratio above over below at {}'.format(21+i)] = 1.0
             
-
+    
 
     pick = age_pick & in_sample
 
@@ -473,7 +480,10 @@ def compute_moments(self):
         moments['spouse log coef 1 year after'] = 0.0
 
     moments['relative income at 30 if childless'] = np.mean(self.female_earnings[pick_top,9])/np.mean(self.female_earnings[pick_bottom,9])
-
+    
+    
+    
+    moments['unplanned pregnancies aborted'] = self.n_aborted.sum() / (1e-4 + self.n_aborted.sum() + self.n_kept.sum())
 
     moments['abortion ratio'] = 1000*(self.aborted.sum())/(self.new_child + self.aborted).sum()
     moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)
@@ -504,6 +514,13 @@ def compute_moments(self):
 
     moments['value function: female, single, no assets'] = self.Mlist[0].V[0]['Female, single']['V'][0,:]
     moments['value function: male, single, no assets'] = self.Mlist[0].V[0]['Male, single']['V'][0,:]
+    moments['value function: couple, no children, no assets'] = self.Mlist[0].V[0]['Couple, no children']['V'][0,:,5]
+
+    moments['value function: female, single, all assets'] = self.Mlist[0].V[0]['Female, single']['V'][:,:]
+    moments['value function: male, single, all assets'] = self.Mlist[0].V[0]['Male, single']['V'][:,:]
+    moments['value function: couple, no children, all assets'] = self.Mlist[0].V[0]['Couple, no children']['V'][:,:,5]
+
+
 
     if self.verbose:
         print('Coefficients are {} at 25 and {} at 30'.format(moments['log earnings coef at 25'],moments['log earnings coef at 30']))
