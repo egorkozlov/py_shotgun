@@ -15,7 +15,7 @@ x, targ_mode = get_point(high_e)
 from fit_plot import FitPlots
 
 
-what = 'no child support'
+what = 'no skills depreciation'
 
 fp = FitPlots(targ_mode=targ_mode,
                base='col {}.pkl'.format(what),

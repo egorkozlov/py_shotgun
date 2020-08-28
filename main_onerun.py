@@ -33,7 +33,6 @@ def main():
     high_e = True
     x, targ_mode = get_point(high_e)
 
-
     tar = target_values(targ_mode)
 
 
@@ -44,6 +43,8 @@ def main():
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=2)
+
+
 
     mdl[0].time_statistics()
 
@@ -65,10 +66,11 @@ def main():
     fp = FitPlots(targ_mode=targ_mode,
                    compare=None,
                    base=this_name+'.pkl',
-                   compare_name='Data',
+                   compare_name='data',
                    base_name='baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
-
+    
+    mdl[0].mar_graphs()
     '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,

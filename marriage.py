@@ -10,6 +10,8 @@ import numpy as onp
 from gridvec import VecOnGrid
 from numba import jit, prange
 
+from marriage_gpu import v_mar_gpu
+
 
 
 from platform import system
@@ -42,7 +44,8 @@ def co(x):
         return cp.asarray(x)
 
 
-def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
+def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
+                                                      return_insides=False):
     
     # this builds matrix for all matches specified by grid positions
     # iassets_couple (na X nmatches) and iexo_couple (nmatches)
@@ -98,14 +101,18 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     else:
         it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     
-    from marriage_gpu import v_mar_gpu
     
     if nogpu:
         v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     else:
         v_f, v_m, agree, nbs, itheta = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     
-    return {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
+    out = {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
+    
+    if return_insides: out.update({'insides':(V_f_yes,V_m_yes,V_f_no,V_m_no)})
+    
+    return out
+        
 
 @jit(nopython=True,parallel=upar)
 def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):

@@ -108,8 +108,7 @@ class FitPlots(object):
             self.plot_single_moms_new()
         except:
             print('failed to plot single moms (new)')
-            
-        #self.plot_welfare()
+                    
         
         try:
             self.plot_welfare()
@@ -508,17 +507,19 @@ class FitPlots(object):
         
         moments,targets,setup = self.moments,self.targets,self.setup
         
-        tval = np.arange(23,36)
+        tval = np.arange(25,36)
         
         
         
         all_sm_model = np.zeros_like(tval,dtype=np.float64)
         rel_sm_model = np.zeros_like(tval,dtype=np.float64)
+        abortions_model = np.zeros_like(tval,dtype=np.float64)
         
         
         
         all_sm_data = np.zeros_like(tval,dtype=np.float64)
         rel_sm_data = np.zeros_like(tval,dtype=np.float64)
+        abortions_data = np.zeros_like(tval,dtype=np.float64)
         
         
         for i,t in enumerate(tval):
@@ -528,6 +529,12 @@ class FitPlots(object):
             
             rel_sm_model[i] = moments['single mothers among mothers at {}'.format(t)]
             rel_sm_data[i] = targets['single mothers among mothers at {}'.format(t)][0]
+            
+            all_sm_model[i] = moments['single mothers in total at {}'.format(t)]
+            all_sm_data[i] = targets['single mothers in total at {}'.format(t)][0]
+            
+            abortions_model[i] = moments['aborted unplanned pregnancies at {}'.format(t)]
+            abortions_data[i] = targets['aborted unplanned pregnancies at {}'.format(t)][0]
             
             
         
@@ -542,15 +549,30 @@ class FitPlots(object):
         ax.grid(True)
         
         
+        
+        
         fig, ax = plt.subplots()
-        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name)
-        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name)
+        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_model)))
+        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_data)))
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
-        ax.set_title('Single mothers among mothers')
+        ax.set_title('Single mothers among mothers + abortions')
         ax.legend()
         ax.set_xticks(tval)
         ax.grid(True) 
+        plt.savefig('sm_among_mothers.pdf')
+
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,abortions_model,'o-b',label=self.base_name)
+        ax.plot(tval,abortions_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Share of abortions')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        
         
     
     def plot_welfare(self,a_mult=35):
@@ -590,7 +612,7 @@ class FitPlots(object):
         plt.title('Welfare differences: female, 21, no kids, no assets') 
         plt.xlabel('female productivity')
         plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        
+        plt.savefig('welfare_female.pdf')
         
         fig, ax = plt.subplots()        
         plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
@@ -601,7 +623,7 @@ class FitPlots(object):
         plt.title('Welfare differences: male, 23, no kids, no assets') 
         plt.xlabel('male productivity')
         plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        
+        plt.savefig('welfare_male.pdf')
         
         # couples 
         # transofrm the state
@@ -689,6 +711,9 @@ def v_compare(agrid,v_base,v_compare,*,a_mult):
     
     aall = list()
     
+    amin = agrid.min()
+    amax = agrid.max()
+    
     for (v0, v1), name in zip([(v_base, v_compare),(v_compare, v_base)],
                                 names):
         
@@ -709,6 +734,8 @@ def v_compare(agrid,v_base,v_compare,*,a_mult):
                 a = 0.0
             else:
                 a = agrid[j]*(1-wn) + agrid[j+1]*wn
+                
+            a = np.clip(a,amin,amax)
             
             alist.append(a_mult*a)
             
