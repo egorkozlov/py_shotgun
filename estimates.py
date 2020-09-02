@@ -16,7 +16,7 @@ def get_point(high_e):
         targ_mode = 'high education'
         
     else:
-        x = {'sigma_psi': 0.8783208275619998, 'sigma_psi_init': 4.841913371090404, 'pmeet_21': 0.4429662745957216, 'pmeet_30': 0.09976862644045448, 'pmeet_40': 0.6556590675095522, 'preg_21': 0.09259183950519333, 'preg_28': 0.07428802631882996, 'preg_35': -0.049794628003451157, 'u_shift_mar': 1.7959460915784782, 'util_alp': 0.4593118057932805, 'util_kap': 1.1639238152564353, 'util_qbar': 0.6935697519247619, 'disutil_marry_sm_mal': 79.68148741525432, 'disutil_shotgun': 5.315001707974356, 'abortion_costs': 5.516265535524452, 'p_abortion_access': 0.18163829572926798, 'u_lost_divorce': 1.184990222239299,
+        x = {'pmeet_21': 0.45883585688212, 'pmeet_30': 0.18734805268478968, 'pmeet_40': 0.9999913332916613, 'preg_21': 0.017231341009001214, 'preg_28': 0.182654503841859, 'preg_35': 0.2978696650103295, 'util_qbar': 0.6406286963250206, 'disutil_marry_sm_mal': 19.855662599071852, 'disutil_shotgun': 3.024338048927361, 'abortion_costs': 5.761894369635252, 'p_abortion_access': 0.5081043774395521, 'u_lost_divorce': 2.222141109928797, 'sigma_psi': 0.2798538779149558, 'sigma_psi_init': 1.6916827480353398, 'u_shift_mar': 1.1207829780316174, 'util_alp': 0.33532441265560753, 'util_kap': 0.8617581929517057, 'couple_rts': 2.80540188195949,
              'high education': False}
         
         targ_mode = 'low education'
