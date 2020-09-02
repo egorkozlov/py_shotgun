@@ -42,6 +42,23 @@ def interp_np(grid,xnew,return_wnext=True,trim=False):
     
     return j, (wnext if return_wnext else 1-wnext) 
 
+try:
+    import cupy as cp
+except:
+    pass
+
+def interp_cp(grid,xnew,return_wnext=True,trim=False):    
+    # this finds grid positions and weights for performing linear interpolation
+    # this implementation uses numpy
+    np = cp
+    
+    if trim: xnew = np.minimum(grid[-1], np.maximum(grid[0],xnew) )
+    
+    j = np.minimum( np.searchsorted(grid,xnew,side='left')-1, grid.size-2 )
+    wnext = (xnew - grid[j])/(grid[j+1] - grid[j])
+    
+    return j, (wnext if return_wnext else 1-wnext)
+
 
 def interp_tu(grid,xnew,return_wnext=True,trim=True):
     # this is based on trans_unif.py code

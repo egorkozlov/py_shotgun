@@ -6,9 +6,11 @@ Created on Fri Jul  3 10:59:28 2020
 @author: egorkozlov
 """
 
-import numpy as np
+import numpy as onp
 from gridvec import VecOnGrid
 from numba import jit, prange
+
+from marriage_gpu import v_mar_gpu
 
 
 
@@ -21,6 +23,7 @@ if system() != 'Darwin':
         del(g)
         ugpu = True
         upar = True
+        import cupy as cp
     except:
         print('no gpu mode')
         ugpu = False
@@ -29,29 +32,53 @@ else:
     ugpu = False
     upar = False
 
+nogpu = not ugpu
+np = onp if nogpu else cp
 
-def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
+
+
+def co(x):
+    if nogpu:
+        return x
+    else:
+        return cp.asarray(x)
+
+
+def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
+                                                      return_insides=False):
     
     # this builds matrix for all matches specified by grid positions
     # iassets_couple (na X nmatches) and iexo_couple (nmatches)
     
-    iexo, izf, izm, ipsi = setup.all_indices(t,iexo_couple)
+    iexo, izf, izm, ipsi = [co(x) for x in setup.all_indices(t,iexo_couple)]
     
     vals = pick_values(setup,V,match_type=match_type)
     V_fem, V_mal = vals['V_fem'], vals['V_mal']
     
+    agrid_c = setup.agrid_c if nogpu else setup.cupy.agrid_c
+    agrid_s = setup.agrid_s if nogpu else setup.cupy.agrid_s
+    
     # obtain partner's value
-    assets_partner = np.clip(setup.agrid_c[iassets_couple] - setup.agrid_s[:,None],0.0,setup.agrid_s.max())
+    
+    assets_partner = np.clip(agrid_c[iassets_couple] - agrid_s[:,None],0.0,agrid_s.max())
     # this can be fastened by going over repeated values of ipsi
-    v_assets_partner = VecOnGrid(setup.agrid_s,assets_partner)
+    v_assets_partner = VecOnGrid(agrid_s,assets_partner)
     i, wnext, wthis = v_assets_partner.i, v_assets_partner.wnext, v_assets_partner.wthis
     
-    if female:
-        V_f_no = V_fem[:,izf]
-        V_m_no = V_mal[i,izm[None,:]]*wthis + V_mal[i+1,izm[None,:]]*wnext
-    else:
-        V_f_no = V_fem[i,izf[None,:]]*wthis + V_fem[i+1,izf[None,:]]*wnext
-        V_m_no = V_mal[:,izm]
+    
+    if type(V_fem) is tuple:
+        # in this case 
+        assert match_type=='Unplanned pregnancy'
+        V_f_no, V_m_no, abortion_decision = get_upp_disagreement_values(setup,t,V_fem,V_mal,izf,izm,female,v_assets_partner)
+    else:        
+        if female:
+            V_f_no = V_fem[:,izf]
+            V_m_no = V_mal[i,izm[None,:]]*wthis + V_mal[i+1,izm[None,:]]*wnext
+        else:
+            V_f_no = V_fem[i,izf[None,:]]*wthis + V_fem[i+1,izf[None,:]]*wnext
+            V_m_no = V_mal[:,izm]
+            
+    
         
     V_fem_mar, V_mal_mar = vals['V_fem_mar'], vals['V_mal_mar']
     
@@ -65,21 +92,27 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female):
     
     # fill abortion decisions 
     if match_type == 'Unplanned pregnancy' and female:
-        do_abortion = vals['i_abortion'][:,izf]
+        do_abortion = abortion_decision #vals['i_abortion'][:,izf]
     else:
         do_abortion = np.zeros(V_f_no.shape,dtype=np.bool_)
     
+    if nogpu:
+        it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
+    else:
+        it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     
-    it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     
-    from marriage_gpu import v_mar_gpu
-    
-    if not ugpu:
+    if nogpu:
         v_f, v_m, agree, nbs, itheta = get_marriage_values(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     else:
         v_f, v_m, agree, nbs, itheta = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     
-    return {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
+    out = {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
+    
+    if return_insides: out.update({'insides':(V_f_yes,V_m_yes,V_f_no,V_m_no)})
+    
+    return out
+        
 
 @jit(nopython=True,parallel=upar)
 def get_marriage_values(vfy,vmy,vfn,vmn,ithtgrid,wnthtgrid):
@@ -184,12 +217,13 @@ def pick_values(setup,V,*,match_type):
         
         i_abortion = (V['Female, single']['V'] - u_costs) >= V['Female and child']['V']
         
-        V_fem = (1-p_access)*V['Female and child']['V'] + \
-                   p_access *(np.maximum( V['Female, single']['V'] - u_costs,V['Female and child']['V'] )) \
-                   - setup.pars['disutil_shotgun']
+          
+        V_fem = (V['Female and child']['V'] - setup.pars['disutil_shotgun'],
+                 V['Female, single']['V'] - u_costs- setup.pars['disutil_shotgun'],
+                 i_abortion, p_access)
                    
         V_mal = V['Male, single']['V'] \
-                - setup.pars['disutil_shotgun'] # child support enforcement here 
+                - setup.pars['disutil_shotgun']
                 
         V_fem_mar = V['Couple and child']['VF']
         V_mal_mar = V['Couple and child']['VM']
@@ -213,5 +247,69 @@ def pick_values(setup,V,*,match_type):
     else:
         raise KeyError('unknown match type')
     
+
+def get_upp_disagreement_values(setup,t,V_fem,V_mal,izf,izm,female,v_assets_partner):
+    # this interacts abortion decisions with child support
+    # timing: first the match is realized, then the abortion decision is made,
+    # finally child support randomness is realized.
+    
+    # solving from backwards:
+    
+    # expected value of disagreement if no abortion is done is subject to child 
+    # support realization
+    cst = setup.child_support_transitions[t]
+    p_awarded = setup.pars['child_support_awarded_nm']
+    
+    
+    (Vfc, Vfa, i_abortion, p_access) = V_fem
+    Vmc = V_mal
+    
+    
+    # no child support --- just get izf, izm
+    
+    izf_t_cs = co(cst['i_this_fem'])[izf,izm]
+    wzf_t_cs = co(cst['w_this_fem'])[izf,izm]
+    wzf_tp_cs = 1-wzf_t_cs
+    
+    izm_t_cs = co(cst['i_this_mal'])[izm]
+    wzm_t_cs = co(cst['w_this_mal'])[izm]
+    wzm_tp_cs = 1-wzm_t_cs
+    
+    
+    i, wnext, wthis = v_assets_partner.i, v_assets_partner.wnext, v_assets_partner.wthis
+    
+    
+    if female:
+        V_fem_cs = Vfc[:,izf_t_cs]*wzf_t_cs + Vfc[:,izf_t_cs+1]*wzf_tp_cs
+        V_mal_cs = (Vmc[i,  izm_t_cs]*wzm_t_cs + Vmc[i,  izm_t_cs+1]*wzm_tp_cs)*wthis + \
+                   (Vmc[i+1,izm_t_cs]*wzm_t_cs + Vmc[i+1,izm_t_cs+1]*wzm_tp_cs)*wnext
+        
+        V_fem_nocs = Vfc[:,izf]
+        V_mal_nocs = Vmc[i,izm]*wthis + Vmc[i+1,izm]*wnext
+        
+        
+        V_fem_abortion = Vfa[:,izf]
+        V_mal_abortion = V_mal[i,izm]*wthis + V_mal[i+1,izm]*wnext
+    else:
+        V_mal_cs = Vmc[:,izm_t_cs]*wzm_t_cs + Vmc[:,izm_t_cs+1]*wzm_tp_cs
+        V_fem_cs = (Vfc[i,  izf_t_cs]*wzf_t_cs + Vfc[i,  izf_t_cs+1]*wzf_tp_cs)*wthis + \
+                   (Vfc[i+1,izf_t_cs]*wzf_t_cs + Vfc[i+1,izf_t_cs+1]*wzf_tp_cs)*wnext
+        
+        V_fem_nocs = Vfc[i,izf]*wthis + Vfc[i+1,izf]*wnext
+        V_mal_nocs = Vmc[:,izm]
+        
+        V_fem_abortion = Vfa[i,izf]*wthis + Vfa[i+1,izf]*wnext
+        V_mal_abortion = V_mal[:,izm]
     
         
+    V_fem_birth = p_awarded*V_fem_cs + (1-p_awarded)*V_fem_nocs
+    V_mal_birth = p_awarded*V_mal_cs + (1-p_awarded)*V_mal_nocs
+    
+    i_abortion = V_fem_abortion > V_fem_birth # if abortion is done subject to access
+    
+    V_fem = (1-p_access)*V_fem_birth + p_access*(V_fem_birth*(~i_abortion) + V_fem_abortion*(i_abortion))
+    V_mal = (1-p_access)*V_mal_birth + p_access*(V_mal_birth*(~i_abortion) + V_mal_abortion*(i_abortion))
+    
+    
+    return V_fem, V_mal, i_abortion
+    

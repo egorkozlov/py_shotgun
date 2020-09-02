@@ -23,15 +23,15 @@ class FitPlots(object):
                  base_name='Model',
                  compare_name='Data',
                  graphs_title_add=None,
-                 moments_aux=None):
-        
+                 moments_aux=None,
+                 noplot=False):
         
         
         if setup is None: self.setup = ModelSetup()
         
         
         if type(base) is str:
-            self.moments = filer(base,0,0)
+            self.moments = filer(base,0,0,repeat=False)
         else:
             self.moments = base
             
@@ -49,19 +49,23 @@ class FitPlots(object):
         
             
         if type(compare) is str:
-            targ_load = filer(compare,0,0)
+            targ_load = filer(compare,0,0,repeat=False)
             # emulating targets
             self.targets = {key: (targ_load[key],0.0) for key in targ_load}
         else:
             self.targets = all_targets(targ_mode)
         
-        
-        
         try:
             self.print_things()
         except:
             print('failed to print')
+            
+        self.moments_aux = moments_aux
         
+        if not noplot: self.plot()
+    
+    def plot(self):
+        '''
         try:
             self.plot_estimates()
         except:
@@ -71,7 +75,8 @@ class FitPlots(object):
             self.plot_hazards()
         except:
             print('failed to plot hazards')
-            
+        '''
+        
         try:
             self.plot_cumulative()
         except:
@@ -87,17 +92,35 @@ class FitPlots(object):
         except:
             print('failed to plot kfmf')
             
-        if moments_aux is not None: 
+        if self.moments_aux is not None: 
             try:
                 self.plot_men()
             except:
                 print('failed to plot men')
         
+        try:
+            self.plot_single_moms()
+        except:
+            print('failed to plot single moms')
+            
+            
+        try:
+            self.plot_single_moms_new()
+        except:
+            print('failed to plot single moms (new)')
+                    
+        
+        try:
+            self.plot_welfare()
+        except:
+            print('failed to plot welfare')
         
         try:
             self.plot_kfmf_ref()
         except:
             print('failed to plot ref')
+            
+        plt.show()
         
     
     def print_things(self):
@@ -414,8 +437,227 @@ class FitPlots(object):
         ax.set_xticks(yval)
         plt.savefig('div_kfmf_ref.pdf')
         
+    
+    def plot_single_moms(self):
+        # graph 1: hazard of any marriage
+        
+        moments,targets,setup = self.moments,self.targets,self.setup
+        
+        tval = np.arange(23,36)
         
         
+        nm_sm_model = np.zeros_like(tval,dtype=np.float64)
+        div_sm_model = np.zeros_like(tval,dtype=np.float64)
+        all_sm_model = np.zeros_like(tval,dtype=np.float64)
+        
+        nm_sm_data = np.zeros_like(tval,dtype=np.float64)
+        div_sm_data = np.zeros_like(tval,dtype=np.float64)
+        all_sm_data = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        for i,t in enumerate(tval):
+            
+            nm_sm_model[i] = moments['never married and kids in population at {}'.format(t)]
+            div_sm_model[i] = moments['divorced and kids in population at {}'.format(t)]
+            all_sm_model[i] = nm_sm_model[i] + div_sm_model[i]
+            
+            nm_sm_data[i] = targets['never married and kids in population at {}'.format(t)][0]
+            div_sm_data[i] = targets['divorced and kids in population at {}'.format(t)][0]
+            all_sm_data[i] = nm_sm_data[i] + div_sm_data[i]
+            
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*all_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*all_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers all.pdf')
+        
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*div_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*div_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Divorced mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers div.pdf')
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*nm_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*nm_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Never married mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        plt.savefig('single mothers nm.pdf')
+        
+        
+        
+    def plot_single_moms_new(self):
+        # graph 1: hazard of any marriage
+        
+        moments,targets,setup = self.moments,self.targets,self.setup
+        
+        tval = np.arange(25,36)
+        
+        
+        
+        all_sm_model = np.zeros_like(tval,dtype=np.float64)
+        rel_sm_model = np.zeros_like(tval,dtype=np.float64)
+        abortions_model = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        
+        all_sm_data = np.zeros_like(tval,dtype=np.float64)
+        rel_sm_data = np.zeros_like(tval,dtype=np.float64)
+        abortions_data = np.zeros_like(tval,dtype=np.float64)
+        
+        
+        for i,t in enumerate(tval):
+            
+            all_sm_model[i] = moments['single mothers in total at {}'.format(t)]
+            all_sm_data[i] = targets['single mothers in total at {}'.format(t)][0]
+            
+            rel_sm_model[i] = moments['single mothers among mothers at {}'.format(t)]
+            rel_sm_data[i] = targets['single mothers among mothers at {}'.format(t)][0]
+            
+            all_sm_model[i] = moments['single mothers in total at {}'.format(t)]
+            all_sm_data[i] = targets['single mothers in total at {}'.format(t)][0]
+            
+            abortions_model[i] = moments['aborted unplanned pregnancies at {}'.format(t)]
+            abortions_data[i] = targets['aborted unplanned pregnancies at {}'.format(t)][0]
+            
+            
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*all_sm_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*all_sm_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        
+        
+        
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_model)))
+        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_data)))
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Single mothers among mothers + abortions')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True) 
+        plt.savefig('sm_among_mothers.pdf')
+
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,abortions_model,'o-b',label=self.base_name)
+        ax.plot(tval,abortions_data,'o-k',label=self.compare_name)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Share of abortions')
+        ax.legend()
+        ax.set_xticks(tval)
+        ax.grid(True)
+        
+        
+    
+    def plot_welfare(self,a_mult=35):
+        # singles
+        z_fem = self.setup.exogrid.zf_t[0]
+        w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
+        
+        z_mal = self.setup.exogrid.zm_t[0]
+        w_mal = np.exp(z_mal + self.setup.pars['f_wage_trend'][0])
+        
+        moments,targets = self.moments, self.targets
+        
+        
+        
+        # males and females
+        a_female = \
+                  v_compare(self.setup.agrid_s,
+                            moments['value function: female, single, all assets'],
+                            targets['value function: female, single, all assets'][0],
+                            a_mult=a_mult)
+        
+        
+        a_male = \
+                  v_compare(self.setup.agrid_s,
+                  moments['value function: male, single, all assets'],
+                  targets['value function: male, single, all assets'][0],
+                  a_mult=a_mult)
+                  
+        
+        
+        fig, ax = plt.subplots()
+        plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        ax.grid(True)
+        xticks = z_fem
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare differences: female, 21, no kids, no assets') 
+        plt.xlabel('female productivity')
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+        plt.savefig('welfare_female.pdf')
+        
+        fig, ax = plt.subplots()        
+        plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        ax.grid(True)
+        xticks = z_mal
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare differences: male, 23, no kids, no assets') 
+        plt.xlabel('male productivity')
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+        plt.savefig('welfare_male.pdf')
+        
+        # couples 
+        # transofrm the state
+        ipsi = np.arange(self.setup.pars['n_psi'])
+        imal = 2*np.ones_like(ipsi)
+        ifem = 3*np.ones_like(ipsi)
+        
+        iexo, _, _, _ = self.setup.all_indices(0,(ifem,imal,ipsi))
+        
+        
+        a_couple = \
+                  v_compare(self.setup.agrid_c,
+                            moments['value function: couple, no children, all assets'][:,iexo],
+                            targets['value function: couple, no children, all assets'][0][:,iexo],
+                            a_mult=a_mult)
+        
+        
+        
+        psi = self.setup.exogrid.psi_t[0]
+        
+        
+        fig, ax = plt.subplots()
+        #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
+        #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
+        plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        ax.grid(True)
+        xticks = np.linspace(psi.min(),psi.max(),7)
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
+        plt.xlabel('love shock')
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)')  
+        
+    
         
     def plot_men(self):
         
@@ -454,5 +696,52 @@ class FitPlots(object):
             plt.xlabel('age')
             plt.ylabel('ratio (%)')
             plt.savefig('{}.pdf'.format(fname))
+    
+    
+    
+from interp_np import interp
+def v_compare(agrid,v_base,v_compare,*,a_mult):
+    
+    ia0 = 0
+    
+    names = ['extra assets in base to reach 0 in compare',
+             'extra assets in compare to reach 0 in base']
+    
+    i = 0
+    
+    aall = list()
+    
+    amin = agrid.min()
+    amax = agrid.max()
+    
+    for (v0, v1), name in zip([(v_base, v_compare),(v_compare, v_base)],
+                                names):
         
+        print('')
+        print(name)
+        print('')
+        print('v0 is larger in {} cases'.format(np.sum(v0>v1)))
+        print('v0 is smaller in {} cases'.format(np.sum(v0<v1)))
+        
+        alist = list()
+        
+        for iz in range(v0.shape[1]):
+            
+            
+            j, wn = interp(v0[:,iz],v1[ia0,iz],return_wnext=True)
+            
+            if j <= -1:
+                a = 0.0
+            else:
+                a = agrid[j]*(1-wn) + agrid[j+1]*wn
+                
+            a = np.clip(a,amin,amax)
+            
+            alist.append(a_mult*a)
+            
+        
+        i += 1
+        
+        aall.append(np.array(alist))
+    return aall[1] - aall[0]
     

@@ -6,20 +6,37 @@ Created on Mon Oct 28 20:13:57 2019
 @author: egorkozlov
 """
 
-from interp_np import interp            
+from interp_np import interp_np, interp_cp
 from aux_routines import num_to_nparray
 import numpy as np
 
+try:
+    import cupy as cp
+except:
+    pass
+
 # this is griddend linear interpolant that uses interpolation routines from
-# interp_np. It can be applied to arrays specifying values of function to get
+# interp_self.np. It can be applied to arrays specifying values of function to get
 # their interpolated values along an arbitrary dimesnion (see method apply)
 
 # TODO: this should have nan-like values and throw errors
 class VecOnGrid(object):
-    def __init__(self,grid,values,iwn=None,trim=True,fix_w=True):
+    def __init__(self,grid,values,iwn=None,trim=True,fix_w=True,force_cupy=False):
         # this assumes grid is strictly increasing o/w unpredictable
+        try:
+            self.np = cp.get_array_module(values)
+        except:
+            self.np = np
+            
+        if force_cupy: self.np = cp        
+            
+        interp = interp_np if (self.np == np) else interp_cp
+        
+        
+        values = self.np.array(values,copy=False) 
+        grid = self.np.array(grid,copy=False)  
         self.val = values
-        self.val_trimmed = np.clip(values,grid[0],grid[-1])
+        self.val_trimmed = self.np.clip(values,grid[0],grid[-1])
         self.grid = grid
         
         if iwn is None:
@@ -28,17 +45,17 @@ class VecOnGrid(object):
             self.i, self.wnext = iwn
         
         
-        if np.any(self.i<0):
+        if self.np.any(self.i<0):
             # manual correction to avoid -1
             ichange = (self.i<0)
-            assert np.allclose(self.wnext[ichange],1.0)
+            assert self.np.allclose(self.wnext[ichange],1.0)
             self.i[ichange] = 0
             self.wnext[ichange] = 0.0
             
             
         if fix_w:
-            i_fix_w = (np.isclose(self.wnext,1.0)) & (self.i < (self.grid.size-2))
-            if np.any(i_fix_w):
+            i_fix_w = (self.np.isclose(self.wnext,1.0)) & (self.i < (self.grid.size-2))
+            if self.np.any(i_fix_w):
                 # manual correction to avoid -1
                 self.i[i_fix_w] = self.i[i_fix_w] + 1
                 self.wnext[i_fix_w] = 0.0
@@ -48,7 +65,7 @@ class VecOnGrid(object):
         
         self.n = self.i.size
         
-        self.one = np.array(1).astype(grid.dtype) # sorry
+        self.one = self.np.array(1).astype(grid.dtype) # sorry
         
         self.wthis = self.one-self.wnext
         self.trim = trim
@@ -58,7 +75,7 @@ class VecOnGrid(object):
         
         
         
-        assert np.allclose(self.val_trimmed,self.apply_crude(grid))
+        assert self.np.allclose(self.val_trimmed,self.apply_crude(grid))
         
     
     def apply_crude(self,xin):
@@ -131,8 +148,9 @@ class VecOnGrid(object):
         
         if take is not None:
             
+            
             dimextra = [t[0] for t in take]
-            iextra = [t[1] for t in take]
+            iextra = [self.np.array(t[1]) for t in take]
             
             for d, i in zip(dimextra,iextra):
                 
@@ -160,7 +178,7 @@ class VecOnGrid(object):
         # TODO: check if this hurts dimensionality
         # FIXME: yes it does
         
-        return (np.atleast_1d(out.astype(typein,copy=False).squeeze()))
+        return (self.np.atleast_1d(out.astype(typein,copy=False).squeeze()))
     
     
     def apply_2dim(self,xin,*,apply_first,axis_first,axis_this=0,take=None,pick=None,reshape_i=True):
@@ -204,7 +222,7 @@ class VecOnGrid(object):
         assert ( where.size == values.size ) or (values.size == 1)
         
         if values.size == 1:
-            values = values*np.ones(where.shape)
+            values = values*self.np.ones(where.shape)
         
         self.val[where] = values
         self.i[where], self.wnext[where] = \
@@ -219,7 +237,7 @@ class VecOnGrid(object):
         
         if shocks is None:
             print('Warning: fix the seed please')
-            shocks = np.random.random_sample(self.val.shape)
+            shocks = self.np.random.random_sample(self.val.shape)
             
         out = self.i
         out[shocks>self.wthis] += 1

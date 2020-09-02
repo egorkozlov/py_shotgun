@@ -6,14 +6,21 @@ Created on Thu May 28 11:06:41 2020
 @author: egorkozlov
 """
 
+from estimates import get_point
 
+high_e = True
+x, targ_mode = get_point(high_e)
 
 
 from fit_plot import FitPlots
-fp = FitPlots(targ_mode='low education',
-               compare='high school baseline.pkl',
-               base='high school 2O percent child support.pkl',
-               base_name='20 percent child support',
-               compare_name='Baseline',
-               #graphs_title_add="Experiment: Child Support for Divorced",
+
+
+what = 'no skills depreciation'
+
+fp = FitPlots(targ_mode=targ_mode,
+               base='col {}.pkl'.format(what),
+               compare='col baseline.pkl',
+               base_name=what,
+               compare_name='baseline',
+               #graphs_title_add="Experiment: Removing Subsistence Constraint",
                moments_aux=None)#,moments_aux=moments_aux)

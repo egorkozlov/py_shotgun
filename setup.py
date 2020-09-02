@@ -18,16 +18,27 @@ from nopar_assets_dist import get_estimates
 
 from scipy import sparse
 
+try:
+    import cupy as cp
+    q = cp.array([1,2,3])
+    assert cp.allclose(q.mean(),2.0)
+    print('using cupy!')
+    cupy = True
+except:
+    print('using cpu!')
+    cupy = False
+
 
 
 class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
+        
         p = dict()       
         T = 55
         Tret = 45 # first period when the agent is retired
         Tfert = 18 # first peroid when infertile
         Tdiv = 44 # first period when cannot divorce / renegotiate
-        Tmeet = 25 # first period when stop meeting partners
+        Tmeet = 43 # first period when stop meeting partners
         Tinc = 25 # first period where stop tracking income process and assume it to be fixed
         p['T'] = T
         p['Tret'] = Tret
@@ -35,7 +46,7 @@ class ModelSetup(object):
         p['Tsim'] = T
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
-        p['sigma_psi_mult'] = 0.28
+        p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
         p['R_t'] = [1.025]*T
         p['n_psi'] = 15
@@ -54,8 +65,8 @@ class ModelSetup(object):
         
         
         p['pmeet_21'] = 0.1
-        p['pmeet_28'] = 0.2
-        p['pmeet_35'] = 0.1
+        p['pmeet_30'] = 0.2
+        p['pmeet_40'] = 0.1
         
         p['m_zf'] = 0.9
         p['m_zf0'] = 1.0
@@ -79,22 +90,25 @@ class ModelSetup(object):
         p['u_shift_coh'] = 0.0
         p['sm_shift'] = 0.0
         
-        p['disutil_marry_sm_fem_coef'] = 0.0
-        p['disutil_marry_sm_mal_coef'] = 10.0
-        p['disutil_shotgun_coef'] = 2.0
+        p['disutil_marry_sm_fem'] = 0.0
+        p['disutil_marry_sm_mal'] = 10.0
+        p['disutil_shotgun'] = 2.0
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
         
         p['taste_shock_mult'] = 1.0
         
         p['p_abortion_access'] = 0.5
-        p['abortion_costs_mult'] = 10.0
+        p['abortion_costs'] = 10.0
         
-        p['u_lost_divorce_mult'] = 0.0 
+        p['u_lost_divorce'] = 0.0 
        
         
         p['child_a_cost'] = 0.0
-        p['child_support_share'] = 0.0    
+        
+        p['child_support_share'] = 0.2  
+        p['child_support_awarded_nm'] = 0.284
+        p['child_support_awarded_div'] = 0.461
             
         
         
@@ -105,7 +119,6 @@ class ModelSetup(object):
         p['util_qbar'] = 0.0
         
         p['util_out_lf'] = 0.0
-        
         
         
         
@@ -125,17 +138,18 @@ class ModelSetup(object):
             p['sig_zm']    = p['income_sd_mult']*0.16138593
             p['sig_zm_0']  = p['income_sd_mult']*0.41966813 
             
-            # FIXME: I need guidance how to pin these down
             p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.19571624
             p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.43351219
         else:
-            p['sig_zm']    = p['income_sd_mult']*0.2033373
-            p['sig_zm_0']  = p['income_sd_mult']*0.40317171
+            p['sig_zm']    = p['income_sd_mult']*0.17195085
+            p['sig_zm_0']  = p['income_sd_mult']*0.2268650
             
             
-            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.14586778
-            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.62761052
+            p['sig_zf']    = p['income_sd_mult']*p['m_zf']*0.1762148
+            p['sig_zf_0']  = p['income_sd_mult']*p['m_zf0']*0.1762148
             
+        
+        p['sm_init'] = (0.02 if p['high education'] else 0.25) if p['any kids'] else 0.0 # initial share of single moms
         
         
         # college
@@ -173,38 +187,36 @@ class ModelSetup(object):
             
         else:
         # no college
-        
-        
-        
-        
+            m_trend_data = [0.0,0.03824801,.13410532,.1663402,.18535393,.20804419,.22880115,.23963687,.26544877,.27445022,.28828461,.29908889,.3242355,.34399191,.35703786,.36160155,.37354454,.37365049,.38967079,.39410233,.40492857,.40538787,.42001778,.43326506,.43527713]
+            
+            
+            f_trend_data = [0.0,0.03709545,.07178513,.09427489,.18766845,.20733048,.21432513,.22962527,.24421213,.25502674,.26330492,.26669114,.271962,.2775313,.29847667,.29413686,.30664712,.30294726,.31538057,.31768117,.32177537,.32804634,.32827188,.33866797,.34713842]
+            
+            
+            nm = len(m_trend_data)-1
+            nf = len(f_trend_data)-1
+            
+            t0 = 4
+            gap = 2.5449782 - 2.3597982 # male - female
+            
+            c_female = -f_trend_data[t0]
+            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [-0.2424105 + 0.037659*(min(t+2,30)-5)  
-                                             -0.0015337*((min(t+2,30)-5)**2) 
-                                             + 0.000026*((min(t+2,30)-5)**3)
+                                        [c_male + m_trend_data[min(t,nm)]
                                              for t in range(T)]
                                         )
             p['f_wage_trend'] = np.array(
-                                [-0.3668214 + 
-                                 0.0264887*(min(t,30) - 5)
-                                 -0.0012464*((min(t,30)-5)**2)
-                                 +0.0000251*((min(t,30)-5)**3)
+                                [c_female + f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
+        
+        
         if not p['pay_gap']:
             p['sig_zf'], p['sig_zf_0'] = p['sig_zm'], p['sig_zm_0']
             p['f_wage_trend'] = p['m_wage_trend']
         
-        # derivative parameters
-        p['sigma_psi_init'] = p['sigma_psi_mult']*p['sigma_psi']
-        
-        
-        p['disutil_marry_sm_mal'] = p['disutil_marry_sm_mal_coef']*p['u_shift_mar']
-        p['disutil_marry_sm_fem'] = p['disutil_marry_sm_fem_coef']*p['u_shift_mar']
-        p['disutil_shotgun'] =  p['disutil_shotgun_coef']*p['sigma_psi_init']
-        p['abortion_costs'] = p['abortion_costs_mult']*p['u_shift_mar']
-        p['u_lost_divorce'] = p['u_lost_divorce_mult']*p['sigma_psi_init']
         
         p['preg_az'] =  0.00
         p['preg_azt'] = 0.00
@@ -212,7 +224,7 @@ class ModelSetup(object):
         #Get the probability of meeting, adjusting for year-period
            
         
-        p['taste_shock'] = 0.0*p['taste_shock_mult']*0.0#p['sigma_psi']
+        p['taste_shock'] = 0.0 #*p['taste_shock_mult']*0.0#p['sigma_psi']
         
         p['is fertile'] = [p['any kids']]*Tfert + [False]*(T-Tfert)
         p['can divorce'] = [True]*Tdiv + [False]*(T-Tdiv)        
@@ -221,7 +233,7 @@ class ModelSetup(object):
         
         
         p['pmeet_0'],  p['pmeet_t'], p['pmeet_t2'] = prob_polyfit(
-                    (p['pmeet_21'],0),(p['pmeet_28'],7),(p['pmeet_35'],14),
+                    (p['pmeet_21'],0),(p['pmeet_30'],7),(p['pmeet_40'],14),
                                                                    max_power=2)
         
         p['preg_a0'],  p['preg_at'], p['preg_at2'] = prob_polyfit(
@@ -234,6 +246,8 @@ class ModelSetup(object):
         
         
         p['n_psi_t'] = [p['n_psi']]*T
+        
+        p['psi_clip'] = 2.5*p['sigma_psi_init']
         
         
         self.pars = p
@@ -352,7 +366,8 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
             
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])
@@ -459,8 +474,9 @@ class ModelSetup(object):
         self.child_a_cost_single = np.minimum(self.agrid_s,self.pars['child_a_cost'])
         self.child_a_cost_couple = np.minimum(self.agrid_c,self.pars['child_a_cost'])
         
-        self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
-        self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
+        assert self.pars['child_a_cost']<1e-3, 'not implemented'
+        #self.vagrid_child_single = VecOnGrid(self.agrid_s, self.agrid_s - self.child_a_cost_single)
+        #self.vagrid_child_couple = VecOnGrid(self.agrid_c, self.agrid_c - self.child_a_cost_couple)
         
         
         # construct finer grid for bargaining
@@ -481,7 +497,6 @@ class ModelSetup(object):
         # precomputed object for interpolation
 
             
-        
         
         
 
@@ -508,21 +523,28 @@ class ModelSetup(object):
         # this pre-computes transition matrices for meeting a partner
        
         
+        name_fem_pkl = 'az_dist_fem.pkl' if p['high education'] else 'az_dist_fem_noc.pkl'
+        name_mal_pkl = 'az_dist_mal.pkl' if p['high education'] else 'az_dist_mal_noc.pkl'
+        name_fem_csv = 'income_assets_distribution_male.csv' if p['high education'] else 'ia_male_noc.csv'
+        name_mal_csv = 'income_assets_distribution_female.pkl' if p['high education'] else 'ia_female_noc.csv'
+        # this is not an error, things are switched
+        
         
         try:
-            self.partners_distribution_fem = filer('az_dist_fem.pkl',0,0,repeat=False)
-            self.partners_distribution_mal = filer('az_dist_mal.pkl',0,0,repeat=False)
+            self.partners_distribution_fem = filer(name_fem_pkl,0,0,repeat=False)
+            self.partners_distribution_mal = filer(name_mal_pkl,0,0,repeat=False)
         except:
             print('recreating estimates...')
-            est_fem = get_estimates(fname='income_assets_distribution_male.csv',
+            
+            est_fem = get_estimates(fname=name_fem_csv,
                                     age_start=23,age_stop=42,
                                     zlist=self.exogrid.zm_t[2:])
-            filer('az_dist_fem.pkl',est_fem,True,repeat=False)
+            filer(name_fem_pkl,est_fem,True,repeat=False)
             self.partners_distribution_fem = est_fem
-            est_mal = get_estimates(fname='income_assets_distribution_female.csv',
+            est_mal = get_estimates(fname=name_mal_csv,
                                     age_start=21,age_stop=40,
                                     zlist=self.exogrid.zf_t[0:])
-            filer('az_dist_mal.pkl',est_mal,True,repeat=False)
+            filer(name_mal_pkl,est_mal,True,repeat=False)
             self.partners_distribution_mal = est_mal
             
         self.build_matches()
@@ -555,6 +577,8 @@ class ModelSetup(object):
         self.u_precompute()
         self.unplanned_pregnancy_probability()
         self.compute_taxes()
+        
+        self.cupyfy()
         
         
     
@@ -746,17 +770,18 @@ class ModelSetup(object):
     
     def u_part_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
-        l = self.ls_levels['Couple and child'][il]
-        us = self.ls_ushift['Couple and child'][il]
+        #l = self.ls_levels['Couple and child'][il]
+        #us = self.ls_ushift['Couple and child'][il]
+        l, us = self._get_l_and_us('Couple and child',il)
         upub = self.u_pub(x,l) + ushift + psi
         return self.u(kf*c) + upub + us, self.u(km*c) + upub
     
     def u_couple_k(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         umult = self.u_mult(theta) 
-        l = self.ls_levels['Couple and child'][il]
-        us = theta*self.ls_ushift['Couple and child'][il] 
-        return umult*self.u(c) + self.u_pub(x,l) + us + ushift + psi
-    
+        l, us = self._get_l_and_us('Couple and child',il)
+        tus = theta*us
+        return umult*self.u(c) + self.u_pub(x,l) + tus + ushift + psi
+        
     def u_part_nk(self,c,x,il,theta,ushift,psi): # this returns utility of each partner out of some c
         kf, km = self.c_mult(theta)   
         upub = ushift + psi
@@ -768,10 +793,24 @@ class ModelSetup(object):
     
     def u_single_k(self,c,x,il,ushift):
         umult = 1.0
-        l = self.ls_levels['Female and child'][il]
-        us = self.ls_ushift['Female and child'][il]
+        #l = self.ls_levels['Female and child'][il]
+        #us = self.ls_ushift['Female and child'][il]
+        l, us = self._get_l_and_us('Female and child',il)
         return umult*self.u(c) + self.u_pub(x,l) + us + ushift
     
+    def _get_l_and_us(self,key,il):
+        try:
+            l = self.ls_levels[key][il]
+            us = self.ls_ushift[key][il] 
+        except:
+            l = 0.0*il
+            us = 0.0*il
+            for i, (li, usi) in enumerate(zip(self.ls_levels[key],self.ls_ushift[key])):
+                mask = (il==i)
+                l += mask*li
+                us += mask*usi
+        return l, us
+
     def u_precompute(self):
         
         
@@ -981,6 +1020,37 @@ class ModelSetup(object):
             transitions.append(trans_t)
         
         self.child_support_transitions = transitions
+    
+    def cupyfy(self):
+        # this sends copies of important objects to cupy
+        # only things that are going to be reused are worth storing
+        
+        
+        if not cupy:
+            self.cupy = None
+            return
+        
+        stuff = dict()
+        
+        stuff['theta_orig_on_fine'] = cp.array(self.theta_orig_on_fine,dtype=self.dtype)
+        stuff['thetagrid'] = cp.array(self.thetagrid,dtype=self.dtype)
+        stuff['thetagrid_fine'] = cp.array(self.thetagrid_fine,dtype=self.dtype)
+        stuff['v_thetagrid_fine'] = VecOnGrid(stuff['thetagrid'],stuff['thetagrid_fine'],force_cupy=True) 
+        stuff['agrid_c'] = cp.array(self.agrid_c,dtype=self.dtype)
+        stuff['agrid_s'] = cp.array(self.agrid_s,dtype=self.dtype)
+        stuff['sgrid_c'] = cp.array(self.sgrid_c,dtype=self.dtype)
+        stuff['sgrid_s'] = cp.array(self.sgrid_s,dtype=self.dtype)
+        stuff['vsgrid_c'] = VecOnGrid(self.agrid_c,self.sgrid_c,force_cupy=True)
+        stuff['vsgrid_s'] = VecOnGrid(self.agrid_s,self.sgrid_s,force_cupy=True)
+        stuff['mgrid_c'] = cp.array(self.mgrid_c,dtype=self.dtype)
+        stuff['mgrid_s'] = cp.array(self.mgrid_s,dtype=self.dtype)
+        
+        uu = self.u_precomputed
+        upc = {key : {e: cp.array(uu[key][e]) for e in uu[key]} for key in uu}
+        stuff['u_precomputed'] = upc
+        
+        self.cupy = namedtuple('cupy',stuff.keys())(**stuff)
+        
         
         
         

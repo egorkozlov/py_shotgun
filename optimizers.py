@@ -11,9 +11,12 @@ Both versions are needed as it is not clear whether we'll actually use cuda
 
 
 
-import numpy as np
+import numpy as onp
 from numba import njit, prange, cuda
 from platform import system
+
+np = onp
+
 
 
 
@@ -22,8 +25,10 @@ if system() != 'Darwin':
         #assert False
         g = cuda.device_array((2,5))
         del(g)
+        import cupy as cp
         ugpu = True
         upar = True
+        
     except:
         print('no gpu mode')
         ugpu = False
@@ -32,12 +37,16 @@ else:
     ugpu = False
     upar = True
     
+    
 def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun=lambda x : 0.0*x,
-                              use_gpu=ugpu,dtype=np.float32):
+                              use_gpu=ugpu,dtype=onp.float64):
     
     # This optimizer avoids creating big arrays and uses parallel-CPU on 
     # machines without NUMBA-CUDA codes otherwise
-    
+    if ugpu:
+        np = cp.get_array_module(EV[1])
+    else:
+        np = onp
 
     nls = len(ls)
     
@@ -60,15 +69,20 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun
     if isinstance(EV,tuple):
         assert len(EV) == 2
         vsgrid,EVin = EV
-        EV_by_l = vsgrid.apply_preserve_shape(EVin)
+        try:
+            EV_by_l = vsgrid.apply_preserve_shape(EVin)
+        except:
+            print(type(vsgrid.i))
+            print(type(vsgrid.wnext))
+            print(type(EVin))
+            assert False
+            
         assert EVin.shape[1:] == EV_by_l.shape[1:]
         assert EVin.dtype == EV_by_l.dtype
 
         
     
     ntheta = EV_by_l.shape[-2]
-    ns = sgrid.size
-    nm = mgrid.size
     
     tal = np.take_along_axis
     
@@ -262,9 +276,11 @@ def v_couple_gpu(money,sgrid,EV,mgrid,util,xvals,beta,uadd,use_kernel_pool=False
     
     bEV = beta*EV
     
-    
-    money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (cuda.to_device(np.ascontiguousarray(x)) for x in (money, sgrid, bEV, mgrid, util, xvals))
-    
+    convert = (cp.get_array_module(EV)==np)
+    if convert: 
+        money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (cuda.to_device(np.ascontiguousarray(x)) for x in (money, sgrid, bEV, mgrid, util, xvals))
+    else:
+        money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g = (money, sgrid, bEV, mgrid, util, xvals)
     
     threadsperblock = (8, 16, 8)
     # this is a tunning parameter. 8*16*8=1024 is the number of threads per 
@@ -279,7 +295,12 @@ def v_couple_gpu(money,sgrid,EV,mgrid,util,xvals,beta,uadd,use_kernel_pool=False
     cuda_ker[blockspergrid, threadsperblock](money_g, sgrid_g, bEV_g, mgrid_g, util_g, xvals_g, uadd,
                                                 V_opt_g,i_opt_g,x_opt_g)
     
-    V_opt, i_opt, x_opt = (x.copy_to_host() for x in (V_opt_g,i_opt_g,x_opt_g))
+    
+    if convert: 
+        V_opt, i_opt, x_opt = (x.copy_to_host() for x in (V_opt_g,i_opt_g,x_opt_g))
+    else:
+        V_opt, i_opt, x_opt = (cp.asarray(x) for x in (V_opt_g,i_opt_g,x_opt_g))
+    
     
     s_opt = sgrid[i_opt]
     c_opt = money[:,:,None] - x_opt - s_opt

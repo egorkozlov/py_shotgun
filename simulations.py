@@ -76,7 +76,9 @@ class Agents:
         
         self._shocks_child_support_fem = np.random.random_sample((N,T))
         self._shocks_child_support_mal = np.random.random_sample((N,T))
+        self._shocks_child_support_award = np.random.random_sample((N,T))
         
+        self._shocks_init_sm = np.random.random_sample((N,))
 
         # no randomnes past this line please
         
@@ -117,7 +119,11 @@ class Agents:
         self.k_m = np.zeros((N,T),dtype=np.bool)
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
+        
         self.nmar = np.zeros((N,T),dtype=np.int8)
+        self.n_kept = np.zeros((T,),dtype=np.int8)
+        self.n_aborted = np.zeros((T,),dtype=np.int8)
+        self.share_aborted = np.zeros((T,),dtype=np.float64)
         
         self.ub_hit_single = False
         self.ub_hit_couple = False
@@ -144,11 +150,28 @@ class Agents:
         
         
         self.state = np.zeros((N,T),dtype=np.int8)       
-        self.state[:,0] = self.state_codes[self.single_state]  # everyone starts as female
+        self.state[:,0] = self.state_codes[self.single_state]  
+        
+        # initial single mothers:
+        i_sm_init = (self._shocks_init_sm <= self.setup.pars['sm_init'])
+        self.state[i_sm_init,0] = (self.state_codes['Female and child'] \
+                                        if self.female else \
+                                        self.state_codes['Male, single'])
+        
+                                        
+                                                
         
         self.timer('Simulations, creation',verbose=self.verbose)
         self.ils_def = 0#self.setup.nls - 1
             
+        
+        
+        # replace fls to optimal values
+        fls_policy = self.Mlist[0].V[0]['Female and child']['fls'] 
+        self.ils_i[i_sm_init,0] = fls_policy[self.iassets[i_sm_init,0],iexoinit[i_sm_init]]
+        
+        
+        
         #Create a file with the age of the change foreach person
         
         self.policy_ind = np.zeros((N,T),dtype=np.int8)
@@ -378,7 +401,14 @@ class Agents:
                     
                     
                     if not 'Not pregnant' in matches or (pmeet<1e-5):
-                        assert pmeet<1e-5
+                        try:
+                            assert pmeet<1e-5
+                        except:
+                            print(t)
+                            print(pmeet)
+                            print(sname)
+                            print(matches.keys())
+                            assert False
                         # propagate yaftmar
                         # !!! this needs to be verified
                         
@@ -514,13 +544,20 @@ class Agents:
                     
                     n_abortions = i_abortion.sum()
                     n_kept = i_kept.sum()
-                    #if n_abortions>0: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
-                    #if n_kept>0: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
+                    
+                    if sname == 'Female, single':
+                        self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
+                        self.n_kept[t] = n_kept
+                        self.n_aborted[t] = n_abortions
+                    
+                    if n_abortions>0 and self.verbose: print('{} abortions done at t = {} for {}'.format(n_abortions,t,sname))
+                    if n_kept>0 and self.verbose: print('{} abortions refused at t = {} for {}'.format(n_kept,t,sname))
                     
                     
                     if not sname=='Female and child':
                         become_sm = (i_disagree_and_meet) & (i_preg) & self.female & ~(i_abortion)
                         become_single = (i_disagree_or_nomeet) & ~(become_sm)   
+                        #assert not np.any(become_sm)
                     else:
                         become_sm = (i_disagree_or_nomeet) & (i_preg)
                         assert np.all(i_preg)
@@ -562,7 +599,7 @@ class Agents:
                         self.agreed_unplanned[ind[i_agree_mar],t] = i_preg[i_agree_mar]*(sname!='Female and child')
                         
                         self.k_m[ind[i_agree_mar],(t+1):] = True
-                        self.k_m_true[ind[i_agree_mar],(t+1):] = i_preg[i_agree_mar][:,None]
+                        self.k_m_true[ind[i_agree_mar],(t+1):] = (i_preg[i_agree_mar][:,None] & (sname!='Female and child'))
                         
                         
                         
@@ -601,6 +638,14 @@ class Agents:
                         self.nmar[ind[i_agree_coh],t+1:] += 1
                         
                         
+                        
+                    # determine izf and izm in case of disagreement
+                    
+                    p_csa = self.setup.pars['child_support_awarded_nm']
+                    izf_cs, izm_cs = self.disagreement_with_child_support(t,ind,izf,izm,p_csa)
+                    
+                       
+                        
                     if np.any(i_disagree_or_nomeet):
                         # do not touch assets
                         fls_policy = self.Mlist[ipol].V[t+1]['Female and child']['fls']
@@ -610,14 +655,19 @@ class Agents:
                         if sname=='Male, single': assert not np.any(become_sm)
                         
                         
-                        iz = izf if self.female else izm
+                        cs_eligible = (become_sm & (sname != 'Female and child'))
+                        
+                        izf_no = izf*(~cs_eligible) + izf_cs*(cs_eligible)
+                        izm_no = izm*(~cs_eligible) + izm_cs*(cs_eligible)
+                        
+                        iz = izf_no if self.female else izm_no
                         self.iexo[ind[i_disagree_or_nomeet],t+1] = iz[i_disagree_or_nomeet]
                         #self.state[ind[i_disagree_or_nomeet],t+1] = self.state_codes['Female, single']
                         self.state[ind[become_single],t+1] = self.state_codes[ss]
                         self.state[ind[become_sm],t+1] = self.state_codes['Female and child']
                         self.ils_i[ind[become_single],t+1] = self.ils_def
                         self.ils_i[ind[become_sm],t+1] = fls_policy[self.iassets[ind[become_sm],t+1],
-                                                                       izf[become_sm]]
+                                                                       iz[become_sm]]
                         
                         self.yaftmar[ind[i_disagree_or_nomeet],t+1] = \
                             (self.yaftmar[ind[i_disagree_or_nomeet],t] + 1)*\
@@ -647,24 +697,9 @@ class Agents:
                     iall, izf, izm, ipsi = self.Mlist[ipol].setup.all_indices(t+1,self.iexo[ind,t+1])
                     
                     if sname == "Couple and child":
-
-                        transitions = self.setup.child_support_transitions[t+1]
-                        izf_div_0 = transitions['i_this_fem'][izf,izm]
-                        izf_div_1 = izf_div_0 + 1
-                        wzf_div_0 = transitions['w_this_fem'][izf,izm]
-                        pick_zf_0 = (self._shocks_child_support_fem[ind,t] < wzf_div_0)                        
-                        izf_div = izf_div_0*(pick_zf_0) + izf_div_1*(~pick_zf_0)
                         
-                        izm_div_0 = transitions['i_this_mal'][izm]
-                        izm_div_1 = izm_div_0 + 1
-                        wzm_div_0 = transitions['w_this_mal'][izm]
-                        pick_zm_0 = (self._shocks_child_support_mal[ind,t] < wzm_div_0)                        
-                        izm_div = izm_div_0*(pick_zm_0) + izm_div_1*(~pick_zm_0)
-                        
-                        if self.setup.pars['child_support_share'] < 1e-5:
-                            assert np.all(izf_div==izf)
-                            assert np.all(izm_div==izm)
-                        
+                        p_csa = self.setup.pars['child_support_awarded_div']
+                        izf_div, izm_div = self.disagreement_with_child_support(t,ind,izf,izm,p_csa)
                         
                         
                     elif sname == "Couple, no children":
@@ -830,6 +865,34 @@ class Agents:
         
         assert not np.any(np.isnan(self.state[:,t+1]))   
         
+        
+    def disagreement_with_child_support(self,t,ind,izf,izm,p_award):
+        
+        transitions = self.setup.child_support_transitions[t+1]
+        izf_div_0 = transitions['i_this_fem'][izf,izm]
+        izf_div_1 = izf_div_0 + 1
+        wzf_div_0 = transitions['w_this_fem'][izf,izm]
+        pick_zf_0 = (self._shocks_child_support_fem[ind,t] < wzf_div_0)                        
+        izf_div_cs = izf_div_0*(pick_zf_0) + izf_div_1*(~pick_zf_0)
+        
+        izm_div_0 = transitions['i_this_mal'][izm]
+        izm_div_1 = izm_div_0 + 1
+        wzm_div_0 = transitions['w_this_mal'][izm]
+        pick_zm_0 = (self._shocks_child_support_mal[ind,t] < wzm_div_0)                        
+        izm_div_cs = izm_div_0*(pick_zm_0) + izm_div_1*(~pick_zm_0)
+        
+        award_cs = (self._shocks_child_support_award[ind,t] < p_award) 
+        
+        izf_div = izf_div_cs*(award_cs) + izf*(~award_cs)
+        izm_div = izm_div_cs*(award_cs) + izm*(~award_cs)
+        
+        if self.setup.pars['child_support_share'] < 1e-5 or p_award<1e-4:
+            assert np.all(izf_div==izf)
+            assert np.all(izm_div==izm)
+        return izf_div, izm_div
+        
+        
+        
     def compute_aux(self):
         # this should be ran after the last simulations
         
@@ -843,6 +906,8 @@ class Agents:
         
         
         self.female_wage = -np.ones((self.N,self.T),dtype=np.float32)
+        self.female_z = -1000*np.ones((self.N,self.T),dtype=np.float32)
+        self.male_z = -1000*np.ones((self.N,self.T),dtype=np.float32)
         self.male_wage = -np.ones((self.N,self.T),dtype=np.float32)
         self.female_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.male_earnings = -np.ones((self.N,self.T),dtype=np.float32)
@@ -887,12 +952,14 @@ class Agents:
                 if state == 'Female, single' or state == 'Female and child':
                     wage = np.exp(self.setup.exogrid.zf_t[t][iexo] + tf)
                     self.female_wage[pick,t] = wage
+                    self.female_z[pick,t] = self.setup.exogrid.zf_t[t][iexo]
                     self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.female_earnings[pick,t]
                     assert np.all(wage>0)
                 elif state == 'Male, single':                    
                     wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + tm)
                     self.male_wage[pick,t] = wage
+                    self.male_z[pick,t] = self.setup.exogrid.zm_t[t][iexo]
                     self.male_earnings[pick,t] = wage # !!!
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.male_earnings[pick,t]
                     assert np.all(wage>0)
@@ -902,6 +969,8 @@ class Agents:
                     wage_m = np.exp(self.setup.exogrid.zm_t[t][izm] + tm)
                     self.female_wage[pick,t] = wage_f
                     self.male_wage[pick,t] = wage_m
+                    self.male_z[pick,t] = self.setup.exogrid.zm_t[t][izm]
+                    self.female_z[pick,t] = self.setup.exogrid.zf_t[t][izf]                    
                     self.female_earnings[pick,t] = wage_f*self.labor_supply[pick,t]
                     self.male_earnings[pick,t] = wage_m
                     self.couple_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]

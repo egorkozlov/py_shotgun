@@ -62,7 +62,6 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     
     
-    iter_name = 'default' if not verbose else 'default-timed'
     
     
     def join_path(name,path):
@@ -87,7 +86,7 @@ def mdl_resid(x=None,targets=None,weights=w,
                 
     if load_from is None:
         
-        mdl = Model(iterator_name=iter_name,**kwords)
+        mdl = Model(verbose=verbose,**kwords)
         mdl_list = [mdl]
         
     else:       
@@ -110,12 +109,12 @@ def mdl_resid(x=None,targets=None,weights=w,
         moments_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False).compute_moments() for _ in range(moments_repeat)]
     
     
-    mom = {key : np.mean([m[key] for m in moments_list]) for key in moments_list[0].keys()}
+    mom = {key : np.mean([m[key] for m in moments_list],axis=0) for key in moments_list[0].keys()}
     
     
-    mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
+    #mom_join = Agents( mdl_list, N=10000, T=18, female=False, verbose=False).aux_moments()
     #mom_men = agents_extra.compute_moments()
-    mom.update(mom_join)
+    #mom.update(mom_join)
     
     
     
@@ -142,8 +141,8 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     
 
-
-    print('Distance is {}'.format(dist))
+    tt = mdl_list[0].get_total_time()
+    print('Distance {}, time {}'.format(dist,tt))
     
     
     
@@ -196,13 +195,17 @@ def distance_to_targets(moments,targets,weights={},relative=True,report=False):
         
         resid[i] = (mom - targ0)/targ0 if relative_here else (mom-targ0)
         
-        if report:
-            print('{} is {:02.3g} (target {:02.3g})'.format(name,mom,targ0))
         
         try:
             W[i,i] = weights[name]
         except:
             W[i,i] = 1/num
+        
+        
+        if report:
+            print('{} is {:02.3g} (target {:02.3g})'.format(name,mom,targ0))
+        
+        
             
     # normalize W
     #W = W/np.sum(W)
