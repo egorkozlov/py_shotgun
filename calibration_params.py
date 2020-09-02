@@ -30,7 +30,7 @@ def calibration_params(xin=None,xfix=None):
               u_shift_mar=(0.8,2.0,1.83),
               util_alp=(0.001,1.0,0.627),
               util_kap=(0.2,1.6,0.834),
-              util_qbar=(0.0,4.0,0.5),
+              util_qbar=(0.0,10.0,0.5),
               disutil_marry_sm_mal = (0.0,20.0,15.5),
               disutil_shotgun=(0.0,20.0,0.63),
               abortion_costs=(0.0,20.0,5.0),

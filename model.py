@@ -171,6 +171,7 @@ class Model(object):
         for t in reversed(range(T)):
             Vnow = dict()
             decnow = dict()
+            if self.verbose: print('solving for t = {}'.format(t))
             
             Vnext = self.V[0] if t<T-1 else None
             
