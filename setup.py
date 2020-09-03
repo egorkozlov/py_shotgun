@@ -526,17 +526,18 @@ class ModelSetup(object):
             
             est_fem = get_estimates(fname=name_fem_csv,
                                     age_start=23,age_stop=42,
-                                    zlist=self.exogrid.zm_t[2:])
+                                    zlist=self.exogrid.zm_t[2:],
+                                    female=False,college=p['high education'])
             filer(name_fem_pkl,est_fem,True,repeat=False)
             self.partners_distribution_fem = est_fem
             est_mal = get_estimates(fname=name_mal_csv,
                                     age_start=21,age_stop=40,
-                                    zlist=self.exogrid.zf_t[0:])
+                                    zlist=self.exogrid.zf_t[0:],
+                                    female=True,college=p['high education'])
             filer(name_mal_pkl,est_mal,True,repeat=False)
             self.partners_distribution_mal = est_mal
             
         self.build_matches()
-        
         
         # building m grid
         ezfmin = min([np.min(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])

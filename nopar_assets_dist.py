@@ -11,8 +11,45 @@ import pandas as pd
 import scipy.stats as sps
 import scipy.optimize as spo
 from tiktak import filer
+from mc_tools import int_prob
 
-def nonpar_distribution(z,data,nbins):
+
+
+
+
+# male, college: sd: exp(1.056854 -.0106599*t)
+# male, college: mean: 1.066965 + .2004596*t + 1.309432*z + .0649392*zt
+
+# female, college: sd: exp(1.153647 -.013831*t)
+# female, college: mean:  .496482 + .2205861*t + .888435*z + .0874937*z*t
+
+# male, hs: sd: exp(1.173178  -.0113634*t)
+# male, hs: mean: -.5651976 + .1630382*t + 2.479825*z - .0588704*z*t
+
+# female, hs: sd: exp(.8055752 + .0050402*t)
+# female, hs: mean: .5254092 + .0645352*t + 1.717792*z + .0047126*z*t
+
+
+def nonpar_distribution(z,t,data,nbins,*,female,college):
+    
+    if female and college:
+        sd = lambda t : np.exp(1.153647 -.013831*t)
+        mu = lambda z, t : .496482 + .2205861*t + .888435*z + .0874937*z*t
+        
+    if (not female) and college:
+        sd = lambda t : np.exp(1.056854 -.0106599*t)
+        mu = lambda z, t : .496482 + .2205861*t + .888435*z + .0874937*z*t
+    
+    if (female) and (not college):
+        sd = lambda t : np.exp(.8055752 + .0050402*t)
+        mu = lambda z, t : .5254092 + .0645352*t + 1.717792*z + .0047126*z*t
+        
+    if (not female) and (not college):
+        sd = lambda t : np.exp(1.173178  -.0113634*t)
+        mu = lambda z, t : .5254092 + .0645352*t + 1.717792*z + .0047126*z*t
+        
+    
+    
     vec = z
     vm = np.concatenate( ([-np.inf],vec[:-1]) )
     vp = np.concatenate( (vec[1:],[np.inf]) )
@@ -24,48 +61,46 @@ def nonpar_distribution(z,data,nbins):
     a_probs_by_z = np.zeros((z.size,nbins))
     a_vals_by_z = np.zeros((z.size,nbins))
     
+    
+    if nbins == 5:
+        sa = np.array([-1.5,-0.75,0.0,0.75,1.5])
+    else:
+        sa = sps.norm.ppf([(i+1)/(nbins+1) for i in range(nbins)])
+    
+    
+    
+    
+    muz = np.average(data['z'],weights=data['w'])
+    sdz = np.sqrt(np.average((data['z']-muz)**2,weights=data['w']))
+    
+    
+    pz_all = int_prob( vec, mu=muz, sig=sdz )
+    
     for iz in range(nz):
         p_groups = np.zeros((nbins))
         a_vals = np.zeros((nbins))
-        i_group = (data['z']>=z_down[iz]) & (data['z']<=z_up[iz])
-        p_z = 0.0
         
-        if np.any(i_group):
+        
             
-            p_z = (i_group*data['w']).sum() / (data['w'].sum())
-            i_a0 = (data['a'] < 1e-2) & i_group
-            p_a0 = (i_a0[i_group]*data['w'][i_group]).sum()/(data['w'][i_group].sum()) if np.any(i_a0) else 0.0
-            i_ap = (~i_a0) & i_group
-            a_val_pos = data['a'][i_ap]
-            wa_val_pos = data['w'][i_ap]
-            data['a_group'] = np.zeros_like(data['a'])
-            p_groups[0] = p_a0
             
-            a_unique = np.unique(a_val_pos)
-            n_unique = a_unique.size
+        
+        p_z = pz_all[iz]
+        
+    
+        
+        
+        
+        
+        vsd = sd(t)
+        vmu = mu(z[iz], t)
+        
+        la_vals = vmu + sa*vsd
+        p_groups = int_prob( la_vals,mu=vmu,sig=vsd,trim=False) 
+        
+        
+        a_vals = np.exp(la_vals)*(la_vals >= 0)
             
-            if n_unique < nbins:
-                for i, a in enumerate(a_unique):
-                    a_vals[i+1] = a
-                    p_groups[i+1] = (1-p_a0)*(wa_val_pos[a_val_pos==a].sum()/wa_val_pos.sum())
-            else:
-                # do histogram
-                
-                n_q_groups = nbins - 1 # 0 is always a group
-                
-                _, be = np.histogram(a_val_pos,bins=n_q_groups,weights=wa_val_pos)
-                
-                
-                # this includes 0th quantile and 100th quantile
-                for i in range(n_q_groups):
-                    a_low = be[i]
-                    a_high = be[i+1]
-                    pick = (i_ap) & (data['a'] >= a_low) & ((data['a'] < a_high) if i<n_q_groups-1 else True)                    
-                    data['a_group'][pick] = i+1
-                    p_groups[i+1] = (pick[i_group]*data['w'][i_group]).sum()/(data['w'][i_group].sum())
-                    a_vals[i+1] = (a_low+a_high)/2 if np.sum(pick) < 2 else (data['a'][pick]*data['w'][pick]).sum()/(data['w'][pick].sum())
-        else: # if no one has the right z
-            p_groups[0] = 1.0
+            
             
         z_probs[iz] = p_z
         a_probs_by_z[iz,:] = p_groups
@@ -76,13 +111,18 @@ def nonpar_distribution(z,data,nbins):
     assert np.allclose(z_probs.sum(),1.0)
     return z_probs, a_probs_by_z, a_vals_by_z
 
+    
+    
+
 
 
 def get_estimates(fname='income_assets_distribution.csv',
                       save='za_dist.pkl',
-                      age_start=23,age_stop=45,weighted=True,
-                      age_bw=1,
-                      zlist=None):
+                      weighted=True,                      
+                      zlist=None,*,
+                      age_start,age_stop,
+                      female,college
+                      ):
     print('obtaining estimates from file {}'.format(fname))
     df = pd.read_csv(fname)
     assert not np.any(np.isnan(df))
@@ -90,8 +130,10 @@ def get_estimates(fname='income_assets_distribution.csv',
     ages_array = np.arange(age_start,age_stop+1)
     out_list = []
     for i, age in enumerate(ages_array):
+        t = age - age_start
         
-        age_pick = (df['age']>=age-age_bw) &  (df['age']<=age+age_bw)
+        
+        age_pick = (df['age']>=age) &  (df['age']<=age)
         data = df[age_pick][['z','a','w']]
         
         if not zlist:
@@ -104,7 +146,7 @@ def get_estimates(fname='income_assets_distribution.csv',
                                   'a':data['a'].copy(),
                                   'w':data['w'].copy()})
         
-        out = nonpar_distribution(zval,data_npar,5)
+        out = nonpar_distribution(zval,t,data_npar,5,female=female,college=college)
         out_list.append(out)
         
     result = {'age':ages_array,

@@ -12,9 +12,9 @@ Created on Mon Jan 27
 
 
 from platform import system
+import os
 
 if system() != 'Darwin' and system() != 'Windows':
-    import os
     os.environ['QT_QPA_PLATFORM']='offscreen'
 
 
@@ -24,8 +24,19 @@ from targets import target_values
 
 print('Hi!')
 
-import os
+
 os.environ['MKL_CBWR']='AUTO'
+try:
+    os.remove('az_dist_fem.pkl')
+    print('removed')
+except:
+    pass
+
+try:
+    os.remove('az_dist_mal.pkl')
+    print('removed')
+except:
+    pass
 from estimates import get_point
  
 def main():
