@@ -48,9 +48,9 @@ class ModelSetup(object):
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
         p['sigma_psi']   = 0.11
-        p['R_t'] = [1.025]*T
+        p['R_t'] = [1/0.96]*T
         p['n_psi'] = 15
-        p['beta_t'] = [0.98]*T
+        p['beta_t'] = [0.96]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
@@ -354,8 +354,8 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
-            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
+            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+           # exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
             
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])
@@ -425,9 +425,9 @@ class ModelSetup(object):
             
             
         #Grid Couple
-        self.na = 40
+        self.na = 90
         self.amin = 0
-        self.amax = 2000
+        self.amax = 1000
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
         #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
@@ -453,7 +453,7 @@ class ModelSetup(object):
         self.vsgrid_s = VecOnGrid(self.agrid_s,self.sgrid_s)
         
         # grid for theta
-        self.ntheta = 11
+        self.ntheta = 15
         self.thetamin = 0.01
         self.thetamax = 0.99
         self.thetagrid = np.linspace(self.thetamin,self.thetamax,self.ntheta,dtype=self.dtype)
@@ -550,8 +550,8 @@ class ModelSetup(object):
         mmax = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
         mint = (ezfmax + ezmmax) # poin where more dense grid begins
         
-        ndense = 600
-        nm = 1500
+        ndense = 1900
+        nm = 3500
         
         gsparse = np.linspace(mint,mmax,nm-ndense)
         gdense = np.linspace(mmin,mint,ndense+1) # +1 as there is a common pt
