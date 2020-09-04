@@ -47,6 +47,7 @@ class ModelSetup(object):
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
+        p['mu_psi_init'] = 0.0
         p['sigma_psi']   = 0.11
         p['R_t'] = [1/0.96]*T
         p['n_psi'] = 15
@@ -425,9 +426,9 @@ class ModelSetup(object):
             
             
         #Grid Couple
-        self.na = 90
+        self.na = 50
         self.amin = 0
-        self.amax = 1000
+        self.amax = 1000.0
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
         #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
@@ -453,7 +454,7 @@ class ModelSetup(object):
         self.vsgrid_s = VecOnGrid(self.agrid_s,self.sgrid_s)
         
         # grid for theta
-        self.ntheta = 15
+        self.ntheta = 11
         self.thetamin = 0.01
         self.thetamax = 0.99
         self.thetagrid = np.linspace(self.thetamin,self.thetamax,self.ntheta,dtype=self.dtype)
@@ -582,6 +583,8 @@ class ModelSetup(object):
         sigma_psi_init = setup.pars['sigma_psi_init']
         psi_couple = setup.exogrid.psi_t[t+1]
         
+        mu = setup.pars['mu_psi_init']
+        
         
         if female:
             nz_single = setup.exogrid.zf_t[t].shape[0]
@@ -620,7 +623,7 @@ class ModelSetup(object):
         agrid_s = self.agrid_s
         
         for iz in range(n_zown):
-            p_psi = int_prob(psi_couple,mu=0.0,sig=sigma_psi_init)
+            p_psi = int_prob(psi_couple,mu=mu,sig=sigma_psi_init)
             if female:
                 p_zm  = np.array(pz)
                 p_zf  = zmat_own[iz,:]
