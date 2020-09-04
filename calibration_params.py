@@ -36,7 +36,7 @@ def calibration_params(xin=None,xfix=None):
               abortion_costs=(0.0,80.0,5.0),
               p_abortion_access=(0.0,1.0,0.5),
               u_lost_divorce=(0.0,15.0,2.0),
-              mu_psi=(-2.0,2.0,0.0)
+              mu_psi_init=(-2.0,2.0,0.0)
                         )
     
     
