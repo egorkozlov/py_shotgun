@@ -179,10 +179,14 @@ def v_ren_uni(model,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
          
     else:
         if canswitch:
-            #vcc_v, vcc_vf, vcc_vm = \
-            #[setup.vagrid_child_couple.apply_preserve_shape(x)
-            #    for x in [V['Couple and child'][y] for y in ['V','VF','VM']]]
-            vcc_v, vcc_vf, vcc_vm = [V['Couple and child'][y] for y in ['V','VF','VM']]
+            
+            pfert = setup.pars['fert_prob_t'][t]
+            def ws(y):
+                return pfert*V['Couple and child'][y] + (1-pfert)*V['Couple, no children'][y]
+            
+                
+            
+            vcc_v, vcc_vf, vcc_vm = [ws(y) for y in ['V','VF','VM']]
                 
             if not ugpu:                
                 

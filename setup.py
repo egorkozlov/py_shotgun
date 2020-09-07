@@ -128,6 +128,7 @@ class ModelSetup(object):
         p['preg_35'] = 0.3
         
         
+        
         for key, value in kwargs.items():
             assert (key in p), 'wrong name?'
             p[key] = value
@@ -237,6 +238,15 @@ class ModelSetup(object):
         p['n_psi_t'] = [p['n_psi']]*T
         
         p['psi_clip'] = 2.5*p['sigma_psi_init']
+        
+        
+        
+        p['fert_prob_t'] = [0.86*(t<=3) + 0.78*(t>3 and t<=8) + 
+                            0.63*(t>=9 and t<=13) + 0.52*(t>=14) for
+                            t in range(T)]
+        
+        #p['fert_prob_t'] = [1.0]*T
+        
         
         
         self.pars = p
