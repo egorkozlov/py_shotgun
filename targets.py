@@ -45,7 +45,6 @@ def target_values(mode='high education'):
             ('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
-            #('divorced ratio above over below at ',(28,35),1/4),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',)
            ]
