@@ -45,7 +45,7 @@ def co(x):
 
 
 def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
-                                                      return_insides=False):
+                                                      return_insides=False,nogpu_here=nogpu):
     
     # this builds matrix for all matches specified by grid positions
     # iassets_couple (na X nmatches) and iexo_couple (nmatches)
@@ -99,7 +99,7 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
     if nogpu:
         it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
     else:
-        it, wnt = setup.v_thetagrid_fine.i, setup.v_thetagrid_fine.wnext
+        it, wnt = setup.cupy.v_thetagrid_fine.i, setup.cupy.v_thetagrid_fine.wnext
     
     
     if nogpu:
@@ -109,7 +109,8 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
     
     out = {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
     
-    if return_insides: out.update({'insides':(V_f_yes,V_m_yes,V_f_no,V_m_no)})
+    if return_insides: out.update({'V_f_yes':V_f_yes,'V_m_yes':V_m_yes,                           
+                                   'V_f_no':V_f_no,'V_m_no':V_m_no})
     
     return out
         

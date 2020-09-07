@@ -44,6 +44,7 @@ class Model(object):
         self.start = default_timer()
         self.last = default_timer()
         self.time_dict = dict()
+        self.gpu = gpu
         
         self.setup = ModelSetup(**kwargs)
         self.dtype = self.setup.dtype
@@ -176,8 +177,7 @@ class Model(object):
             Vnext = self.V[0] if t<T-1 else None
             
             if gpu and (Vnext is not None):
-                Vnext = {d: {k: cp.array(Vnext[d][k]) for k in Vnext[d]} 
-                                                        for d in Vnext}    
+                Vnext = self.cupyfy_v(Vnext)  
                 self.time('Transfer to gpu')
             
             for desc in self.setup.state_names:
@@ -197,7 +197,12 @@ class Model(object):
             import pickle
             pickle.dump(self,open('model_save.pkl','wb+'))
         
-        
+    def cupyfy_v(self,V):
+        # this sends value funciton dict to the GPU
+        return {d: {k: cp.array(V[d][k]) for k in V[d]} for d in V}
+    
+    
+    
     def x_reshape(self,x,t):
         # this reshapes couple's values to multidimensional objects
         ss = self.setup

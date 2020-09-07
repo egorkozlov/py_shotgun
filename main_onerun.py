@@ -26,24 +26,30 @@ print('Hi!')
 
 
 os.environ['MKL_CBWR']='AUTO'
-try:
-    os.remove('az_dist_fem.pkl')
-    print('removed')
-except:
-    pass
 
-try:
-    os.remove('az_dist_mal.pkl')
-    print('removed')
-except:
-    pass
 from estimates import get_point
  
-def main():
+def main(read_wisdom=True,erase=True):
     
     high_e = True
-    x, targ_mode = get_point(high_e)
+    
+    if erase:
+        try:
+            os.remove('az_dist_fem.pkl')
+            print('removed')
+        except:
+            pass
 
+        try:
+            os.remove('az_dist_mal.pkl')
+            print('removed')
+        except:
+            pass
+    
+    x, targ_mode = get_point(high_e,read_wisdom=read_wisdom)
+    
+        
+    
     tar = target_values(targ_mode)
 
 
