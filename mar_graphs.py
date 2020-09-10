@@ -14,7 +14,7 @@ try:
 except:
     pass
 
-def mar_graphs(self,t=2):
+def mar_graphs(self,t=4):
     mdl = self
     setup = mdl.setup
     V = mdl.V
@@ -55,10 +55,9 @@ def mar_graphs(self,t=2):
         res_r = mdl.x_reshape(res['itheta'][...,None],t).squeeze(axis=-1)
         tht_r = setup.thetagrid_fine[res_r]
         tht_all = ma.masked_where(res_r<0,tht_r)
-        tht_pick = tht_all[iac,:,izm,:]
-        print(tht_pick.shape)
+        tht_pick = tht_all[iac,:,izm,:].astype(np.float32)
         fig, ax = plt.subplots()
-        cs = ax.contourf(zfg,psig,tht_pick.T,cmap='Blues',vmin=0.0,vmax=0.95) 
+        cs = ax.contourf(zfg,psig,tht_pick.T,cmap='Blues',vmin=0.05,vmax=0.95) 
         cb = fig.colorbar(cs)
         cb.set_label(r'Resulting female bargaining power ($\theta$)')
         plt.xlabel('Female productivity')
