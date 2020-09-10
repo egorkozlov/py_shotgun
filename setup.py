@@ -36,7 +36,7 @@ class ModelSetup(object):
         p = dict()       
         T = 55
         Tret = 45 # first period when the agent is retired
-        Tfert = 18 # first peroid when infertile
+        Tfert = 20 # first peroid when infertile
         Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 43 # first period when stop meeting partners
         Tinc = 25 # first period where stop tracking income process and assume it to be fixed
@@ -465,8 +465,8 @@ class ModelSetup(object):
         
         # grid for theta
         self.ntheta = 11
-        self.thetamin = 0.01
-        self.thetamax = 0.99
+        self.thetamin = 0.05
+        self.thetamax = 0.95
         self.thetagrid = np.linspace(self.thetamin,self.thetamax,self.ntheta,dtype=self.dtype)
         
         

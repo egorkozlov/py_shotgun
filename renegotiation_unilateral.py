@@ -251,13 +251,13 @@ def v_ren_uni(model,V,haschild,canswitch,t,return_extra=False,return_vdiv_only=F
         
         return vo
     
-    v_resc = v_rescale(v_out,itheta_out) if rescale else v_out.copy()
     
     if rebuild:
         v_out = thtgrid[None,None,:]*vf_out + \
             (setup.dtype(1)-thtgrid[None,None,:])*vm_out
     
     
+    v_resc = v_rescale(v_out,itheta_out) if rescale else v_out.copy()
     
     
         

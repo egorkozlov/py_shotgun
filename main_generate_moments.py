@@ -30,7 +30,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     
     assert (high_e or low_e), 'wrong specifier for education'
     
-    x, targ_mode = get_point(high_e)
+    x, targ_mode = get_point(high_e,read_wisdom=True)
 
     tar = target_values(targ_mode)
 
@@ -104,6 +104,7 @@ def adj_list(return_dict=False):
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
                                               'abortion_costs':0.0}),
+                   ('no social stigma',{'disutil_shotgun':0.0}),
                    ('no child support',{'child_support_awarded_nm':0.0,
                                         'child_support_awarded_div':0.0}),
                    ('full child support',{'child_support_awarded_nm':1.0,
@@ -118,7 +119,6 @@ def adj_list(return_dict=False):
                    ('no abortions',{'p_abortion_access':0.0}),
                    ('costless abortion',{'p_abortion_access':1.0,
                                          'abortion_costs':0.0}),
-                   ('no social stigma',{'disutil_shotgun':0.0}),
                    ('infinite social stigma',{'disutil_shotgun':400.0}),
                    ('no remar penalty',{'disutil_marry_sm_mal':0.0}),
                    ('infinite remar penalty',{'disutil_marry_sm_mal':500.0}),
@@ -153,7 +153,7 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['col','hs']:
+    for educ_name in ['col']: #,'hs']:
         for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
