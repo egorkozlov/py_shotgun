@@ -74,8 +74,11 @@ class FitPlots(object):
         try:
             self.plot_hazards()
         except:
-            print('failed to plot hazards')
+            print('failed to plot hazards')            
         '''
+        
+        
+        self.plot_trends()
         
         try:
             self.plot_cumulative()
@@ -132,6 +135,35 @@ class FitPlots(object):
             print('{}: base {}, compare {}'.format(l,self.moments[l],self.targets[l][0]))
     
     
+    
+    def plot_trends(self):
+        setup = self.setup
+        tval = np.arange(21,45)
+        
+        trend_f = np.zeros_like(tval,dtype=np.float32)
+        trend_m = np.zeros_like(tval,dtype=np.float32)
+        for i, t in enumerate(tval):
+            trend_f[i] = np.exp( setup.pars['f_wage_trend'][i] )
+            trend_m[i] = np.exp( setup.pars['m_wage_trend'][i-2] ) if i >= 2 else None
+        
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,trend_f,'--b',label='female')
+        ax.plot(tval,trend_m,'-k',label='male')
+
+        ax.set_xlabel('age')
+        ax.set_ylabel('income (USD 1000s)')
+        ax.set_title('estimated earnings trends:\n{}'.format(self.base_name))
+        ax.legend()
+        ax.grid(True)
+        plt.savefig('earnings_trend.pdf')
+
+        
+        
+        
+        
+        
+        
     
     def plot_estimates(self):
         setup = self.setup

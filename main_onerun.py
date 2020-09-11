@@ -29,7 +29,7 @@ os.environ['MKL_CBWR']='AUTO'
 
 from estimates import get_point
  
-def main(read_wisdom=True,erase=False):
+def main(read_wisdom=False,erase=False):
     
     high_e = False
     
@@ -84,7 +84,7 @@ def main(read_wisdom=True,erase=False):
                    compare=None,
                    base=this_name+'.pkl',
                    compare_name='data',
-                   base_name='baseline',
+                   base_name='high school baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
     mdl[0].mar_graphs()
