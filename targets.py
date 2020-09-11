@@ -32,15 +32,15 @@ def target_values(mode='low education'):
     
     
     keys = [
-            ('ever kids by years after marriage, ',(4,8),1),
+            #('ever kids by years after marriage, ',(4,8),1),
             ('k then m in population at ',(23,35),1),
             ('m then k in population at ',(23,35),1),
             ('k then m in sample at ',(23,35),1),
             ('divorced by years after marriage if kids first, ',(1,10),1/4),
             ('divorced by years after marriage if marriage first, ',(1,10),1/4),
-            ('mean x share',),
+            #('mean x share',),
             ('more than one mar at 40',),
-            ('in labor force at 30 if kids',),
+            #('in labor force at 30 if kids',),
             ('never married and no kids in population at ',(23,35),1),
             ('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
