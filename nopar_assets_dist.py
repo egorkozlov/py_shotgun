@@ -89,8 +89,6 @@ def nonpar_distribution(z,t,data,nbins,*,female,college):
     
         
         
-        
-        
         vsd = sd(t)
         vmu = mu(z[iz], t)
         
@@ -129,11 +127,15 @@ def get_estimates(fname='income_assets_distribution.csv',
         
     ages_array = np.arange(age_start,age_stop+1)
     out_list = []
+    
+    
+    amin = df['age'].min()
+    
     for i, age in enumerate(ages_array):
-        t = age - age_start
+        t = age - max(age_start,amin)
         
         
-        age_pick = (df['age']>=age) &  (df['age']<=age)
+        age_pick = (df['age']==max(age,amin))
         data = df[age_pick][['z','a','w']]
         
         if not zlist:

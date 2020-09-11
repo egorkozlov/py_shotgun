@@ -34,6 +34,15 @@ class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         
         p = dict()       
+        
+        
+        #age_begin = 21
+        #age_data = 23 # age at which the data start being available
+        #age_death = 76
+        #age_retire = 65
+        #age_fertile = 41
+        
+        
         T = 55
         Tret = 45 # first period when the agent is retired
         Tfert = 20 # first peroid when infertile
