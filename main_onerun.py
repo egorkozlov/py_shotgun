@@ -84,7 +84,7 @@ def main(read_wisdom=False,erase=False):
                    compare=None,
                    base=this_name+'.pkl',
                    compare_name='data',
-                   base_name='high school baseline',
+                   base_name='college baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
     mdl[0].mar_graphs()

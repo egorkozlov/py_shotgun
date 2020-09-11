@@ -36,6 +36,9 @@ def nonpar_distribution(z,t,data,nbins,*,female,college):
         sd = lambda t : np.exp(1.153647 -.013831*t)
         mu = lambda z, t : .496482 + .2205861*t + .888435*z + .0874937*z*t
         
+        
+        # 1.066965 + .2004596*t + 1.309432*z + .0649392*zt
+    # FIXME
     if (not female) and college:
         sd = lambda t : np.exp(1.056854 -.0106599*t)
         mu = lambda z, t : .496482 + .2205861*t + .888435*z + .0874937*z*t
