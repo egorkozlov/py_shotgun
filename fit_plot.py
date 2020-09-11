@@ -330,8 +330,10 @@ class FitPlots(object):
         
         names = ['ever kids by years after marriage','divorced by years after marriage']
         captions = ['% with kids by years after marriage\n (if married)' + self.graphs_title_add,'% divorced by years after marriage \n (excluding remarried)'+ self.graphs_title_add]
+        fnames = ['kids_by_duration','divorced_by_duration']
         
-        for name, cap in zip(names,captions):
+        
+        for name, cap, fname in zip(names,captions, fnames):
             prob_model = np.zeros_like(yval,dtype=np.float64)
             prob_data  = np.zeros_like(yval,dtype=np.float64)
             
@@ -351,7 +353,9 @@ class FitPlots(object):
             i_data = ~np.isnan(prob_data)
             i_model = ~np.isnan(prob_model)
             plt.plot(yval[i_model],prob_model[i_model]*100,'o-b',label=self.base_name)
-            plt.plot(yval[i_data],prob_data[i_data]*100,'o-k',label=self.compare_name)
+            plt.plot(yval[i_data],prob_data[i_data]*100,'d-k',label=self.compare_name)
+            if name == 'ever kids by years after marriage' and self.compare_name == 'data':
+                plt.plot(yval[i_data][3:],prob_data[i_data][3:]*100,'+',label='targeted',linewidth=6,markersize=14)
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
             plt.legend()
             plt.title(cap) 
@@ -359,7 +363,7 @@ class FitPlots(object):
             plt.ylabel('share (%)')
             ax.grid(True)
             ax.set_xticks(yval)
-            plt.savefig('{}.pdf'.format(name))
+            plt.savefig('{}.pdf'.format(fname))
             
             
     
@@ -486,6 +490,11 @@ class FitPlots(object):
         div_sm_data = np.zeros_like(tval,dtype=np.float64)
         all_sm_data = np.zeros_like(tval,dtype=np.float64)
         
+        div_childless_data =  np.zeros_like(tval,dtype=np.float64)
+        div_childless_model = np.zeros_like(tval,dtype=np.float64)
+        
+        nm_childless_data = np.zeros_like(tval,dtype=np.float64)
+        nm_childless_model = np.zeros_like(tval,dtype=np.float64)
         
         for i,t in enumerate(tval):
             
@@ -497,6 +506,12 @@ class FitPlots(object):
             div_sm_data[i] = targets['divorced and kids in population at {}'.format(t)][0]
             all_sm_data[i] = nm_sm_data[i] + div_sm_data[i]
             
+            nm_childless_data[i] = targets['never married and no kids in population at {}'.format(t)][0]
+            nm_childless_model[i] = moments['never married and no kids in population at {}'.format(t)]
+            
+            div_childless_data[i] = targets['divorced and no kids in population at {}'.format(t)][0]
+            div_childless_model[i] = moments['divorced and no kids in population at {}'.format(t)]
+            
         
         fig, ax = plt.subplots()
         ax.plot(tval,100*all_sm_model,'o-b',label=self.base_name)
@@ -506,31 +521,62 @@ class FitPlots(object):
         ax.set_title('Single mothers in population')
         ax.legend()
         ax.set_xticks(tval)
+        plt.ylim(bottom=-1.0)
         ax.grid(True)
-        plt.savefig('single mothers all.pdf')
+        plt.savefig('fit_single_mothers_all.pdf')
         
         
         fig, ax = plt.subplots()
         ax.plot(tval,100*div_sm_model,'o-b',label=self.base_name)
-        ax.plot(tval,100*div_sm_data,'o-k',label=self.compare_name)
+        ax.plot(tval,100*div_sm_data,'d-k',label=self.compare_name)
+        if self.compare_name == 'data': ax.plot(tval[5:],100*div_sm_data[5:],'+k',label='targeted',linewidth=6,markersize=14)
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
-        ax.set_title('Divorced mothers in population')
+        ax.set_title('Divorced with kids in population')
         ax.legend()
         ax.set_xticks(tval)
+        plt.ylim(bottom=-0.2)
         ax.grid(True)
-        plt.savefig('single mothers div.pdf')
+        plt.savefig('fit_single_mothers_div.pdf')
         
         fig, ax = plt.subplots()
         ax.plot(tval,100*nm_sm_model,'o-b',label=self.base_name)
-        ax.plot(tval,100*nm_sm_data,'o-k',label=self.compare_name)
+        ax.plot(tval,100*nm_sm_data,'d-k',label=self.compare_name)
+        if self.compare_name == 'data': ax.plot(tval[5:],100*nm_sm_data[5:],'+k',label='targeted',linewidth=6,markersize=14)
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
-        ax.set_title('Never married mothers in population')
+        plt.ylim(bottom=-0.2)
+        ax.set_title('Never married with kids in population')
         ax.legend()
         ax.set_xticks(tval)
         ax.grid(True)
-        plt.savefig('single mothers nm.pdf')
+        plt.savefig('fit_single_mothers_nm.pdf')
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*div_childless_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*div_childless_data,'d-k',label=self.compare_name)
+        if self.compare_name == 'data': ax.plot(tval[5:],100*div_childless_data[5:],'+k',label='targeted',linewidth=6,markersize=14)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Divorced witout kids in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        plt.ylim(bottom=-0.2)
+        ax.grid(True)
+        plt.savefig('fit_single_nonmothers_div.pdf')
+        
+        fig, ax = plt.subplots()
+        ax.plot(tval,100*nm_childless_model,'o-b',label=self.base_name)
+        ax.plot(tval,100*nm_childless_data,'d-k',label=self.compare_name)
+        if self.compare_name == 'data': ax.plot(tval[0:],100*nm_childless_data[0:],'+k',label='targeted',linewidth=6,markersize=14)
+        ax.set_xlabel('age')
+        ax.set_ylabel('share (%)')
+        ax.set_title('Never married without kids in population')
+        ax.legend()
+        ax.set_xticks(tval)
+        plt.ylim(bottom=-1.0)
+        ax.grid(True)
+        plt.savefig('fit_single_nonmothers_nm.pdf')
         
         
         
