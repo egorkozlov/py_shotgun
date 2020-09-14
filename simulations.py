@@ -669,7 +669,7 @@ class Agents:
                             thti(fls_policy,(self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1]),self.itheta[ind[i_agree_coh],t+1])
                         
                         self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
-                        self.nmar[ind[i_agree_mar],t+1:] = self.nmar[ind[i_agree_mar],t][:,None] + 1
+                        self.nmar[ind[i_agree_coh],t+1:] = self.nmar[ind[i_agree_coh],t][:,None] + 1
                         
                         
                         

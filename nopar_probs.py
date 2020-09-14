@@ -16,7 +16,7 @@ class AgentsEst(Agents):
     def __init__(self,*args,**kwargs):
         Agents.__init__(self,*args,nosim=True,**kwargs)
         self.define_targets()
-        self.simulate()
+        self.run_sim()
         self.get_shares()
         
         
