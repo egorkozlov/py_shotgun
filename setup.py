@@ -53,6 +53,7 @@ class ModelSetup(object):
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
+        p['Tmeet'] = Tmeet
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28

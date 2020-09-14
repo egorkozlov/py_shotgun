@@ -494,10 +494,14 @@ class Agents:
                         else:
                             p_preg = fert*self.ppreg_exo[t]
                     elif sname == 'Female and child':
-                        p_preg = np.ones_like(ind,dtype=np.float64)
+                        p_preg = 1.0 #np.ones_like(ind,dtype=np.float64)[]
                     else:
                         assert False
+                        
+                        
                     
+                    
+                    #print('p_preg is {}'.format(p_preg))
                     # these are individual-specific pregnancy probabilities
                     # for those who are not fertile this is forced to be zero
                         
@@ -505,6 +509,7 @@ class Agents:
                     
                     vpreg = self._shocks_single_preg[ind,t]
                     i_preg = (vpreg < p_preg)
+                    
                     
                     #i_pmat = i_pmat_p*(i_preg) + i_pmat_np*(~i_preg)
                     
@@ -656,13 +661,15 @@ class Agents:
                         
                         def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
                         
+                        
+                        
                         fls_policy = self.Mlist[ipol].V[t+1]['Couple, no children']['fls']
                         
                         self.ils_i[ind[i_agree_coh],t+1] = \
                             thti(fls_policy,(self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1]),self.itheta[ind[i_agree_coh],t+1])
                         
                         self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
-                        self.nmar[ind[i_agree_coh],t+1:] += 1
+                        self.nmar[ind[i_agree_mar],t+1:] = self.nmar[ind[i_agree_mar],t][:,None] + 1
                         
                         
                         
@@ -703,6 +710,9 @@ class Agents:
                         
                 
                 
+                    #print('next period kf: {}'.format(self.k_m[:,t+1].mean()))
+                    #assert p_preg > 0.0
+                    
                 elif sname == "Couple and child" or sname == "Couple, no children":
                     
                     

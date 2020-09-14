@@ -8,9 +8,14 @@ Created on Mon Sep 14 12:00:01 2020
 
 from simulations import Agents
 
+import dfols
+import numpy as np
+    
+
 class AgentsEst(Agents):
     def __init__(self,*args,**kwargs):
         Agents.__init__(self,*args,nosim=True,**kwargs)
+        self.define_targets()
         self.simulate()
         self.get_shares()
         
@@ -22,18 +27,124 @@ class AgentsEst(Agents):
         self.iexonext(t) 
         self.statenext(t)
     
+    
+    def simulate_npsolve(self,t):
+        try:
+            pmeet0 = self.pmeet_exo[:t] 
+            ppreg0 = self.ppreg_exo[:t]
+        except:
+            pmeet0 = None
+            ppreg0 = None
+        
+        
+        
+        # this is horrible but works somehow...
+        # the way k_m is defined makes it impossible to simulate with diff't
+        # probabilities and the same t...
+        
+        km_save = self.k_m.copy()
+        mk_save = self.m_k.copy()
+        nmar_save  = self.nmar.copy()
+        kmtrue_save = self.k_m_true.copy()
+        
+        
+        
+        try:
+            s_dta = self.ss_val[t]
+            kf_dta = self.kf_val[t]
+            skip = False
+        except:
+            s_dta = self.ss_val[-1]
+            kf_dta = self.kf_val[-1]
+            skip = True
+        
+        def get_residuals(x):
+            pmeet_here = x[0]
+            ppreg_here = x[1]
+            
+            
+            self.k_m = km_save.copy()
+            self.m_k = mk_save.copy()
+            self.km_ture = kmtrue_save.copy()
+            self.nmar = nmar_save.copy()
+            
+            
+            self.pmeet_exo = [pmeet_here] if pmeet0 is None else pmeet0 + [pmeet_here]
+            self.ppreg_exo = [ppreg_here] if ppreg0 is None else ppreg0 + [ppreg_here]
+            
+            self.anext(t)
+            self.iexonext(t) 
+            self.statenext(t)
+            
+            
+            s_mdl = (self.state[:,t+1] == self.state_codes['Female, single']).mean() #((self.i_singles())[:,t+1]).mean()
+            
+            
+            kf_mdl = (self.k_m[:,t+1] & (self.nmar[:,t+1] == 1)).mean() #(self.i_km())[:,t+1].mean()
+            
+            
+            #print('targets are : {}, {}'.format(kf_dta,s_dta))
+            #print('model values are : {}, {}'.format(kf_mdl,s_mdl))
+            
+            resid = np.array([s_mdl - s_dta,kf_mdl-kf_dta])
+            print('t is {}, x is {}, resid is {}'.format(t,x,np.sum(resid**2)))
+            
+            return resid
+        
+        
+        
+        if t == 0:
+            xinit = np.array([0.1,0.1])
+        else:
+            xinit = np.array([self.pmeet_exo[t-1],self.ppreg_exo[t-1]])
+        
+        if not skip:
+            res = dfols.solve(get_residuals,xinit,rhoend=1e-3,bounds=(np.array([0.0,0.0]),np.array([1.0,1.0])))
+            print('t = {}'.format(t))
+            print(res)
+        
+            get_residuals(res.x) # this writes the probabilities into the object
+        
+        else:
+            xinit = np.array([self.pmeet_exo[t-1],self.ppreg_exo[t-1]])
+            print('skipping optimization: no data for t = {}'.format(t))
+            get_residuals(xinit) 
+    
+    
     def simulate(self,rep=1):
         for t in range(self.T-1):      
-            for _ in range(rep): self.simulate_t(t)
+            print(t)
+            for _ in range(rep): self.simulate_npsolve(t)
             
-            
-        
             if self.verbose: self.timer('Simulations, iteration')
+        
+    def define_targets(self):
+        from targets import all_targets
+        tar = all_targets('high education')
+        
+        
+        kf_val = [tar['k then m in population at {}'.format(a)][0] for a in range(22,36)]
+        #kf_val = [kf_val[1] - (kf_val[2] - kf_val[1])] + kf_val # interpolate
+        
+        ss_val = [(tar['divorced and no kids in population at {}'.format(a)][0] +
+                   tar['never married and no kids in population at {}'.format(a)][0])for a in range(23,36)]
+        
+        ss_val = [ss_val[0] - (ss_val[1] - ss_val[0])] + ss_val
+        
+        self.ss_val = np.array(ss_val)
+        self.kf_val = np.array(kf_val)
+        
+        
+    def i_singles(self):
+        return (self.state == self.state_codes['Female, single'])
+    
+    def i_km(self):
+        return (self.k_m & (self.nmar == 1))
         
         
     def get_shares(self):
-        self.share_singles = (self.state == self.state_codes['Female, single']).mean(axis=0)
-        self.share_km = (self.k_m & (self.nmar == 1)).mean(axis=0)
+        self.share_singles = (self.i_singles()).mean(axis=0)
+        self.share_km = (self.i_km()).mean(axis=0)
          
         
 if __name__ == '__main__':
@@ -44,29 +155,17 @@ if __name__ == '__main__':
         from dill import load
         mdl = load(open('mdl.pkl','rb+'))
         
+        
+    np.random.seed(12)
+
+    o = AgentsEst(mdl,T=30,verbose=False)
+    ss_val = o.ss_val
+    kf_val = o.kf_val
     
     
-    from targets import all_targets
-    tar = all_targets('high education')
-    
-    share_km_tar = tar['k then m in population at 22'][0]
-    share_singles_tar = 1 - tar['ever married at 22'][0]
-    
-    kf_val = [tar['k then m in population at {}'.format(a)][0] for a in range(22,36)]
-    #kf_val = [kf_val[1] - (kf_val[2] - kf_val[1])] + kf_val # interpolate
-    
-    ss_val = [(tar['divorced and no kids in population at {}'.format(a)][0] +
-               tar['never married and no kids in population at {}'.format(a)][0])for a in range(23,36)]
-    
-    ss_val = [ss_val[0] - (ss_val[1] - ss_val[0])] + ss_val
-    
-    ss_val = np.array(ss_val)
-    kf_val = np.array(kf_val)
     
     
-    import dfols
-    
-    
+    '''
     pmeet_np = []
     ppreg_np = []
     
@@ -94,10 +193,16 @@ if __name__ == '__main__':
         
         pmeet_np = pmeet_np + [res.x[0]]
         ppreg_np = ppreg_np + [res.x[1]]
-        
+    '''
     
-    
-    
+    '''
+    reference values:
+    pmeet_np = [0.22565941308804738,0.3338372741573408,
+                0.32564675711745394,0.4380962723617894]
+    ppreg_np = [0.02788504431884112,0.018360629740272073,
+                 0.02202381141320635,0.02776843206522462]
+    '''
+
     
     
     
