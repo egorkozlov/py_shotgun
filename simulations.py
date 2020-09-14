@@ -10,10 +10,16 @@ import numpy as np
 from mc_tools import mc_simulate, int_prob
 from gridvec import VecOnGrid
 
+
+
+
+
+
+
 class Agents:
     
     def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,verbose=True,nosim=False,
-                 fix_seed=True):
+                 fix_seed=True,pmeet_exo=None,ppreg_exo=None):
             
             
         if fix_seed: np.random.seed(18)
@@ -25,6 +31,9 @@ class Agents:
             Mlist = [Mlist]
             
 
+        self.pmeet_exo = pmeet_exo
+        self.ppreg_exo = ppreg_exo
+        
         
         #Unilateral Divorce
         self.Mlist = Mlist
@@ -161,7 +170,7 @@ class Agents:
                                         
                                                 
         
-        self.timer('Simulations, creation',verbose=self.verbose)
+        if self.verbose: self.timer('Simulations, creation')
         self.ils_def = 0#self.setup.nls - 1
             
         
@@ -193,13 +202,20 @@ class Agents:
         else:
             self.policy_ind[:] = 0
             
-        if not nosim: self.simulate()
+        if not nosim: self.run_sim()
+        
+    
+     
+        
+    def run_sim(self):
+        # this runs simulations and computes necessary stuff
+        self.simulate()
         self.compute_aux()
         counts, offers, marriages = self.marriage_stats()
-        
+    
         if self.verbose and self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.verbose and self.ub_hit_couple: print('Assets upped bound is reached for couples')
-        
+    
     
     def tht_interpolate(self,v,i_other,i_theta):
         it = self.setup.v_thetagrid_fine.i[i_theta]
@@ -224,7 +240,7 @@ class Agents:
             self.anext(t) 
             self.iexonext(t)            
             self.statenext(t)
-            self.timer('Simulations, iteration',verbose=False)
+            if self.verbose: self.timer('Simulations, iteration')
         
         
         #return self.gsavings, self.iexo, self.state,self.gtheta
@@ -385,7 +401,11 @@ class Agents:
                     pcoef = self.Mlist[ipol].setup.pars['pmeet_multiplier_fem']
                     
                     
-                    pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
+                    if self.pmeet_exo is None:
+                        pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
+                    else:
+                        pmeet = pcoef*self.pmeet_exo[t]
+                    
                     p_abortion_access = self.Mlist[ipol].setup.pars['p_abortion_access']
                     
                     # divide by 2 subgroups
@@ -464,9 +484,15 @@ class Agents:
                         fert = self.setup.pars['is fertile'][t-2] if t>=2 else False
                     
                     if sname == 'Female, single':
-                        p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                        if self.ppreg_exo is None:
+                            p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                        else:
+                            p_preg = fert*self.ppreg_exo[t]
                     elif sname == 'Male, single':
-                        p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                        if self.ppreg_exo is None:
+                            p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                        else:
+                            p_preg = fert*self.ppreg_exo[t]
                     elif sname == 'Female and child':
                         p_preg = np.ones_like(ind,dtype=np.float64)
                     else:
@@ -547,7 +573,7 @@ class Agents:
                     n_kept = i_kept.sum()
                     
                     if sname == 'Female, single':
-                        self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
+                        self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept) if ((n_abortions + n_kept) > 0) else 0.0
                         self.n_kept[t] = n_kept
                         self.n_aborted[t] = n_abortions
                     
@@ -613,7 +639,7 @@ class Agents:
                             thti(fls_policy,(self.iassets[ind[i_agree_mar],t+1],self.iexo[ind[i_agree_mar],t+1]),self.itheta[ind[i_agree_mar],t+1])
                         
                         self.yaftmar[ind[i_agree_mar],t+1] = 0                        
-                        self.nmar[ind[i_agree_mar],t+1:] += 1
+                        self.nmar[ind[i_agree_mar],t+1:] = self.nmar[ind[i_agree_mar],t][:,None] + 1
                         
                     if np.any(i_agree_coh):
                         
