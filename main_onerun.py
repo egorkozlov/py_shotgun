@@ -12,9 +12,9 @@ Created on Mon Jan 27
 
 
 from platform import system
+import os
 
 if system() != 'Darwin' and system() != 'Windows':
-    import os
     os.environ['QT_QPA_PLATFORM']='offscreen'
 
 
@@ -24,15 +24,32 @@ from targets import target_values
 
 print('Hi!')
 
-import os
+
 os.environ['MKL_CBWR']='AUTO'
+
 from estimates import get_point
  
-def main():
+def main(read_wisdom=False,erase=False):
     
     high_e = True
-    x, targ_mode = get_point(high_e)
+    
+    if erase:
+        try:
+            os.remove('az_dist_fem.pkl')
+            print('removed')
+        except:
+            pass
 
+        try:
+            os.remove('az_dist_mal.pkl')
+            print('removed')
+        except:
+            pass
+    
+    x, targ_mode = get_point(high_e,read_wisdom=read_wisdom)
+    
+        
+    
     tar = target_values(targ_mode)
 
 
@@ -67,7 +84,7 @@ def main():
                    compare=None,
                    base=this_name+'.pkl',
                    compare_name='data',
-                   base_name='baseline',
+                   base_name='college baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
     mdl[0].mar_graphs()

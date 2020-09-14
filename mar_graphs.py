@@ -9,7 +9,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy import ma
 
-def mar_graphs(mdl,t=2):
+try:
+    import cupy as cp
+except:
+    pass
+
+def mar_graphs(self,t=4):
+    mdl = self
     setup = mdl.setup
     V = mdl.V
     from marriage import v_mar
@@ -39,16 +45,19 @@ def mar_graphs(mdl,t=2):
     results = list()
     for upp in [False,True]:
         mt = 'Regular' if not upp else 'Unplanned pregnancy'
-        res = v_mar(setup,V[t],t,icouple,inds,match_type=mt,female=True,
+        Vnext = self.cupyfy_v(V[t]) if self.gpu else V[t]
+        
+        res = v_mar(setup,Vnext,t,icouple,inds,match_type=mt,female=True,
                                                         return_insides=True)
-    
+        
+        if self.gpu: res = {k:cp.asnumpy(res[k]) for k in res}
+        
         res_r = mdl.x_reshape(res['itheta'][...,None],t).squeeze(axis=-1)
         tht_r = setup.thetagrid_fine[res_r]
         tht_all = ma.masked_where(res_r<0,tht_r)
-        tht_pick = tht_all[iac,:,izm,:]
-        print(tht_pick.shape)
+        tht_pick = tht_all[iac,:,izm,:].astype(np.float32)
         fig, ax = plt.subplots()
-        cs = ax.contourf(zfg,psig,tht_pick.T,cmap='Blues',vmin=0.0,vmax=0.95) 
+        cs = ax.contourf(zfg,psig,tht_pick.T,cmap='Blues',vmin=0.05,vmax=0.95) 
         cb = fig.colorbar(cs)
         cb.set_label(r'Resulting female bargaining power ($\theta$)')
         plt.xlabel('Female productivity')
@@ -79,7 +88,7 @@ def mar_graphs(mdl,t=2):
     
     
     for n, upp, res in zip([0,1],[False,True],[result_noupp,result_upp]):
-        Vfm,Vmm,Vfs,Vms = res['insides']
+        Vfm,Vmm,Vfs,Vms = res['V_f_yes'], res['V_m_yes'], res['V_f_no'], res['V_m_no']        
         Vfm0, Vmm0 = [mdl.x_reshape(x,t) for x in [Vfm,Vmm]]
         Vfs0,Vms0 = [mdl.x_reshape(x[...,None],t) for x in [Vfs,Vms]]
         

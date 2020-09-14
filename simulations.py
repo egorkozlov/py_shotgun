@@ -522,7 +522,8 @@ class Agents:
                                     + matches['Pregnant']['Abortion'][ia,i_pmat_p]*(i_preg)
                                     
                     
-                    
+                    # TODO: child immediately is a binary decision and does not
+                    # respect infertility.
                     
                     
                     i_disagree = (~i_pot_agree)
@@ -746,6 +747,9 @@ class Agents:
                     assert np.all(self.yaftmar[ind,t]>=0)
                     self.yaftmar[ind,t+1] = self.yaftmar[ind,t] + 1 # extra year past marriage
                     
+                    
+                    pfert = self.setup.pars['fert_prob_t'][t]
+                    
                     if np.any(i_div):
                         
                         
@@ -809,7 +813,9 @@ class Agents:
                             def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
                             self.ils_i[ind[i_ren],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
-                            i_birth = (decision['Give a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
+                            
+                            
+                            i_birth = (decision['Give a birth'][isc,iall,thts]*pfert > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_ren]
                             
                             self.planned_preg[ind[i_ren],t] = i_birth1
@@ -844,7 +850,7 @@ class Agents:
                             ipick = (self.iassets[ind[i_sq],t+1],self.iexo[ind[i_sq],t+1],self.itheta[ind[i_sq],t+1])
                             self.ils_i[ind[i_sq],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
-                            i_birth = (decision['Give a birth'][isc,iall,thts] > self._shocks_planned_preg[ind,t])
+                            i_birth = (decision['Give a birth'][isc,iall,thts]*pfert > self._shocks_planned_preg[ind,t])
                             i_birth1=i_birth[i_sq]
                             self.m_k[ind[i_sq][i_birth1],(t+1):] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1

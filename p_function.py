@@ -20,7 +20,7 @@ from calibration_params import calibration_params
 try:
     from numba import cuda
     g = cuda.device_array((2,5))
-    npt = 120
+    npt = 120 
 except:
     npt = 90
 
@@ -87,7 +87,7 @@ def fun(x):
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.25, rhoend=5e-4, maxfun=npt, bounds=(xl,xu),
+        res=dfols.solve(q, xc, rhobeg = 0.10, rhoend=5e-5, maxfun=npt, bounds=(xl,xu),
                         npt=len(xc)+5,scaling_within_bounds=True, 
                         user_params={'tr_radius.gamma_dec':0.75,'tr_radius.gamma_inc':1.5,
                                      'tr_radius.alpha1':0.5,'tr_radius.alpha2':0.75,

@@ -6,19 +6,45 @@ Created on Wed May 27 19:43:08 2020
 @author: egorkozlov
 """
 
-def get_point(high_e):
+from tiktak import filer
+from calibration_params import calibration_params
+
+def get_point(high_e,read_wisdom=False):
 
     if high_e:
         
-        x = {'sigma_psi': 0.2798538779149558, 'sigma_psi_init': 1.6916827480353398, 'pmeet_21': 0.22119951722233813, 'pmeet_30': 0.6944929872458302, 'pmeet_40': 0.9401168334472371, 'preg_21': 0.006423586619122713, 'preg_28': 0.027174530214511234, 'preg_35': -0.008892724807002941, 'u_shift_mar': 1.1207829780316174, 'util_alp': 0.33532441265560753, 'util_kap': 0.8617581929517057, 'util_qbar': 1.0366661841345464, 'disutil_marry_sm_mal': 36.86138371293624, 'disutil_shotgun': 8.880815017095989, 'abortion_costs': 29.230222498956632, 'p_abortion_access': 0.15865079162079268, 'u_lost_divorce': 9.747677263576907, 'couple_rts': 2.805401881959498,
+        x = {'sigma_psi': 0.3869773077864603, 'sigma_psi_init': 0.9938164169266216, 'pmeet_21': 0.26138291062442615, 'pmeet_30': 0.7186472606306563, 'pmeet_40': 0.6593653665181554, 'preg_21': 0.01355186141662465, 'preg_28': 0.026776949709968387, 'preg_35': 0.037440655536951584, 'u_shift_mar': 0.23416090232520456, 'util_alp': 0.4080762765646524, 'util_kap': 11.265720476636952, 'util_qbar': 30.846312906184785, 'disutil_marry_sm_mal': 16.579301983282175, 'disutil_shotgun': 7.775996065960521, 'abortion_costs': 7.10104593516042, 'p_abortion_access': 0.5697660445900381, 'u_lost_divorce': 13.108545716002517, 'mu_psi_init': -0.5566081252903454,
              'high education': True}
-    
+        
+        if read_wisdom:
+            try:
+                print('read wisdom from file!')
+                o = filer('wisdom.pkl',0,0,repeat=False)[0]
+                x = calibration_params()[-1](o[1])
+                print(x)
+                print('saved distance is {}'.format(o[0]))
+                x.update({'high education': True})
+            except:
+                print('failed to read from wisdom file')
+            
         targ_mode = 'high education'
         
     else:
-        x = {'sigma_psi': 0.8783208275619998, 'sigma_psi_init': 4.841913371090404, 'pmeet_21': 0.4429662745957216, 'pmeet_30': 0.09976862644045448, 'pmeet_40': 0.6556590675095522, 'preg_21': 0.09259183950519333, 'preg_28': 0.07428802631882996, 'preg_35': -0.049794628003451157, 'u_shift_mar': 1.7959460915784782, 'util_alp': 0.4593118057932805, 'util_kap': 1.1639238152564353, 'util_qbar': 0.6935697519247619, 'disutil_marry_sm_mal': 79.68148741525432, 'disutil_shotgun': 5.315001707974356, 'abortion_costs': 5.516265535524452, 'p_abortion_access': 0.18163829572926798, 'u_lost_divorce': 1.184990222239299,
+        x = {'pmeet_21': 0.728698619306192, 'pmeet_30': 0.23310107046750475, 'pmeet_40': 0.9629955398495929, 'preg_21': 0.03687725755909954, 'preg_28': 0.0743925695472168, 'preg_35': 0.19133138664351215, 'util_qbar': 25.181454069571686, 'disutil_marry_sm_mal': 14.040986098063753, 'disutil_shotgun': 5.8766374053947485, 'abortion_costs': 4.317887395330901, 'p_abortion_access': 0.6662455812243002, 'u_lost_divorce': 5.439790568560208, 'sigma_psi': 0.3869773077864603, 'sigma_psi_init': 0.9938164169266216, 'u_shift_mar': 0.23416090232520456, 'util_alp': 0.4080762765646524, 'util_kap': 11.265720476636952, 'mu_psi_init': -0.5566081252903454,
              'high education': False}
         
         targ_mode = 'low education'
+        
+        if read_wisdom:
+            try:
+                print('read wisdom from file!')
+                o = filer('wisdom.pkl',0,0,repeat=False)[0]
+                x = calibration_params()[-1](o[1])
+                print(x)
+                print('saved distance is {}'.format(o[0]))
+                x.update({'high education': False})
+            except:
+                print('failed to read from wisdom file')
+            
     
     return x, targ_mode

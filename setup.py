@@ -34,9 +34,18 @@ class ModelSetup(object):
     def __init__(self,nogrid=False,divorce_costs_k='Default',divorce_costs_nk='Default',**kwargs): 
         
         p = dict()       
+        
+        
+        #age_begin = 21
+        #age_data = 23 # age at which the data start being available
+        #age_death = 76
+        #age_retire = 65
+        #age_fertile = 41
+        
+        
         T = 55
         Tret = 45 # first period when the agent is retired
-        Tfert = 18 # first peroid when infertile
+        Tfert = 20 # first peroid when infertile
         Tdiv = 44 # first period when cannot divorce / renegotiate
         Tmeet = 43 # first period when stop meeting partners
         Tinc = 25 # first period where stop tracking income process and assume it to be fixed
@@ -47,10 +56,11 @@ class ModelSetup(object):
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
+        p['mu_psi_init'] = 0.0
         p['sigma_psi']   = 0.11
-        p['R_t'] = [1.025]*T
+        p['R_t'] = [1/0.96]*T
         p['n_psi'] = 15
-        p['beta_t'] = [0.98]*T
+        p['beta_t'] = [0.96]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
         p['couple_rts'] = 0.23    
@@ -68,13 +78,15 @@ class ModelSetup(object):
         p['pmeet_30'] = 0.2
         p['pmeet_40'] = 0.1
         
-        p['m_zf'] = 0.9
+        p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
         
-        p['z_drift'] = -0.09
+        
         p['no kids at meeting'] = True
         p['high education'] = True # what trend to pick
         p['any kids'] = True
+        
+        p['z_drift'] = -0.09 if p['high education'] else -0.06
         
         p['wret'] = 0.8
         p['uls'] = 0.2
@@ -127,6 +139,7 @@ class ModelSetup(object):
         p['preg_35'] = 0.3
         
         
+        
         for key, value in kwargs.items():
             assert (key in p), 'wrong name?'
             p[key] = value
@@ -157,57 +170,45 @@ class ModelSetup(object):
         if p['high education']: 
             
             
-            m_trend_data = [0.0,0.11316599,.2496034,.31260625,.37472204,.4268548,.48067884,.52687573,
-                            .57293878,.60941412,.65015743,.6685226,.72482815,.74446455,.76712521,.78038137,.79952806,
-                            .80092523,.81972567,.82913486,.83849471,.84308452,.84646086,.85437072,.85499576]
+            m_trend_data = [3.3899509,3.5031169,3.6395543,3.7025571,3.7646729,3.8168057,3.8706297,3.9168266,3.9628897,3.999365,4.0401083,4.0584735,4.114779,4.1344154,4.1570761,4.1703323,4.189479,4.1908761,4.2096766,4.2190858,4.2284456,4.2330354,4.2364118,4.2443216,4.2449467]
             
             
-            f_trend_data = [0.0,0.06715984,.21149606,.32283002,.46885336,.52712037,.58302632,.63348555,.68024646,
-                             .71450132,.74246337,.77044807,.79946406,.80640353,.83799304,.85356081,.86832235
-                             ,.87407447,.87820755,.86840901,.87630054,.8765972,.87894493,.87800553,.87932908]
+            f_trend_data = [3.0796507,3.1468105,3.2911468,3.4024807,3.5485041,3.6067711,3.662677,3.7131363,3.7598972,3.794152,3.8221141,3.8500988,3.8791148,3.8860543,3.9176438,3.9332115,3.9479731,3.9537252,3.9578583,3.9480597,3.9559513,3.9562479,3.9585957,3.9576563,3.9589798]
+
             
             
             nm = len(m_trend_data)-1
             nf = len(f_trend_data)-1
             
-            t0 = 4
-            gap = 3.0340077 - 2.8180354 # male - female
-            
-            c_female = -f_trend_data[t0]
-            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [c_male + m_trend_data[min(t,nm)]
+                                        [m_trend_data[min(t,nm)]
                                              for t in range(T)]
                                         )
             p['f_wage_trend'] = np.array(
-                                [c_female + f_trend_data[min(t,nf)]
+                                [f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
         else:
         # no college
-            m_trend_data = [0.0,0.03824801,.13410532,.1663402,.18535393,.20804419,.22880115,.23963687,.26544877,.27445022,.28828461,.29908889,.3242355,.34399191,.35703786,.36160155,.37354454,.37365049,.38967079,.39410233,.40492857,.40538787,.42001778,.43326506,.43527713]
+            m_trend_data = [3.091856,3.130104,3.2259613,3.2581962,3.2772099,3.2999002,3.3206571,3.3314928,3.3573047,3.3663062,3.3801406,3.3909449,3.4160915,3.4358479,3.4488938,3.4534575,3.4654005,3.4655065,3.4815268,3.4859583,3.4967845,3.4972438,3.5118738,3.525121,3.5271331]
             
             
-            f_trend_data = [0.0,0.03709545,.07178513,.09427489,.18766845,.20733048,.21432513,.22962527,.24421213,.25502674,.26330492,.26669114,.271962,.2775313,.29847667,.29413686,.30664712,.30294726,.31538057,.31768117,.32177537,.32804634,.32827188,.33866797,.34713842]
+            f_trend_data = [2.9056071,2.9427025,2.9773922,2.999882,3.0932755,3.1129375,3.1199322,3.1352323,3.1498192,3.1606338,3.168912,3.1722982,3.1775691,3.1831384,3.2040837,3.1997439,3.2122542,3.2085543,3.2209876,3.2232882,3.2273824,3.2336534,3.233879,3.244275,3.2527455]
+
             
             
             nm = len(m_trend_data)-1
             nf = len(f_trend_data)-1
             
-            t0 = 4
-            gap = 2.5449782 - 2.3597982 # male - female
-            
-            c_female = -f_trend_data[t0]
-            c_male = gap - m_trend_data[t0]
             
             p['m_wage_trend'] = np.array(
-                                        [c_male + m_trend_data[min(t,nm)]
+                                        [m_trend_data[min(t,nm)]
                                              for t in range(T)]
                                         )
             p['f_wage_trend'] = np.array(
-                                [c_female + f_trend_data[min(t,nf)]
+                                [f_trend_data[min(t,nf)]
                                              for t in range(T)]
                                         )
             
@@ -248,6 +249,15 @@ class ModelSetup(object):
         p['n_psi_t'] = [p['n_psi']]*T
         
         p['psi_clip'] = 2.5*p['sigma_psi_init']
+        
+        
+        
+        p['fert_prob_t'] = [0.86*(t<=3) + 0.78*(t>3 and t<=8) + 
+                            0.63*(t>=9 and t<=13) + 0.52*(t>=14) for
+                            t in range(T)]
+        
+        #p['fert_prob_t'] = [1.0]*T
+        
         
         
         self.pars = p
@@ -366,8 +376,8 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
-            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
+            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+           # exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
             
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])
@@ -437,17 +447,17 @@ class ModelSetup(object):
             
             
         #Grid Couple
-        self.na = 40
+        self.na = 50
         self.amin = 0
-        self.amax = 100
+        self.amax = 1000.0
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
         #tune=1.5
         #self.agrid_c = np.geomspace(self.amin+tune,self.amax+tune,num=self.na)-tune
         
         # this builds finer grid for potential savings
         s_between = 7 # default numer of points between poitns on agrid
-        s_da_min = 0.01 # minimal step (does not create more points)
-        s_da_max = 0.1 # maximal step (creates more if not enough)
+        s_da_min = 0.2 # minimal step (does not create more points)
+        s_da_max = 10.0 # maximal step (creates more if not enough)
         
         self.sgrid_c = build_s_grid(self.agrid_c,s_between,s_da_min,s_da_max)
         self.vsgrid_c = VecOnGrid(self.agrid_c,self.sgrid_c)
@@ -466,8 +476,8 @@ class ModelSetup(object):
         
         # grid for theta
         self.ntheta = 11
-        self.thetamin = 0.01
-        self.thetamax = 0.99
+        self.thetamin = 0.05
+        self.thetamax = 0.95
         self.thetagrid = np.linspace(self.thetamin,self.thetamax,self.ntheta,dtype=self.dtype)
         
         
@@ -525,8 +535,8 @@ class ModelSetup(object):
         
         name_fem_pkl = 'az_dist_fem.pkl' if p['high education'] else 'az_dist_fem_noc.pkl'
         name_mal_pkl = 'az_dist_mal.pkl' if p['high education'] else 'az_dist_mal_noc.pkl'
-        name_fem_csv = 'income_assets_distribution_male.csv' if p['high education'] else 'ia_male_noc.csv'
-        name_mal_csv = 'income_assets_distribution_female.pkl' if p['high education'] else 'ia_female_noc.csv'
+        name_fem_csv = 'income_assets_distribution_male_col.csv' if p['high education'] else 'income_assets_distribution_male_hs.csv'
+        name_mal_csv = 'income_assets_distribution_female_col.csv' if p['high education'] else 'income_assets_distribution_female_hs.csv'
         # this is not an error, things are switched
         
         
@@ -538,17 +548,18 @@ class ModelSetup(object):
             
             est_fem = get_estimates(fname=name_fem_csv,
                                     age_start=23,age_stop=42,
-                                    zlist=self.exogrid.zm_t[2:])
+                                    zlist=self.exogrid.zm_t[2:],
+                                    female=False,college=p['high education'])
             filer(name_fem_pkl,est_fem,True,repeat=False)
             self.partners_distribution_fem = est_fem
             est_mal = get_estimates(fname=name_mal_csv,
                                     age_start=21,age_stop=40,
-                                    zlist=self.exogrid.zf_t[0:])
+                                    zlist=self.exogrid.zf_t[0:],
+                                    female=True,college=p['high education'])
             filer(name_mal_pkl,est_mal,True,repeat=False)
             self.partners_distribution_mal = est_mal
             
         self.build_matches()
-        
         
         # building m grid
         ezfmin = min([np.min(np.exp(g+t)) for g,t in zip(exogrid['zf_t'],p['f_wage_trend'])])
@@ -561,8 +572,8 @@ class ModelSetup(object):
         mmax = ezfmax + ezmmax + np.max(self.pars['R_t'])*self.amax
         mint = (ezfmax + ezmmax) # poin where more dense grid begins
         
-        ndense = 600
-        nm = 1500
+        ndense = 1900
+        nm = 3500
         
         gsparse = np.linspace(mint,mmax,nm-ndense)
         gdense = np.linspace(mmin,mint,ndense+1) # +1 as there is a common pt
@@ -592,6 +603,8 @@ class ModelSetup(object):
         nexo = setup.pars['nexo_t'][t]
         sigma_psi_init = setup.pars['sigma_psi_init']
         psi_couple = setup.exogrid.psi_t[t+1]
+        
+        mu = setup.pars['mu_psi_init']
         
         
         if female:
@@ -631,7 +644,7 @@ class ModelSetup(object):
         agrid_s = self.agrid_s
         
         for iz in range(n_zown):
-            p_psi = int_prob(psi_couple,mu=0.0,sig=sigma_psi_init)
+            p_psi = int_prob(psi_couple,mu=mu,sig=sigma_psi_init)
             if female:
                 p_zm  = np.array(pz)
                 p_zf  = zmat_own[iz,:]
@@ -959,11 +972,16 @@ class ModelSetup(object):
     
     def compute_taxes(self):
         self.taxes = dict()
-        self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,1.1086085)
-        self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,1.2123768)
-        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,1.5605029) # use one child
-        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,2.3169997)
-        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,2.3169997)
+        
+        
+        ai_fem = np.mean(np.exp(self.pars['f_wage_trend'][:20]))
+        ai_mal = np.mean(np.exp(self.pars['f_wage_trend'][:20]))
+        ai_c = ai_fem + ai_mal
+        self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,ai_fem)
+        self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,ai_mal)
+        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem) # use one child
+        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c)
+        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c)
         
     def compute_child_support_transitions(self,*,child_support_share):
         from interp_np import interp
