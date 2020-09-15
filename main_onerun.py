@@ -56,7 +56,7 @@ def main(read_wisdom=False,erase=False):
     this_name = 'college baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #load_from='mdl.pkl',
+                                      load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=2)
@@ -87,7 +87,7 @@ def main(read_wisdom=False,erase=False):
                    base_name='college baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
-    mdl[0].mar_graphs()
+    mdl[0].mar_graphs(t = 4)
     '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,

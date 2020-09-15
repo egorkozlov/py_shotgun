@@ -14,7 +14,7 @@ try:
 except:
     pass
 
-def mar_graphs(self,t=4):
+def mar_graphs(self,t=2):
     mdl = self
     setup = mdl.setup
     V = mdl.V
@@ -22,7 +22,7 @@ def mar_graphs(self,t=4):
     from gridvec import VecOnGrid
     agrid_c = mdl.setup.agrid_c
     agrid_s = mdl.setup.agrid_s
-    icouple = VecOnGrid(agrid_c,2*agrid_s).i
+    
     
     npsi = setup.pars['n_psi_t'][t]
     psig = setup.exogrid.psi_t[t]
@@ -33,29 +33,40 @@ def mar_graphs(self,t=4):
     
     
     izm = 2
-    wm = setup.pars['m_wage_trend'][t] + zmg[izm]
-    wzf = np.exp( setup.pars['f_wage_trend'][t] + zfg) / np.exp(wm)
+    
+    wm = np.exp(setup.pars['m_wage_trend'][t] + zmg[izm])
+    wf = np.exp( setup.pars['f_wage_trend'][t] + zfg) 
     
     
     inds = mdl.setup.all_indices(t)[0] # all possible outcomes for couples
-    iac = np.searchsorted(agrid_c,5.0*wm)
     
     
+    af = 0.0*wf[3]
+    am = 2.0*wm
+    
+    iaf = np.searchsorted(agrid_c,af)
+    iac = np.searchsorted(agrid_c,af+am)
+    
+    icouple = iac*np.ones_like(agrid_c,dtype=np.int16)
     icouple = np.broadcast_to(icouple[:,None],(icouple.size,inds.size))
     results = list()
     for upp in [False,True]:
         mt = 'Regular' if not upp else 'Unplanned pregnancy'
         Vnext = self.cupyfy_v(V[t]) if self.gpu else V[t]
+        #f = setup.pars['disutil_shotgun']
+        #setup.pars['disutil_shotgun'] = 0.0
         
         res = v_mar(setup,Vnext,t,icouple,inds,match_type=mt,female=True,
                                                         return_insides=True)
+        
+        #setup.pars['disutil_shotgun'] = f
         
         if self.gpu: res = {k:cp.asnumpy(res[k]) for k in res}
         
         res_r = mdl.x_reshape(res['itheta'][...,None],t).squeeze(axis=-1)
         tht_r = setup.thetagrid_fine[res_r]
         tht_all = ma.masked_where(res_r<0,tht_r)
-        tht_pick = tht_all[iac,:,izm,:].astype(np.float32)
+        tht_pick = tht_all[iaf,:,izm,:].astype(np.float32)
         fig, ax = plt.subplots()
         cs = ax.contourf(zfg,psig,tht_pick.T,cmap='Blues',vmin=0.05,vmax=0.95) 
         cb = fig.colorbar(cs)
@@ -73,9 +84,9 @@ def mar_graphs(self,t=4):
     result_noupp, result_upp = results
     
     
-    izf = 1
-    izm = 3
-    ipsi = 5
+    izf = 3
+    izm = 2
+    ipsi = 7
     
     fig, axs = plt.subplots(1,2)
     
@@ -141,6 +152,7 @@ def mar_graphs(self,t=4):
     #axs[0].set_ylim(-50,10)
     #axs[1].set_ylim(-50,10)
     
+    plt.show()
         
     
 
