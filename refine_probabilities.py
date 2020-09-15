@@ -98,8 +98,8 @@ if __name__ == '__main__':
         
         
         for i in range(nw):
-            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init
-            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init
+            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:nw]
+            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:nw]
             
             xsearch = xinit.copy()
             xsearch.update({'pmeet_exo':prob_meet_w,
