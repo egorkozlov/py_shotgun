@@ -91,8 +91,6 @@ class AgentsEst(Agents):
         
     
         res = dfols.solve(get_residuals,xinit,rhoend=1e-3,bounds=(np.array([0.0,0.0]),np.array([1.0,1.0])))
-        print('t = {}'.format(t))
-        print(res)
     
         get_residuals(res.x) # this writes the probabilities into the object
         
@@ -103,7 +101,6 @@ class AgentsEst(Agents):
         print('estimating')
 
         for t in range(self.T-1):      
-            print(t)
             try:
                 for _ in range(rep): self.simulate_npsolve(t)
                 if self.verbose: self.timer('Simulations, estimation')
