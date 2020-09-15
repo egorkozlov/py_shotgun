@@ -404,7 +404,10 @@ class Agents:
                     if self.pmeet_exo is None:
                         pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
                     else:
-                        pmeet = pcoef*self.pmeet_exo[t]
+                        try:
+                            pmeet = pcoef*self.pmeet_exo[t]
+                        except IndexError:
+                            pmeet = pcoef*self.pmeet_exo[-1]
                     
                     p_abortion_access = self.Mlist[ipol].setup.pars['p_abortion_access']
                     
@@ -488,11 +491,14 @@ class Agents:
                             p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
                         else:
                             p_preg = fert*self.ppreg_exo[t]
+                            
                     elif sname == 'Male, single':
                         if self.ppreg_exo is None:
                             p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
                         else:
                             p_preg = fert*self.ppreg_exo[t]
+                            #except IndexError:
+                            #    p_preg = fert*self.ppreg_exo[-1]
                     elif sname == 'Female and child':
                         p_preg = 1.0 #np.ones_like(ind,dtype=np.float64)[]
                     else:

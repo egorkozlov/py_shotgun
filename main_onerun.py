@@ -66,7 +66,7 @@ def main(read_wisdom=False,erase=False):
     mdl[0].time_statistics()
 
 
-
+    
 
 
     print('Done. Residual in point x0 is {}'.format(out))

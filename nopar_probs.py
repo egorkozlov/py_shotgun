@@ -49,14 +49,9 @@ class AgentsEst(Agents):
         
         
         
-        try:
-            s_dta = self.ss_val[t]
-            kf_dta = self.kf_val[t]
-            skip = False
-        except:
-            s_dta = self.ss_val[-1]
-            kf_dta = self.kf_val[-1]
-            skip = True
+        s_dta = self.ss_val[t]
+        kf_dta = self.kf_val[t]
+    
         
         def get_residuals(x):
             pmeet_here = x[0]
@@ -98,25 +93,82 @@ class AgentsEst(Agents):
         else:
             xinit = np.array([self.pmeet_exo[t-1],self.ppreg_exo[t-1]])
         
-        if not skip:
-            res = dfols.solve(get_residuals,xinit,rhoend=1e-3,bounds=(np.array([0.0,0.0]),np.array([1.0,1.0])))
-            print('t = {}'.format(t))
-            print(res)
+    
+        res = dfols.solve(get_residuals,xinit,rhoend=1e-3,bounds=(np.array([0.0,0.0]),np.array([1.0,1.0])))
+        print('t = {}'.format(t))
+        print(res)
+    
+        get_residuals(res.x) # this writes the probabilities into the object
         
-            get_residuals(res.x) # this writes the probabilities into the object
-        
-        else:
-            xinit = np.array([self.pmeet_exo[t-1],self.ppreg_exo[t-1]])
-            print('skipping optimization: no data for t = {}'.format(t))
-            get_residuals(xinit) 
     
     
     def simulate(self,rep=1):
+        # this first estimates probabilities then spits them out
         for t in range(self.T-1):      
             print(t)
-            for _ in range(rep): self.simulate_npsolve(t)
+            try:
+                for _ in range(rep): self.simulate_npsolve(t)
+                if self.verbose: self.timer('Simulations, estimation')
+            except IndexError:
+                break
             
+        print('estimation done!')
+        ppreg = np.array(self.ppreg_exo)
+        pmeet = np.array(self.pmeet_exo)
+        
+        print(ppreg)
+        print(pmeet)
+        
+        ppreg_int = self.interpolate_last(ppreg,nlast=3)
+        pmeet_int = self.interpolate_last(pmeet,nlast=3)
+        print(ppreg_int)
+        print(pmeet_int)
+        
+        self.ppreg_exo = ppreg_int
+        self.pmeet_exo = pmeet_int
+        
+        print('simulating with estimated probabilities')
+        for t in range(self.T-1):
+            self.simulate_t(t)
             if self.verbose: self.timer('Simulations, iteration')
+        print('done')
+        
+        
+    def interpolate_last(self,xin,nlast=1):
+        nx = xin.size
+        xin_int = np.zeros(self.T,dtype=np.float64)
+        xin_int[:nx] = xin
+        xin_int[nx:] = xin[-nlast:].mean()
+        return xin_int
+        
+    def interpolate_average(self,xin):
+        nx = xin.size
+        xin_int = np.zeros(self.T,dtype=np.float64)
+        xin_int[:nx] = xin
+        xin_int[nx:] = xin.mean()
+        return xin_int
+        
+    def interpolate_quadratic(self,xin):
+        reg_y = xin
+        nx = xin.size
+        tval = np.arange(nx,dtype=np.float64)
+        
+        try:
+            pol = np.polyfit(tval,reg_y,2)
+        except:
+            pol = [0,0,0]
+            
+        b0 = pol[2]
+        b1 = pol[1]
+        b2 = pol[0]
+        
+        tval_int = np.arange(self.T,dtype=np.float64)
+        xin_int = np.zeros(self.T,dtype=np.float64)
+        xin_int[:nx] = xin
+        xin_int[nx:] = np.clip(b0 + b1*tval_int[nx:] + b2*tval_int[nx:],0.0,1.0)
+        
+        return xin_int
+            
         
     def define_targets(self):
         from targets import all_targets

@@ -35,7 +35,7 @@ def mdl_resid(x=None,targets=None,weights=w,
     
     from model import Model
     from setup import DivorceCosts
-    from nopar_probs import AgentsEst as Agents
+    from simulations import Agents
     from crosssection import CrossSection
     from calibration_params import calibration_params
 
