@@ -47,6 +47,7 @@ if __name__ == '__main__':
     
     
     out, mdl, agents, res, mom = mdl_resid(x=xinit,targets=tar,
+                                      load_from='mdl.pkl',
                                       return_format=['distance','models','agents','scaled residuals','moments'],                                      
                                       verbose=False)
     
@@ -98,8 +99,8 @@ if __name__ == '__main__':
         
         
         for i in range(nw):
-            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:nw]
-            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:nw]
+            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
+            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:ne]
             
             xsearch = xinit.copy()
             xsearch.update({'pmeet_exo':prob_meet_w,
