@@ -21,6 +21,7 @@ if system() != 'Darwin' and system() != 'Windows':
 
 from residuals import mdl_resid
 from targets import target_values
+import numpy as np
 
 print('Hi!')
 
@@ -63,6 +64,8 @@ def main(read_wisdom=False,erase=False):
 
 
 
+
+    
     mdl[0].time_statistics()
 
 

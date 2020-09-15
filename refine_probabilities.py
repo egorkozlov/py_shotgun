@@ -52,6 +52,11 @@ if __name__ == '__main__':
     
     print('initial distance is {}'.format(out))
     
+    prob_meet_init = np.array(mdl[0].setup.pars['pmeet_t'][:mdl[0].setup.pars['Tmeet']])
+    prob_preg_init = np.array([mdl[0].setup.upp_precomputed_fem[t][3] for t in range(mdl[0].setup.pars['Tmeet'])])
+    
+    
+    
     
     
     nopt = 5
@@ -62,8 +67,8 @@ if __name__ == '__main__':
         
         print('estimating probabilities:')
         
-        prob_meet = 0.0
-        prob_preg = 0.0
+        prob_meet_est = 0.0
+        prob_preg_est = 0.0
         nrep = 4
         np.random.seed(12)
         
@@ -71,11 +76,54 @@ if __name__ == '__main__':
         for rep in range(nrep):
             o = AgentsEst(mdl,T=30,verbose=False,fix_seed=False)
         
-            prob_meet += (1/nrep)*o.pmeet_exo.copy()
-            prob_preg += (1/nrep)*o.ppreg_exo.copy()
+            prob_meet_est += (1/nrep)*o.pmeet_exo.copy()
+            prob_preg_est += (1/nrep)*o.ppreg_exo.copy()
             
-        print('estimated pmeet = {}'.format(prob_meet))
-        print('estimated ppreg = {}'.format(prob_preg))
+        print('estimated pmeet = {}'.format(prob_meet_est))
+        print('estimated ppreg = {}'.format(prob_preg_est))
+        
+        
+        
+        
+        
+        # this does binary search
+        
+        w = 0.5
+        
+        factor = 0.8
+        
+        ne = prob_meet_est.size
+        nw = 10
+        print('reference value is {}'.format(out))
+        
+        
+        for i in range(nw):
+            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init
+            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init
+            
+            xsearch = xinit.copy()
+            xsearch.update({'pmeet_exo':prob_meet_w,
+                                    'ppreg_exo':prob_preg_w})
+        
+            out_w = mdl_resid(x=xsearch,targets=tar,
+                                          return_format=['distance'],                                      
+                                          verbose=False)
+            
+            print('with weight = {}, distance is {}'.format(w,out_w))
+            
+            if out_w < 1.5*out: 
+                print('found a potentially imporving weight!')
+                break
+            else:
+                w = 0.75*w
+                if i < nw-1:
+                    print('trying new weight = {}'.format(w))
+                else:
+                    print('no luck...')
+                
+                
+        
+        
         
         xfix = {k: xinit[k] for k in ['pmeet_21','pmeet_30','pmeet_40',
                                         'preg_21','preg_28','preg_35']}
@@ -88,8 +136,9 @@ if __name__ == '__main__':
         
         def tr(x):
             xx = translator(x)
-            xx.update({'pmeet_exo':prob_meet,'ppreg_exo':prob_preg})
+            xx.update({'pmeet_exo':prob_meet_w,'ppreg_exo':prob_preg_w})
             return xx
+        
         
         
         

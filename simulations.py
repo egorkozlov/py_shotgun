@@ -35,6 +35,8 @@ class Agents:
         self.ppreg_exo = ppreg_exo
         
         
+        
+        
         #Unilateral Divorce
         self.Mlist = Mlist
         self.Vlist = [M.V for M in Mlist]
@@ -52,6 +54,8 @@ class Agents:
         self.T = T
         self.verbose = verbose
         self.timer = self.Mlist[0].time
+        
+        
         
         
         self.female = female
