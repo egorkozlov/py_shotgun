@@ -54,11 +54,11 @@ if __name__ == '__main__':
     
     
     
-    nopt = 3
+    nopt = 5
     
     for iopt in range(nopt):
         
-        print('running esimation round {}'.fomrat(iopt))
+        print('running esimation round {}'.format(iopt))
         
         print('estimating probabilities:')
         
@@ -74,6 +74,8 @@ if __name__ == '__main__':
             prob_meet += (1/nrep)*o.pmeet_exo.copy()
             prob_preg += (1/nrep)*o.ppreg_exo.copy()
             
+        print('estimated pmeet = {}'.format(prob_meet))
+        print('estimated ppreg = {}'.format(prob_preg))
         
         xfix = {k: xinit[k] for k in ['pmeet_21','pmeet_30','pmeet_40',
                                         'preg_21','preg_28','preg_35']}
@@ -96,7 +98,7 @@ if __name__ == '__main__':
         
         x0, lb, ub = np.array(x0), np.array(lb), np.array(ub)
         
-        print('starting from {}'.format(x0))
+        print('starting from {}'.format(tr(x0)))
         
         tar = target_values('high education')
         def q(pt):
@@ -122,7 +124,10 @@ if __name__ == '__main__':
         
         
         print(res)
-        print('Result is {}'.format(translator(res.x)))
+        print('Result is {}'.format(tr(res.x)))
+        from tiktak import filer
+        filer('wisdom_refined.pkl',tr(res.x),True)
+        print('wrote to the file!')
         
         
         xinit = tr(res.x)

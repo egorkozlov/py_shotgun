@@ -78,11 +78,7 @@ class AgentsEst(Agents):
             kf_mdl = (self.k_m[:,t+1] & (self.nmar[:,t+1] == 1)).mean() #(self.i_km())[:,t+1].mean()
             
             
-            #print('targets are : {}, {}'.format(kf_dta,s_dta))
-            #print('model values are : {}, {}'.format(kf_mdl,s_mdl))
-            
             resid = np.array([s_mdl - s_dta,kf_mdl-kf_dta])
-            print('t is {}, x is {}, resid is {}'.format(t,x,np.sum(resid**2)))
             
             return resid
         
@@ -104,6 +100,8 @@ class AgentsEst(Agents):
     
     def simulate(self,rep=1):
         # this first estimates probabilities then spits them out
+        print('estimating')
+
         for t in range(self.T-1):      
             print(t)
             try:
@@ -116,18 +114,14 @@ class AgentsEst(Agents):
         ppreg = np.array(self.ppreg_exo)
         pmeet = np.array(self.pmeet_exo)
         
-        print(ppreg)
-        print(pmeet)
         
         ppreg_int = self.interpolate_last(ppreg,nlast=3)
         pmeet_int = self.interpolate_last(pmeet,nlast=3)
-        print(ppreg_int)
-        print(pmeet_int)
+        
         
         self.ppreg_exo = ppreg_int
         self.pmeet_exo = pmeet_int
         
-        print('simulating with estimated probabilities')
         for t in range(self.T-1):
             self.simulate_t(t)
             if self.verbose: self.timer('Simulations, iteration')
