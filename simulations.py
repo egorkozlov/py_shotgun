@@ -534,8 +534,22 @@ class Agents:
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
                     
                     i_abortion = (i_abortion_allowed) & (i_abortion_preferred) & (i_disagree_and_meet) & (i_preg) &  (sname=='Female, single')
-                    i_kept = (i_abortion_allowed) & (~i_abortion_preferred) & (i_disagree_and_meet) &  (i_preg) & (sname=='Female, single')
-                    i_no_access = ~(i_abortion_allowed) & (i_disagree_and_meet) &  (i_preg) &  (sname=='Female, single')
+                    i_kept_sm = (i_abortion_allowed) & (~i_abortion_preferred) & (i_disagree_and_meet) &  (i_preg) & (sname=='Female, single')
+                    i_no_access_sm = ~(i_abortion_allowed) & (i_disagree_and_meet) &  (i_preg) &  (sname=='Female, single')
+                    
+                    
+                    
+                    
+                    
+                    
+                    i_agree = ~i_disagree_or_nomeet
+    
+                    
+                    i_agree_mar = (i_agree) & (i_m_preferred)
+                    i_agree_coh = (i_agree) & (~i_m_preferred)
+                    
+                    
+                    i_kept_kf = (i_agree_mar & ~(sname=='Female and child'))
                     
                     
                     self.disagreed[ind,t] = i_disagree_and_meet
@@ -544,7 +558,11 @@ class Agents:
                     self.aborted[ind,t] = i_abortion
                     
                     n_abortions = i_abortion.sum()
-                    n_kept = i_kept.sum()
+                    n_kept = i_kept_sm.sum() + i_no_access_sm.sum() + i_kept_kf.sum()
+                    
+                    
+                    
+                    
                     
                     if sname == 'Female, single':
                         self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
@@ -565,17 +583,12 @@ class Agents:
                         become_single = np.zeros_like(become_sm,dtype=np.bool)
                     assert np.all(i_disagree_or_nomeet == ((become_sm) | (become_single)))
                     
-                    i_agree = ~i_disagree_or_nomeet
-    
-                    
-                    i_agree_mar = (i_agree) & (i_m_preferred)
-                    i_agree_coh = (i_agree) & (~i_m_preferred)
                     
                     self.agreed[ind,t] = (i_agree_mar) | (i_agree_coh)
                     self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
                     
                     
-                    self.new_child[ind,t+1] = (i_kept | i_no_access) | (i_agree_mar & ~(sname=='Female and child'))
+                    self.new_child[ind,t+1] = (i_kept_sm | i_no_access_sm) | (i_agree_mar & ~(sname=='Female and child'))
                     
                     
                     
