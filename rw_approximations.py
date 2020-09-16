@@ -32,7 +32,7 @@ def normcdf_tr(z,nsd=5):
         '''
 from mc_tools import int_prob
         
-def nonuniform_centered_grid(npt,bound,share_below=1/3,pwr=0.75):
+def nonuniform_centered_grid(npt,bound,share_below=1/2,pwr=0.5):
     from math import floor
     include_zero = (npt%2 == 1)
     n_below = np.maximum(floor(share_below*npt),2)
