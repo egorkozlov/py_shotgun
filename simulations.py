@@ -12,8 +12,8 @@ from gridvec import VecOnGrid
 
 class Agents:
     
-    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,verbose=True,nosim=False,
-                 fix_seed=True):
+    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,
+                 no_sm=True,verbose=True,nosim=False,fix_seed=True):
             
             
         if fix_seed: np.random.seed(18)
@@ -153,7 +153,7 @@ class Agents:
         self.state[:,0] = self.state_codes[self.single_state]  
         
         # initial single mothers:
-        i_sm_init = (self._shocks_init_sm <= self.setup.pars['sm_init'])
+        i_sm_init = (self._shocks_init_sm <= (self.setup.pars['sm_init'] if not no_sm else 0.0))
         self.state[i_sm_init,0] = (self.state_codes['Female and child'] \
                                         if self.female else \
                                         self.state_codes['Male, single'])
@@ -162,7 +162,7 @@ class Agents:
                                                 
         
         self.timer('Simulations, creation',verbose=self.verbose)
-        self.ils_def = 0#self.setup.nls - 1
+        self.ils_def = 0  # self.setup.nls - 1
             
         
         
@@ -193,10 +193,15 @@ class Agents:
         else:
             self.policy_ind[:] = 0
             
-        if not nosim: self.simulate()
+            
+        if not nosim: self.run_sim()
+            
+            
+    def run_sim(self):        
+        self.simulate()
         self.compute_aux()
         counts, offers, marriages = self.marriage_stats()
-        
+    
         if self.verbose and self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.verbose and self.ub_hit_couple: print('Assets upped bound is reached for couples')
         
@@ -478,7 +483,7 @@ class Agents:
                     # potential assets position of couple
                     
                     vpreg = self._shocks_single_preg[ind,t]
-                    i_preg = (vpreg < p_preg)
+                    i_preg = (vpreg <= p_preg)
                     
                     #i_pmat = i_pmat_p*(i_preg) + i_pmat_np*(~i_preg)
                     
