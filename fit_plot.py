@@ -630,8 +630,8 @@ class FitPlots(object):
         ax.grid(True)
         
         
-        am = moments['unplanned pregnancies aborted']
-        ad = targets['unplanned pregnancies aborted'][0]
+        am = 100*moments['unplanned pregnancies aborted']
+        ad = 100*targets['unplanned pregnancies aborted'][0]
         
         fig, ax = plt.subplots()
         ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name+', abortions {:02.3g}%'.format(am))
