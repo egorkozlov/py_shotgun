@@ -76,7 +76,6 @@ if __name__ == '__main__':
     
     names = ['educ comparison: '+ n for n in names]
     
-    agents_list = list()
     for x, name in zip(xlist,names):        
         print(name)
         print(x)
