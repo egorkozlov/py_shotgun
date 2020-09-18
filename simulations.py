@@ -13,7 +13,7 @@ from gridvec import VecOnGrid
 class Agents:
     
     def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,
-                 no_sm=True,verbose=True,nosim=False,fix_seed=True):
+                 no_sm=False,verbose=True,nosim=False,fix_seed=True):
             
             
         if fix_seed: np.random.seed(18)
