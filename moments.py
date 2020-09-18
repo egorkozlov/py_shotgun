@@ -138,7 +138,7 @@ def compute_moments(self):
 
     for t in range(1,11):
         moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean() if np.any(pick & (self.yaftmar==t) & obs_m_k==1) else 0.0
-
+        
     # divorce hazards
     # simulating by years after marriage
     pick = age_pick & one_mar
@@ -153,8 +153,10 @@ def compute_moments(self):
             just_div[yam] = self.just_divorced[thing].mean()
             haz_div[yam] = just_div[yam]/still_mar[yam]
 
-
-
+    for t in range(0,self.T):
+        moments['ever divorced at {}'.format(21+t)]  = ever_div[:,t].mean()
+        
+    
 
     moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()
 
