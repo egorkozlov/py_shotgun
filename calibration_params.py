@@ -19,7 +19,7 @@ def calibration_params(xin=None,xfix=None):
     
     
     params = OrderedDict(
-              sigma_psi=(0.0001,0.65,0.1),
+              sigma_psi=(0.0001,0.95,0.1),
               sigma_psi_init=(0.001,2.9,0.1),
               pmeet_21=(0.0,1.0,0.09),
               pmeet_30=(0.0,1.0,0.37),
