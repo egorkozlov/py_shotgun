@@ -121,8 +121,8 @@ class Agents:
         self.m_k = np.zeros((N,T),dtype=np.bool)
         
         self.nmar = np.zeros((N,T),dtype=np.int8)
-        self.n_kept = np.zeros((T,),dtype=np.int8)
-        self.n_aborted = np.zeros((T,),dtype=np.int8)
+        self.n_kept = np.zeros((T,),dtype=np.int16)
+        self.n_aborted = np.zeros((T,),dtype=np.int16)
         self.share_aborted = np.zeros((T,),dtype=np.float64)
         
         self.ub_hit_single = False
