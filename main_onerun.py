@@ -31,7 +31,7 @@ from estimates import get_point
  
 def main(read_wisdom=False,erase=False):
     
-    high_e = True
+    high_e = False
     
     if erase:
         try:
@@ -53,7 +53,7 @@ def main(read_wisdom=False,erase=False):
     tar = target_values(targ_mode)
 
 
-    this_name = 'college baseline'
+    this_name = 'college baseline' if high_e else 'high school baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       #load_from='mdl.pkl',

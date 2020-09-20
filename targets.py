@@ -8,7 +8,7 @@ Created on Fri Feb 14 07:59:29 2020
 
 from itertools import chain
 
-def target_values(mode='high education'):
+def target_values(mode='low education'):
         
     
     
