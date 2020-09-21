@@ -70,7 +70,7 @@ if __name__ == '__main__':
         
         prob_meet_est = 0.0
         prob_preg_est = 0.0
-        nrep = 4
+        nrep = 4 if nopt > 0 else 1
         np.random.seed(12)
         
         
@@ -91,39 +91,43 @@ if __name__ == '__main__':
         
         w = 1.0
         
-        factor = 0.8
+        factor = 0.5
         
         ne = prob_meet_est.size
         nw = 10
         print('reference value is {}'.format(out))
         
-        for yfactor in [1.0,1.25,1.5,2.0]:
-            for i in range(nw):
-                prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
-                prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:ne]
-                
-                xsearch = xinit.copy()
-                xsearch.update({'pmeet_exo':prob_meet_w,
-                                        'ppreg_exo':prob_preg_w})
+        y_previous = out
+        
+        
+        
+        
+        yfactor = 1.5
+    
+        for i in range(nw):
+            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
+            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:ne]
             
-                out_w = mdl_resid(x=xsearch,targets=tar,
-                                              return_format=['distance'],                                      
-                                              verbose=False)
-                
-                print('with weight = {}, distance is {}'.format(w,out_w))
-                
-                if out_w < yfactor*out: 
-                    print('found a potentially imporving weight for yfactor = {}'.format(yfactor))
-                    stop_looking=True
-                    break
+            xsearch = xinit.copy()
+            xsearch.update({'pmeet_exo':prob_meet_w,
+                                    'ppreg_exo':prob_preg_w})
+        
+            out_w = mdl_resid(x=xsearch,targets=tar,
+                                          return_format=['distance'],                                      
+                                          verbose=False)
+            
+            print('with weight = {}, distance is {}'.format(w,out_w))
+            
+            if out_w < yfactor*out: 
+                print('found a potentially imporving weight for yfactor = {}'.format(yfactor))
+                break
+            else:
+                w = factor*w
+                if i < nw-1:
+                    print('trying new weight = {}'.format(w))
                 else:
-                    w = factor*w
-                    if i < nw-1:
-                        print('trying new weight = {}'.format(w))
-                    else:
-                        print('no luck...')
+                    print('no luck...')
                         
-            if stop_looking: break
                 
         
         
@@ -141,7 +145,6 @@ if __name__ == '__main__':
             xx = translator(x)
             xx.update({'pmeet_exo':prob_meet_w,'ppreg_exo':prob_preg_w})
             return xx
-        
         
         
         
@@ -184,3 +187,8 @@ if __name__ == '__main__':
         
         xinit = tr(res.x)
         out, mdl, agents, res, mom = mdl_resid(x=xinit,return_format=['distance','models','agents','scaled residuals','moments'])
+        if out > y_previous:
+            print('no reduction in function value obtained')
+            yfactor = 0.5*yfactor + 0.5
+            
+        y_previous = out
