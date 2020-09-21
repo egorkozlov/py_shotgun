@@ -10,15 +10,43 @@ from simulations import Agents
 
 import dfols
 import numpy as np
+from tiktak import filer
+from timeit import default_timer as dt
+
     
 
 class AgentsEst(Agents):
-    def __init__(self,*args,**kwargs):
-        Agents.__init__(self,*args,nosim=True,**kwargs)
+    def __init__(self,Mlist,*args,use_pickles=False,**kwargs):
+        if type(Mlist) is not list:
+            Mlist = [Mlist]
+        
+        if not use_pickles:
+            Agents.__init__(self,Mlist,*args,nosim=True,**kwargs)
+        else:
+            try:
+                pmeet_exo = filer('pmeet_exo.pkl',0,0,repeat=False)
+                ppreg_exo = filer('ppreg_exo.pkl',0,0,repeat=False)
+                Agents.__init__(self,Mlist,*args,pmeet_exo=pmeet_exo,\
+                                ppreg_exo=ppreg_exo,nosim=True,**kwargs)
+            except:
+                print('no available pickles found!')
+                mdl = Mlist
+                assert type(mdl) is list
+                pmeet_exo = np.array(mdl[0].setup.pars['pmeet_t'][:mdl[0].setup.pars['Tmeet']])
+                ppreg_exo = np.array([mdl[0].setup.upp_precomputed_fem[t][3] for t in range(mdl[0].setup.pars['Tmeet'])])
+                Agents.__init__(self,Mlist,*args,pmeet_exo=pmeet_exo,\
+                                ppreg_exo=ppreg_exo,nosim=True,**kwargs)
+                
         self.define_targets()
         self.run_sim()
         self.get_shares()
         
+        if use_pickles:
+            pmeet_exo = self.pmeet_exo.copy()
+            ppreg_exo = self.ppreg_exo.copy()
+            filer('pmeet_exo.pkl',pmeet_exo,True)
+            filer('ppreg_exo.pkl',ppreg_exo,True)
+            print('saved pickles')
         
         
         
@@ -30,6 +58,7 @@ class AgentsEst(Agents):
     
     def simulate_npsolve(self,t):
         try:
+            assert t>0
             pmeet0 = self.pmeet_exo[:t] 
             ppreg0 = self.ppreg_exo[:t]
         except:
@@ -201,11 +230,14 @@ if __name__ == '__main__':
         
     np.random.seed(12)
 
-    o = AgentsEst(mdl,T=30,verbose=True)
+
+
+    q = dt()
+    o = AgentsEst(mdl,T=30,verbose=False)
     ss_val = o.ss_val
     kf_val = o.kf_val
     
-    
+    print('total time is {:02.1f} sec'.format(dt()-q))
     
     
     '''

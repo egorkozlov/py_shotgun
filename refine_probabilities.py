@@ -60,7 +60,7 @@ if __name__ == '__main__':
     
     
     
-    nopt = 5
+    nopt = 10
     
     for iopt in range(nopt):
         
@@ -89,7 +89,7 @@ if __name__ == '__main__':
         
         # this does binary search
         
-        w = 0.5
+        w = 1.0
         
         factor = 0.8
         
@@ -97,31 +97,33 @@ if __name__ == '__main__':
         nw = 10
         print('reference value is {}'.format(out))
         
-        
-        for i in range(nw):
-            prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
-            prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:ne]
-            
-            xsearch = xinit.copy()
-            xsearch.update({'pmeet_exo':prob_meet_w,
-                                    'ppreg_exo':prob_preg_w})
-        
-            out_w = mdl_resid(x=xsearch,targets=tar,
-                                          return_format=['distance'],                                      
-                                          verbose=False)
-            
-            print('with weight = {}, distance is {}'.format(w,out_w))
-            
-            if out_w < 1.5*out: 
-                print('found a potentially imporving weight!')
-                break
-            else:
-                w = 0.75*w
-                if i < nw-1:
-                    print('trying new weight = {}'.format(w))
-                else:
-                    print('no luck...')
+        for yfactor in [1.0,1.25,1.5,2.0]:
+            for i in range(nw):
+                prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
+                prob_preg_w = w*prob_preg_est + (1-w)*prob_preg_init[:ne]
                 
+                xsearch = xinit.copy()
+                xsearch.update({'pmeet_exo':prob_meet_w,
+                                        'ppreg_exo':prob_preg_w})
+            
+                out_w = mdl_resid(x=xsearch,targets=tar,
+                                              return_format=['distance'],                                      
+                                              verbose=False)
+                
+                print('with weight = {}, distance is {}'.format(w,out_w))
+                
+                if out_w < yfactor*out: 
+                    print('found a potentially imporving weight for yfactor = {}'.format(yfactor))
+                    stop_looking=True
+                    break
+                else:
+                    w = factor*w
+                    if i < nw-1:
+                        print('trying new weight = {}'.format(w))
+                    else:
+                        print('no luck...')
+                        
+            if stop_looking: break
                 
         
         
@@ -164,7 +166,7 @@ if __name__ == '__main__':
                 return ans
                 
                 
-        res=dfols.solve(q, x0, rhobeg = 0.02, rhoend=1e-5, maxfun=80, bounds=(lb,ub),
+        res=dfols.solve(q, x0, rhobeg = 0.02, rhoend=1e-5, maxfun=60, bounds=(lb,ub),
                         scaling_within_bounds=True, objfun_has_noise=False,
                         npt = len(x0)+5,
                         user_params={'restarts.use_restarts':True,
