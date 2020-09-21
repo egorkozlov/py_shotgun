@@ -35,32 +35,42 @@ print('Hi!')
  
 import os
 os.environ['MKL_CBWR']='AUTO'
+from tiktak import filer
 
- 
-if __name__ == '__main__':
+def run(resume=False,high_e=True):
     
-    
-    high_e = True
     
     xinit, targ_mode = get_point(high_e,read_wisdom=False)
     tar = target_values(targ_mode)
     
-    
+    if resume:
+        x_load = filer('wisdom_refined.pkl',0,0)
+        prob_meet_load = x_load['pmeet_exo']
+        prob_preg_load = x_load['ppreg_exo']
+        xinit = x_load
+        
+        
+        
     out, mdl, agents, res, mom = mdl_resid(x=xinit,targets=tar,
-                                      #load_from='mdl.pkl',
                                       return_format=['distance','models','agents','scaled residuals','moments'],                                      
                                       verbose=False)
     
+    
+    
     print('initial distance is {}'.format(out))
     
-    prob_meet_init = np.array(mdl[0].setup.pars['pmeet_t'][:mdl[0].setup.pars['Tmeet']])
-    prob_preg_init = np.array([mdl[0].setup.upp_precomputed_fem[t][3] for t in range(mdl[0].setup.pars['Tmeet'])])
-    
-    
+    if resume:
+        prob_meet_init = prob_meet_load
+        prob_preg_init = prob_preg_load
+    else:
+        prob_meet_init = np.array(mdl[0].setup.pars['pmeet_t'][:mdl[0].setup.pars['Tmeet']])
+        prob_preg_init = np.array([mdl[0].setup.upp_precomputed_fem[t][3] for t in range(mdl[0].setup.pars['Tmeet'])])
     
     
     
     nopt = 10
+    yfactor = 1.5
+
     
     for iopt in range(nopt):
         
@@ -102,7 +112,6 @@ if __name__ == '__main__':
         
         
         
-        yfactor = 1.5
     
         for i in range(nw):
             prob_meet_w = w*prob_meet_est + (1-w)*prob_meet_init[:ne]
@@ -180,7 +189,6 @@ if __name__ == '__main__':
         
         print(res)
         print('Result is {}'.format(tr(res.x)))
-        from tiktak import filer
         filer('wisdom_refined.pkl',tr(res.x),True)
         print('wrote to the file!')
         
@@ -192,3 +200,9 @@ if __name__ == '__main__':
             yfactor = 0.5*yfactor + 0.5
             
         y_previous = out
+
+ 
+if __name__ == '__main__':
+    run(resume=False)
+    
+    
