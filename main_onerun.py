@@ -21,6 +21,7 @@ if system() != 'Darwin' and system() != 'Windows':
 
 from residuals import mdl_resid
 from targets import target_values
+import numpy as np
 
 print('Hi!')
 
@@ -56,17 +57,19 @@ def main(read_wisdom=False,erase=False):
     this_name = 'college baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #load_from='mdl.pkl',
+                                      load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=1)
 
 
 
+
+    
     mdl[0].time_statistics()
 
 
-
+    
 
 
     print('Done. Residual in point x0 is {}'.format(out))

@@ -106,7 +106,7 @@ def ev_single_k(setup,V,t):
     
     female = True
     
-    skip_mar = (pmeet < 1e-5)
+    skip_mar = (t >= setup.pars['Tmeet'])
         
     nz = setup.pars['n_zf_t'][t] if female else setup.pars['n_zm_t'][t]
     nl = len(setup.ls_levels['Female and child'])

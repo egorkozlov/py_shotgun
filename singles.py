@@ -110,7 +110,7 @@ def ev_single(setup,V,female,t):
     
     pmeet = setup.pars['pmeet_t'][t]
     
-    skip_mar = (pmeet < 1e-5)
+    skip_mar = (t >= setup.pars['Tmeet'])
     
     if female:
         M = co(setup.exogrid.zf_t_mat[t].T)
