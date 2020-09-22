@@ -35,7 +35,7 @@ def calibration_params(xin=None,xfix=None):
               disutil_shotgun=(0.0,19.0,0.63),
               abortion_costs=(0.0,20.0,5.0),
               p_abortion_access=(0.0,1.0,0.5),
-              u_lost_divorce=(0.0,15.0,2.0),
+              u_lost_divorce=(0.0,25.0,2.0),
               mu_psi_init=(-3.0,3.0,0.0)
                         )
     
