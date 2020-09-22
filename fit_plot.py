@@ -630,11 +630,12 @@ class FitPlots(object):
         ax.grid(True)
         
         
-        
+        am = 100*moments['unplanned pregnancies aborted']
+        ad = 100*targets['unplanned pregnancies aborted'][0]
         
         fig, ax = plt.subplots()
-        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_model)))
-        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name+', abortions {:02.3g}%'.format(np.nanmean(abortions_data)))
+        ax.plot(tval,100*rel_sm_model,'o-b',label=self.base_name+', abortions {:02.3g}%'.format(am))
+        ax.plot(tval,100*rel_sm_data,'o-k',label=self.compare_name+', abortions {:02.3g}%'.format(ad))
         ax.set_xlabel('age')
         ax.set_ylabel('share (%)')
         ax.set_title('Single mothers among mothers + abortions')
