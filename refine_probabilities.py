@@ -203,6 +203,6 @@ def run(resume=False,high_e=True):
 
  
 if __name__ == '__main__':
-    run(resume=False)
+    run(resume=True)
     
     

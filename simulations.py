@@ -906,6 +906,8 @@ class Agents:
                             self.ils_i[ind[i_sq],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
                             i_birth = (decision['Give a birth'][isc,iall,thts]*pfert > self._shocks_planned_preg[ind,t])
+                            
+                            
                             i_birth1=i_birth[i_sq]
                             self.m_k[ind[i_sq][i_birth1],(t+1):] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
@@ -1107,7 +1109,11 @@ class Agents:
                  'Single, not pregnant':nmar_notpreg,'With kids':nmar_sm+nmar_preg}
             
         return counts, offers, marriages
-            
+    
+    
+    def sim_graphs(self):
+        from sim_graphs import plot_sim_graphs
+        plot_sim_graphs(self)
         
             
     def compute_moments(self):
