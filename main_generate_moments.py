@@ -30,7 +30,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     
     assert (high_e or low_e), 'wrong specifier for education'
     
-    x, targ_mode = get_point(high_e,read_wisdom=True)
+    x, targ_mode = get_point(high_e,read_wisdom=False)
 
     tar = target_values(targ_mode)
 
@@ -62,10 +62,11 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 
         if not skip:
             print("computing {}".format(fname))
+            sname = ('mdl for {}'.format(fname) if (adj_name == 'baseline') else None)
             out,  mom = mdl_resid(x=x_new,targets=tar,
                                           return_format=['distance','moments'],
                                           verbose=False,draw=False,cs_moments=False,
-                                          save_to ='mdl for {}'.format(fname),
+                                          save_to = sname,
                                           moments_save_name = name,
                                           moments_repeat=5)
             print("file {} saved".format(fname))
@@ -115,12 +116,12 @@ def adj_list(return_dict=False):
                                         'child_support_awarded_div':0.0}),
                    ('full child support',{'child_support_awarded_nm':1.0,
                                         'child_support_awarded_div':1.0}),
-                   ('in mar child support',{'child_support_awarded_nm':0.0,
-                                        'child_support_awarded_div':1.0}),
-                   ('double social stigma',{'multiply':{'child_support_awarded_nm':2.0}}),
-                   ('double divorce costs',{'multiply':{'u_lost_divorce':2.0}}),
                    #('out mar child support',{'child_support_awarded_nm':1.0,
                    #                     'child_support_awarded_div':0.0}),
+                   ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),
+                   ('in mar child support',{'child_support_awarded_nm':0.0,
+                                        'child_support_awarded_div':1.0}),
+                   ('double divorce costs',{'multiply':{'u_lost_divorce':2.0}}),
                    ('infinite divorce costs',{'u_lost_divorce':200.0}),
                    ('no divorce costs',{'u_lost_divorce':0.0}),
                    #('full access to abortion',{'p_abortion_access':1.0}),
@@ -161,7 +162,7 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['col']: #,'hs']:
+    for educ_name in ['hs','col']:
         for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
