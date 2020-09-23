@@ -490,8 +490,11 @@ def compute_moments(self):
     moments['abortion ratio'] = 1000*(self.aborted.sum())/(self.new_child + self.aborted).sum()
     moments['abortion 30s over 20s'] = self.aborted[:,10:20].sum()/np.maximum(self.aborted[:,0:10].sum(), 1.0)
 
+    pick_above = (self.female_z[:,9] > 0) & (is_mar[:,9])
+    moments['sorting at 30'] = (self.male_z[pick_above,9] > 0).mean()
 
 
+    
 
     # remarriage chances
 
