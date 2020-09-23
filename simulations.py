@@ -1115,6 +1115,9 @@ class Agents:
         from sim_graphs import plot_sim_graphs
         plot_sim_graphs(self)
         
+        
+        
+        
             
     def compute_moments(self):
         import moments
