@@ -482,6 +482,29 @@ def v_no_ren(model,V,haschild,canswitch,t):
         
     return result
 
+'''
+
+def psi_tholds(mdl,v_y_ni, vf_y_ni, vm_y_ni, vf_no, vm_no, itht, wntht, thtgrid):
+    if v_y_ni.shape[0] == 2:
+        nochoice = False
+        v_y_ni_0, v_y_ni_1 = v_y_ni[0], v_y_ni[1]
+        vf_y_ni_0, vf_y_ni_1 = vf_y_ni[0], vf_y_ni[1]
+        vm_y_ni_0, vm_y_ni_1 = vm_y_ni[0], vm_y_ni[1]
+    else:
+        nochoice = True
+        v_y_ni_0 = v_y_ni[0]
+        vf_y_ni_0 = vf_y_ni[0]
+        vm_y_ni_0 = vm_y_ni[0]
+        
+    
+    dtype = v_y_ni.dtype
+    
+        
+    na, ne, nt_coarse = v_y_ni_0.shape
+    nt = thtgrid.size
+    
+    shp = (na,ne,nt)
+'''
 
 
 @njit(parallel=upar)

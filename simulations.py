@@ -12,8 +12,9 @@ from gridvec import VecOnGrid
 
 class Agents:
     
-    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,verbose=True,nosim=False,
-                 fix_seed=True):
+    def __init__(self,Mlist,pswitchlist=None,female=True,N=15000,T=30,
+                 pmeet_exo=None,ppreg_exo=None,
+                 no_sm=False,verbose=True,nosim=False,fix_seed=True):
             
             
         if fix_seed: np.random.seed(18)
@@ -25,6 +26,9 @@ class Agents:
             Mlist = [Mlist]
             
 
+        
+        
+        
         
         #Unilateral Divorce
         self.Mlist = Mlist
@@ -45,8 +49,15 @@ class Agents:
         self.timer = self.Mlist[0].time
         
         
+        
+        
+        
         self.female = female
         self.single_state = 'Female, single' if female else 'Male, single'
+        
+        
+        self.pmeet_exo = pmeet_exo
+        self.ppreg_exo = ppreg_exo
         
         # all the randomness is here
         self._shocks_single_iexo = np.random.random_sample((N,T))
@@ -121,8 +132,8 @@ class Agents:
         self.m_k = np.zeros((N,T),dtype=np.bool)
         
         self.nmar = np.zeros((N,T),dtype=np.int8)
-        self.n_kept = np.zeros((T,),dtype=np.int8)
-        self.n_aborted = np.zeros((T,),dtype=np.int8)
+        self.n_kept = np.zeros((T,),dtype=np.int16)
+        self.n_aborted = np.zeros((T,),dtype=np.int16)
         self.share_aborted = np.zeros((T,),dtype=np.float64)
         
         self.ub_hit_single = False
@@ -153,7 +164,7 @@ class Agents:
         self.state[:,0] = self.state_codes[self.single_state]  
         
         # initial single mothers:
-        i_sm_init = (self._shocks_init_sm <= self.setup.pars['sm_init'])
+        i_sm_init = (self._shocks_init_sm <= (self.setup.pars['sm_init'] if not no_sm else 0.0))
         self.state[i_sm_init,0] = (self.state_codes['Female and child'] \
                                         if self.female else \
                                         self.state_codes['Male, single'])
@@ -162,7 +173,7 @@ class Agents:
                                                 
         
         self.timer('Simulations, creation',verbose=self.verbose)
-        self.ils_def = 0#self.setup.nls - 1
+        self.ils_def = 0  # self.setup.nls - 1
             
         
         
@@ -193,10 +204,15 @@ class Agents:
         else:
             self.policy_ind[:] = 0
             
-        if not nosim: self.simulate()
+            
+        if not nosim: self.run_sim()
+            
+            
+    def run_sim(self):        
+        self.simulate()
         self.compute_aux()
         counts, offers, marriages = self.marriage_stats()
-        
+    
         if self.verbose and self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.verbose and self.ub_hit_couple: print('Assets upped bound is reached for couples')
         
@@ -385,7 +401,14 @@ class Agents:
                     pcoef = self.Mlist[ipol].setup.pars['pmeet_multiplier_fem']
                     
                     
-                    pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
+                    if self.pmeet_exo is None:
+                        pmeet = pcoef*self.Mlist[ipol].setup.pars['pmeet_t'][t] # TODO: check timing
+                    else:
+                        try:
+                            pmeet = pcoef*self.pmeet_exo[t]
+                        except IndexError:
+                            pmeet = pcoef*self.pmeet_exo[-1]
+                    
                     p_abortion_access = self.Mlist[ipol].setup.pars['p_abortion_access']
                     
                     # divide by 2 subgroups
@@ -464,21 +487,35 @@ class Agents:
                         fert = self.setup.pars['is fertile'][t-2] if t>=2 else False
                     
                     if sname == 'Female, single':
-                        p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                        if self.ppreg_exo is None:
+                            p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                        else:
+                            p_preg = fert*self.ppreg_exo[t]
+                            
                     elif sname == 'Male, single':
-                        p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                        if self.ppreg_exo is None:
+                            p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                        else:
+                            p_preg = fert*self.ppreg_exo[t]
+                            #except IndexError:
+                            #    p_preg = fert*self.ppreg_exo[-1]
                     elif sname == 'Female and child':
-                        p_preg = np.ones_like(ind,dtype=np.float64)
+                        p_preg = 1.0 #np.ones_like(ind,dtype=np.float64)[]
                     else:
                         assert False
+                        
+                        
                     
+                    
+                    #print('p_preg is {}'.format(p_preg))
                     # these are individual-specific pregnancy probabilities
                     # for those who are not fertile this is forced to be zero
                         
                     # potential assets position of couple
                     
                     vpreg = self._shocks_single_preg[ind,t]
-                    i_preg = (vpreg < p_preg)
+                    i_preg = (vpreg <= p_preg)
+                    
                     
                     #i_pmat = i_pmat_p*(i_preg) + i_pmat_np*(~i_preg)
                     
@@ -534,8 +571,22 @@ class Agents:
                     i_disagree_and_meet = (i_disagree) & ~(i_nomeet)
                     
                     i_abortion = (i_abortion_allowed) & (i_abortion_preferred) & (i_disagree_and_meet) & (i_preg) &  (sname=='Female, single')
-                    i_kept = (i_abortion_allowed) & (~i_abortion_preferred) & (i_disagree_and_meet) &  (i_preg) & (sname=='Female, single')
-                    i_no_access = ~(i_abortion_allowed) & (i_disagree_and_meet) &  (i_preg) &  (sname=='Female, single')
+                    i_kept_sm = (i_abortion_allowed) & (~i_abortion_preferred) & (i_disagree_and_meet) &  (i_preg) & (sname=='Female, single')
+                    i_no_access_sm = ~(i_abortion_allowed) & (i_disagree_and_meet) &  (i_preg) &  (sname=='Female, single')
+                    
+                    
+                    
+                    
+                    
+                    
+                    i_agree = ~i_disagree_or_nomeet
+    
+                    
+                    i_agree_mar = (i_agree) & (i_m_preferred)
+                    i_agree_coh = (i_agree) & (~i_m_preferred)
+                    
+                    
+                    i_kept_kf = (i_agree_mar & ~(sname=='Female and child'))
                     
                     
                     self.disagreed[ind,t] = i_disagree_and_meet
@@ -544,7 +595,11 @@ class Agents:
                     self.aborted[ind,t] = i_abortion
                     
                     n_abortions = i_abortion.sum()
-                    n_kept = i_kept.sum()
+                    n_kept = i_kept_sm.sum() + i_no_access_sm.sum() + i_kept_kf.sum()
+                    
+                    
+                    
+                    
                     
                     if sname == 'Female, single':
                         self.share_aborted[t] = 100*n_abortions / (n_abortions + n_kept)
@@ -565,17 +620,12 @@ class Agents:
                         become_single = np.zeros_like(become_sm,dtype=np.bool)
                     assert np.all(i_disagree_or_nomeet == ((become_sm) | (become_single)))
                     
-                    i_agree = ~i_disagree_or_nomeet
-    
-                    
-                    i_agree_mar = (i_agree) & (i_m_preferred)
-                    i_agree_coh = (i_agree) & (~i_m_preferred)
                     
                     self.agreed[ind,t] = (i_agree_mar) | (i_agree_coh)
                     self.planned_preg[ind,t] = (i_agree_mar) & ~(i_preg)
                     
                     
-                    self.new_child[ind,t+1] = (i_kept | i_no_access) | (i_agree_mar & ~(sname=='Female and child'))
+                    self.new_child[ind,t+1] = (i_kept_sm | i_no_access_sm) | (i_agree_mar & ~(sname=='Female and child'))
                     
                     
                     
@@ -630,13 +680,15 @@ class Agents:
                         
                         def thti(*agrs): return np.round(self.tht_interpolate(*agrs)).astype(np.int8)
                         
+                        
+                        
                         fls_policy = self.Mlist[ipol].V[t+1]['Couple, no children']['fls']
                         
                         self.ils_i[ind[i_agree_coh],t+1] = \
                             thti(fls_policy,(self.iassets[ind[i_agree_coh],t+1],self.iexo[ind[i_agree_coh],t+1]),self.itheta[ind[i_agree_coh],t+1])
                         
                         self.yaftmar[ind[i_agree_coh],t+1] = 0                                                
-                        self.nmar[ind[i_agree_coh],t+1:] += 1
+                        self.nmar[ind[i_agree_coh],t+1:] = self.nmar[ind[i_agree_coh],t][:,None] + 1
                         
                         
                         
@@ -677,6 +729,9 @@ class Agents:
                         
                 
                 
+                    #print('next period kf: {}'.format(self.k_m[:,t+1].mean()))
+                    #assert p_preg > 0.0
+                    
                 elif sname == "Couple and child" or sname == "Couple, no children":
                     
                     
@@ -851,6 +906,8 @@ class Agents:
                             self.ils_i[ind[i_sq],t+1] = thti(self.Mlist[ipol].V[t+1][sname]['fls'],ipick[:-1],ipick[-1])
                         else:
                             i_birth = (decision['Give a birth'][isc,iall,thts]*pfert > self._shocks_planned_preg[ind,t])
+                            
+                            
                             i_birth1=i_birth[i_sq]
                             self.m_k[ind[i_sq][i_birth1],(t+1):] = True                            
                             self.planned_preg[ind[i_sq],t] = i_birth1
@@ -1052,7 +1109,14 @@ class Agents:
                  'Single, not pregnant':nmar_notpreg,'With kids':nmar_sm+nmar_preg}
             
         return counts, offers, marriages
-            
+    
+    
+    def sim_graphs(self):
+        from sim_graphs import plot_sim_graphs
+        plot_sim_graphs(self)
+        
+        
+        
         
             
     def compute_moments(self):

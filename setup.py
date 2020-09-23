@@ -53,13 +53,14 @@ class ModelSetup(object):
         p['Tret'] = Tret
         p['Tfert'] = Tfert
         p['Tsim'] = T
+        p['Tmeet'] = Tmeet
         p['n_zf_t']      = [7]*Tret + [1]*(T-Tret)
         p['n_zm_t']      = [5]*Tret + [1]*(T-Tret)
         p['sigma_psi_init'] = 0.28
         p['mu_psi_init'] = 0.0
         p['sigma_psi']   = 0.11
         p['R_t'] = [1/0.96]*T
-        p['n_psi'] = 15
+        p['n_psi'] = 17
         p['beta_t'] = [0.96]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
@@ -77,6 +78,9 @@ class ModelSetup(object):
         p['pmeet_21'] = 0.1
         p['pmeet_30'] = 0.2
         p['pmeet_40'] = 0.1
+        
+        p['pmeet_exo'] = None
+        p['ppreg_exo'] = None
         
         p['m_zf'] = 1.0
         p['m_zf0'] = 1.0
@@ -234,15 +238,18 @@ class ModelSetup(object):
         
         
         p['pmeet_0'],  p['pmeet_t'], p['pmeet_t2'] = prob_polyfit(
-                    (p['pmeet_21'],0),(p['pmeet_30'],7),(p['pmeet_40'],14),
+                    (p['pmeet_21'],0),(p['pmeet_30'],9),(p['pmeet_40'],19),
                                                                    max_power=2)
         
         p['preg_a0'],  p['preg_at'], p['preg_at2'] = prob_polyfit(
                     (p['preg_21'],0),(p['preg_28'],7),(p['preg_35'],14),
                                                                    max_power=2)
         
-        
-        p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(Tmeet)] + [0.0]*(T-Tmeet)
+        if p['pmeet_exo'] is None:
+            p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(20)] + \
+                        [p['pmeet_40']]*(Tmeet - 20) + [0.0]*(T-Tmeet)
+        else:
+            p['pmeet_t'] = [p['pmeet_exo'][min(t,p['pmeet_exo'].size-1)] for t in range(Tmeet)] + [0.0]*(T-Tmeet)
         
         
         
@@ -376,9 +383,9 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
-           # exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
-            
+            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
+            #assert False
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])
             all_t_mat_sparse_T = [sparse.csc_matrix(D.T) if D is not None else None for D in all_t_mat]
@@ -447,7 +454,7 @@ class ModelSetup(object):
             
             
         #Grid Couple
-        self.na = 50
+        self.na = 40
         self.amin = 0
         self.amax = 1000.0
         self.agrid_c = np.linspace(self.amin**0.5,self.amax**0.5,self.na,dtype=self.dtype)**2
@@ -944,11 +951,17 @@ class ModelSetup(object):
         
     
     def _unplanned_pregnancy_probability_fun(self,t,z):
-        p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
-            self.pars['preg_at2']*(t**2) + \
-            self.pars['preg_az']*z + self.pars['preg_azt']*t*z
-        #p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
-        #    self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+        
+        if self.pars['ppreg_exo'] is None:
+            p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
+                self.pars['preg_at2']*(t**2) + \
+                self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+        else: # handles exogenous probabilities too
+            try:
+                p = self.pars['ppreg_exo'][t] + 0.0*z
+            except IndexError:
+                p = self.pars['ppreg_exo'][-1] + 0.0*z
+                
         return np.clip(p,0.0,1.0)
     
     def unplanned_pregnancy_probability(self):

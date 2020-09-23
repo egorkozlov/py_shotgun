@@ -49,7 +49,6 @@ def ev_couple_m_c(model,Vpostren,t,haschild,use_sparse=True):
     
     if can_divorce:
         out = v_ren_uni(model,Vpostren,haschild,canswitch,t)
-        
     else:
         out = v_no_ren(model,Vpostren,haschild,canswitch,t)
         

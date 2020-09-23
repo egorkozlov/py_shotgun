@@ -272,9 +272,9 @@ class Model(object):
         from graphs import v_graphs
         v_graphs(self)
         
-    def mar_graphs(self):
+    def mar_graphs(self,**kwargs):
         from mar_graphs import mar_graphs
-        mar_graphs(self)
+        mar_graphs(self,**kwargs)
         
       
         

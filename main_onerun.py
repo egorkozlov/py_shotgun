@@ -21,6 +21,7 @@ if system() != 'Darwin' and system() != 'Windows':
 
 from residuals import mdl_resid
 from targets import target_values
+import numpy as np
 
 print('Hi!')
 
@@ -56,17 +57,19 @@ def main(read_wisdom=False,erase=False):
     this_name = 'college baseline'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #load_from='mdl.pkl',
+                                      load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
-                                      moments_repeat=2)
+                                      moments_repeat=1)
 
 
+    #agents.sim_graphs()
 
+    '''
     mdl[0].time_statistics()
 
 
-
+    
 
 
     print('Done. Residual in point x0 is {}'.format(out))
@@ -87,18 +90,16 @@ def main(read_wisdom=False,erase=False):
                    base_name='college baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
-    mdl[0].mar_graphs()
-    '''
+    
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   base='college no taste shocks.pkl',
-                   compare='college sigma zero.pkl',
-                   base_name='no shocks',
-                   compare_name='sigma zero',
-                   #graphs_title_add="Experiment: Removing Subsistence Constraint",
-                   moments_aux=None)#,moments_aux=moments_aux)
-
-    mdl[0].mar_graphs()
+                   compare='col baseline.pkl',
+                   base='col infinite divorce costs.pkl',
+                   compare_name='baseline',
+                   base_name='no divorce costs',
+                   moments_aux=None) #,moments_aux=moments_aux)
+    
+    mdl[0].mar_graphs(t = 4)
     '''
     return locals()
 
