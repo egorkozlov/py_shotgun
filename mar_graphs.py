@@ -116,8 +116,8 @@ def mar_graphs(self,t=2):
     
     
     
-    #for n, upp, res in zip([0,2,1],[False,True,True],[result_noupp,result_upp_noss,result_upp]):
-    for n, upp, res in zip([0,1],[False,True],[result_noupp,result_upp]):
+    for n, upp, res in zip([0,2,1],[False,True,True],[result_noupp,result_upp_noss,result_upp]):
+    #for n, upp, res in zip([0,1],[False,True],[result_noupp,result_upp]):
         Vfm,Vmm,Vfs,Vms = res['V_f_yes'], res['V_m_yes'], res['V_f_no'], res['V_m_no']        
         Vfm0, Vmm0 = [mdl.x_reshape(x,t) for x in [Vfm,Vmm]]
         Vfs0,Vms0 = [mdl.x_reshape(x[...,None],t) for x in [Vfs,Vms]]

@@ -38,6 +38,11 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     print('doing {} {}'.format(educ_name,adj_name))
 
     x_new = x.copy()
+    
+    if 'multiply' in fix:
+        mult = fix.pop('multiply')
+        for m in mult: x_new[m] *= mult[m]
+        
     x_new.update(fix)
     
     name = '{} {}'.format(educ_name,adj_name)
@@ -100,6 +105,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 
 def adj_list(return_dict=False):
     # this is a list of possible countefactual scenarios with names on them
+    
     adjustments = [('baseline',{}),
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
@@ -109,8 +115,10 @@ def adj_list(return_dict=False):
                                         'child_support_awarded_div':0.0}),
                    ('full child support',{'child_support_awarded_nm':1.0,
                                         'child_support_awarded_div':1.0}),
-                   #('in mar child support',{'child_support_awarded_nm':0.0,
-                   #                     'child_support_awarded_div':1.0}),
+                   ('in mar child support',{'child_support_awarded_nm':0.0,
+                                        'child_support_awarded_div':1.0}),
+                   ('double social stigma',{'multiply':{'child_support_awarded_nm':2.0}}),
+                   ('double divorce costs',{'multiply':{'u_lost_divorce':2.0}}),
                    #('out mar child support',{'child_support_awarded_nm':1.0,
                    #                     'child_support_awarded_div':0.0}),
                    ('infinite divorce costs',{'u_lost_divorce':200.0}),

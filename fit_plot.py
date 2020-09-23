@@ -356,8 +356,8 @@ class FitPlots(object):
             i_model = ~np.isnan(prob_model)
             plt.plot(yval[i_model],prob_model[i_model]*100,'o-b',label=self.base_name)
             plt.plot(yval[i_data],prob_data[i_data]*100,'d-k',label=self.compare_name)
-            #if name == 'ever kids by years after marriage' and self.compare_name == 'data':
-            #    plt.plot(yval[i_data][3:],prob_data[i_data][3:]*100,'+',label='targeted',linewidth=6,markersize=14)
+            if name == 'ever kids by years after marriage' and self.base_name == 'college baseline':
+                plt.plot(yval[i_data][3:],prob_data[i_data][3:]*100,'+',label='targeted',linewidth=6,markersize=14)
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
             plt.legend()
             plt.title(cap) 
