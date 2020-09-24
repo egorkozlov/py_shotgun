@@ -983,17 +983,20 @@ class ModelSetup(object):
             self.upp_precomputed_mal.append(pm)    
             
             
-    def _tax_fun(self,lam,tau,avg_inc):
-        def tax(income):
-            return 1 - lam*((income/avg_inc)**(-tau))
+    def _tax_fun(self,lam,tau,avg_inc,do_taxation=True):
+        if do_taxation:
+            def tax(income):
+                return 1 - lam*((income/avg_inc)**(-tau))
+        else:
+            def tax(income):
+                return np.minimum(1 - lam*((income/avg_inc)**(-tau)),0.0)
         return tax
     
     
     
     def compute_taxes(self):
         
-        def no_tax(income):
-            return 0.0*income
+        
         
         self.taxes = dict()
         
@@ -1003,9 +1006,9 @@ class ModelSetup(object):
         ai_c = ai_fem + ai_mal
         self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,ai_fem)
         self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,ai_mal)
-        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem) if self.pars['tax_single_mothers'] else no_tax # use one child
-        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c) if self.pars['tax_childless_couples'] else no_tax
-        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c) if self.pars['tax_couples_woth_children'] else no_tax
+        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem,self.pars['tax_single_mothers'])
+        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c,self.pars['tax_childless_couples'])
+        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c,self.pars['tax_couples_woth_children'])
         
     def compute_child_support_transitions(self,*,child_support_share):
         from interp_np import interp
