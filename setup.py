@@ -136,6 +136,8 @@ class ModelSetup(object):
         
         p['util_out_lf'] = 0.0
         
+        p['ppreg_sim_mult'] = 1.0
+        
         
         
         p['preg_21'] = 0.01

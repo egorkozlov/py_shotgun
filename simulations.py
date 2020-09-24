@@ -486,17 +486,23 @@ class Agents:
                     else:
                         fert = self.setup.pars['is fertile'][t-2] if t>=2 else False
                     
+                    
+                    try:
+                        mult = self.setup.pars['ppreg_sim_mult']
+                    except:
+                        mult = 1.0
+                    
                     if sname == 'Female, single':
                         if self.ppreg_exo is None:
-                            p_preg = fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
+                            p_preg = mult*fert*self.setup.upp_precomputed_fem[t][self.iexo[ind,t]]
                         else:
-                            p_preg = fert*self.ppreg_exo[t]
+                            p_preg = mult*fert*self.ppreg_exo[t]
                             
                     elif sname == 'Male, single':
                         if self.ppreg_exo is None:
-                            p_preg = fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
+                            p_preg = mult*fert*self.setup.upp_precomputed_mal[t][self.iexo[ind,t]]
                         else:
-                            p_preg = fert*self.ppreg_exo[t]
+                            p_preg = mult*fert*self.ppreg_exo[t]
                             #except IndexError:
                             #    p_preg = fert*self.ppreg_exo[-1]
                     elif sname == 'Female and child':

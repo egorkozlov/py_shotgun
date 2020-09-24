@@ -54,7 +54,7 @@ def main(read_wisdom=False,erase=False):
     tar = target_values(targ_mode)
 
 
-    this_name = 'college baseline'
+    this_name = 'col bl'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
                                       load_from='mdl.pkl',
@@ -93,10 +93,10 @@ def main(read_wisdom=False,erase=False):
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare='col baseline.pkl',
-                   base='col infinite divorce costs.pkl',
-                   compare_name='baseline',
-                   base_name='no divorce costs',
+                   compare='col no unplanned pregnancy.pkl',
+                   base='col no upp in simulations.pkl',
+                   compare_name='anticipated',
+                   base_name='unanticipated',
                    moments_aux=None) #,moments_aux=moments_aux)
     
     mdl[0].mar_graphs(t = 4)
