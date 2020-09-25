@@ -1164,8 +1164,8 @@ class Agents:
             
             if not np.any(i_born):
                 continue
-            else:
-                print((t,periods_ahead))
+            #else:
+                #print((t,periods_ahead))
         
             assert np.all(cse[i_born] == 0)
             
