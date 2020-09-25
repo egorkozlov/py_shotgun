@@ -170,7 +170,10 @@ def compute_moments(self):
         moments['child welfare if born at {}, q75'.format(21+t)]  = np.quantile(cse_pick,0.75) if np.any(ib) else 0.0
         
         
+    cse_all = (self.cse.max(axis=1))
     
+    moments['welfare of all children born, mean'] = np.mean(cse_all[cse_all>0])
+    moments['welfare of all children born, median'] = np.median(cse_all[cse_all>0])
     
 
     moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()

@@ -123,6 +123,11 @@ class FitPlots(object):
         except:
             print('failed to plot ref')
             
+        try:    
+            self.plot_child_welfare()
+        except:
+            print('failed to plot child welfare')
+            
         plt.show()
         
     
@@ -738,7 +743,30 @@ class FitPlots(object):
         plt.legend()
         plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
         plt.xlabel('love shock')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)')  
+        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+        
+        
+    def plot_child_welfare(self):
+        # singles
+        
+        aval = np.arange(25,36)
+        
+        
+        base_val = np.array([self.moments['child welfare if born at {}, median'.format(a)] for a in aval])
+        compare_val = np.array([self.targets['child welfare if born at {}, median'.format(a)][0] for a in aval])
+        print(base_val)
+        print(compare_val)
+        
+        fig, ax = plt.subplots()
+        plt.plot(aval,base_val - compare_val,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        ax.grid(True)
+        xticks = aval
+        ax.set_xticks(xticks)
+        plt.legend()
+        plt.title("Child consumption equivalent differences, by mother's are") 
+        plt.xlabel('age the child is born')
+        plt.ylabel('child consumption equivalent') 
+        
         
     
         
