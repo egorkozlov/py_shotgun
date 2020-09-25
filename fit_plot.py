@@ -754,8 +754,10 @@ class FitPlots(object):
         
         base_val = np.array([self.moments['child welfare if born at {}, median'.format(a)] for a in aval])
         compare_val = np.array([self.targets['child welfare if born at {}, median'.format(a)][0] for a in aval])
-        print(base_val)
-        print(compare_val)
+        
+        change_mean = 100*(self.moments['welfare of all children born, mean'] - self.targets['welfare of all children born, mean'][0])/self.moments['welfare of all children born, mean']
+        change_median = 100*(self.moments['welfare of all children born, median'] - self.targets['welfare of all children born, median'][0])/self.moments['welfare of all children born, median']
+        
         
         fig, ax = plt.subplots()
         plt.plot(aval,base_val - compare_val,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
@@ -763,7 +765,7 @@ class FitPlots(object):
         xticks = aval
         ax.set_xticks(xticks)
         plt.legend()
-        plt.title("Child consumption equivalent differences, by mother's are") 
+        plt.title("Child consumption equivalent differences, by mother's are\n changes mean = {:02.1f}%, median = {:02.1f}%".format(change_mean,change_median)) 
         plt.xlabel('age the child is born')
         plt.ylabel('child consumption equivalent') 
         
