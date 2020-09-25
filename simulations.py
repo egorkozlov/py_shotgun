@@ -212,6 +212,7 @@ class Agents:
         self.simulate()
         self.compute_aux()
         counts, offers, marriages = self.marriage_stats()
+        self.compute_cse()
     
         if self.verbose and self.ub_hit_single: print('Assets upped bound is reached for singles')
         if self.verbose and self.ub_hit_couple: print('Assets upped bound is reached for couples')
