@@ -93,8 +93,8 @@ def main(read_wisdom=False,erase=False):
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare='hs baseline.pkl',
-                   base='hs double social stigma.pkl',
+                   compare='col baseline.pkl',
+                   base='col double social stigma.pkl',
                    compare_name='baseline',
                    base_name='double stigma',
                    moments_aux=None) #,moments_aux=moments_aux)

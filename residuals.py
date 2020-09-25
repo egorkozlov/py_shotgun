@@ -26,7 +26,7 @@ w = dict()
 def mdl_resid(x=None,targets=None,weights=w,
               save_to=None,load_from=None,return_format=['distance'],
               store_path = None,verbose=False,draw=False,graphs=False,
-              rel_diff=False,cs_moments=False,moments_repeat=5,
+              rel_diff=False,cs_moments=False,moments_repeat=5,Tsim=30,
               moments_save_name=None):
     
     
@@ -101,10 +101,10 @@ def mdl_resid(x=None,targets=None,weights=w,
         dill.dump(mdl,open(save_to[0],'wb+'))            
             
     np.random.seed(18)
-    agents = Agents( mdl_list, verbose=verbose, fix_seed=False)
+    agents = Agents( mdl_list, verbose=verbose, fix_seed=False, T = Tsim)
     
     if not cs_moments:
-        moments_list = [agents.compute_moments()] + [Agents( mdl_list, verbose=False, fix_seed=False).compute_moments() for _ in range(moments_repeat-1)]
+        moments_list = [agents.compute_moments()] + [Agents( mdl_list, verbose=False, T = Tsim, fix_seed=False).compute_moments() for _ in range(moments_repeat-1)]
     else:
         moments_list = [CrossSection(mdl_list, verbose=False, N_total=30000, fix_seed=False).compute_moments() for _ in range(moments_repeat)]
     

@@ -71,7 +71,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
                                           verbose=False,draw=False,cs_moments=False,
                                           save_to ='mdl for {}'.format(fname),
                                           moments_save_name = name,
-                                          moments_repeat=5)
+                                          moments_repeat=5,Tsim=42)
             print("file {} saved".format(fname))
         else:
             print("file {} already exists".format(fname))
