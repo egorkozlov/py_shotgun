@@ -39,11 +39,15 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 
     x_new = x.copy()
     
+    fix = fix.copy()
+    
     if 'multiply' in fix:
         mult = fix.pop('multiply')
         for m in mult: x_new[m] *= mult[m]
         
     x_new.update(fix)
+    
+    print(x_new)
     
     name = '{} {}'.format(educ_name,adj_name)
     fname = '{}.pkl'.format(name)
@@ -106,8 +110,11 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 def adj_list(return_dict=False):
     # this is a list of possible countefactual scenarios with names on them
     
-    '''
+    
     adjustments = [('baseline',{}),
+                   ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),
+                   ('plus ten percent social stigma',{'multiply':{'disutil_shotgun':1.1}}),
+                   ('infinite social stigma',{'disutil_shotgun':400.0}),
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
                                               'abortion_costs':0.0}),
@@ -117,9 +124,16 @@ def adj_list(return_dict=False):
                    ('full child support',{'child_support_awarded_nm':1.0,
                                         'child_support_awarded_div':1.0}),
                    ('in mar child support',{'child_support_awarded_nm':0.0,
-                                        'child_support_awarded_div':1.0}),
-                   ('double social stigma',{'multiply':{'child_support_awarded_nm':2.0}}),
+                                        'child_support_awarded_div':1.0}),                   
                    ('double divorce costs',{'multiply':{'u_lost_divorce':2.0}}),
+                   ('half divorce costs',{'multiply':{'u_lost_divorce':0.5}}),
+                   ('no unplanned pregnancy unanticipated',{'ppreg_sim_mult':0.0}),
+                   ('no taxes to couples',{'tax_childless_couples':False,
+                                           'tax_couples_woth_children':False}),
+                   ('no taxes to couples with children',{'tax_couples_woth_children':False}),
+                   ('no taxes to single mothers',{'tax_single_mothers':False}),
+                   ('no taxes to ones with children',{'tax_single_mothers':False,
+                                                      'tax_couples_woth_children':False}),
                    #('out mar child support',{'child_support_awarded_nm':1.0,
                    #                     'child_support_awarded_div':0.0}),
                    ('infinite divorce costs',{'u_lost_divorce':200.0}),
@@ -128,7 +142,6 @@ def adj_list(return_dict=False):
                    ('no abortions',{'p_abortion_access':0.0}),
                    ('costless abortion',{'p_abortion_access':1.0,
                                          'abortion_costs':0.0}),
-                   ('infinite social stigma',{'disutil_shotgun':400.0}),
                    ('no remar penalty',{'disutil_marry_sm_mal':0.0}),
                    ('infinite remar penalty',{'disutil_marry_sm_mal':500.0}),
                    ('no subsistence constraint',{'util_qbar':0.0}),
@@ -142,18 +155,11 @@ def adj_list(return_dict=False):
                     #                'pmeet_28': 0.0,
                     #                'pmeet_35': 0.0}),
                    ('no home production',{'util_kap':0.001})]
-    '''
     
     
-    adjustments = [('half divorce costs',{'multiply':{'u_lost_divorce':0.5}}),
-                   ('no unplanned pregnancy unanticipated',{'ppreg_sim_mult':0.0}),
-                   ('no taxes to couples',{'tax_childless_couples':False,
-                                           'tax_couples_woth_children':False}),
-                   ('no taxes to couples with children',{'tax_couples_woth_children':False}),
-                   ('no taxes to single mothers',{'tax_single_mothers':False}),
-                   ('no taxes to ones with children',{'tax_single_mothers':False,
-                                                      'tax_couples_woth_children':False})
-                   ]
+    
+    
+    
     
     if return_dict: adjustments = dict(adjustments)
     return adjustments
@@ -174,7 +180,7 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['hs','col']:
+    for educ_name in ['col','hs']:
         for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
