@@ -26,14 +26,7 @@ class Agents_FixedSim(Agents):
         self.run_sim()
         
         
-if __name__ == '__main__':
-    import numpy as np
-    try:
-        print(len(mdl.V))
-    except:
-        from dill import load
-        mdl = load(open('mdl.pkl','rb+'))
-        
+def get_causal_table(mdl):
         
     tmeet = 5
     np.random.seed(12)
@@ -109,3 +102,17 @@ if __name__ == '__main__':
         
             table_row = r'\textit{' + '{}, {}'.format(name,scenario) + r'} &' + ' {:02.1f} & {:02.1f} & {:02.1f} & {:02.1f} & {:02.1f}'.format(e(var),m(var),c(var),a(var),n(var)) + r'\\'
             print(table_row)
+        
+       
+        
+if __name__ == '__main__':
+    import numpy as np
+    try:
+        print(len(mdl.V))
+    except:
+        from dill import load
+        mdl = load(open('mdl.pkl','rb+'))
+        
+    get_causal_table(mdl)
+        
+    

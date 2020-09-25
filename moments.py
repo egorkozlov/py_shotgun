@@ -155,7 +155,22 @@ def compute_moments(self):
 
     for t in range(0,self.T):
         moments['ever divorced at {}'.format(21+t)]  = ever_div[:,t].mean()
+        moments['with kids at {}'.format(21+t)]  = ever_kid[:,t].mean()
+        moments['ever married at {}'.format(21+t)]  = ever_mar[:,t].mean()
+        moments['ever divorced if ever married at {}'.format(21+t)]  = ever_div[ever_mar[:,t],t].mean() if np.any(ever_mar[:,t]) else 0.0
         
+        
+    for t in range(0,self.T-2):
+        ib = self.new_child[:,t]
+        cse_pick = self.cse[ib,t]
+        if np.any(ib): assert np.all(cse_pick > 0)
+        moments['child welfare if born at {}, mean'.format(21+t)]  = np.mean(cse_pick) if np.any(ib) else 0.0
+        moments['child welfare if born at {}, median'.format(21+t)]  = np.quantile(cse_pick,0.5) if np.any(ib) else 0.0
+        moments['child welfare if born at {}, q25'.format(21+t)]  = np.quantile(cse_pick,0.25) if np.any(ib) else 0.0
+        moments['child welfare if born at {}, q75'.format(21+t)]  = np.quantile(cse_pick,0.75) if np.any(ib) else 0.0
+        
+        
+    
     
 
     moments['divorced at 30 if one marriage'] = div_now[one_mar[:,9],9].mean()

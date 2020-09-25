@@ -57,7 +57,7 @@ def main(read_wisdom=False,erase=False):
     this_name = 'col bl'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      #load_from='mdl.pkl',
+                                      load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=1)
@@ -93,10 +93,10 @@ def main(read_wisdom=False,erase=False):
     
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
-                   compare='col no unplanned pregnancy.pkl',
-                   base='col no upp in simulations.pkl',
-                   compare_name='anticipated',
-                   base_name='unanticipated',
+                   compare='hs no unplanned pregnancy.pkl',
+                   base='hs no unplanned pregnancy unanticipated.pkl',
+                   compare_name='no upp',
+                   base_name='anticipates upp',
                    moments_aux=None) #,moments_aux=moments_aux)
     
     mdl[0].mar_graphs(t = 4)
@@ -104,5 +104,5 @@ def main(read_wisdom=False,erase=False):
     return locals()
 
 if __name__ == '__main__':
-    allthings = main(read_wisdom=True)
+    allthings = main(read_wisdom=False)
     globals().update(**allthings)

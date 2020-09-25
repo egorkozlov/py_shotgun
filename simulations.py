@@ -1122,6 +1122,69 @@ class Agents:
         plot_sim_graphs(self)
         
         
+    def compute_cse(self):
+        # this child consumption equivalent measure: 
+        # average value given the same utility as Q of the child for
+        # the first 18 years of life.
+        
+        bet = self.setup.pars['beta_t'][0] # assumes constant beta
+        weights = np.array([bet**t for t in range(18)])
+        coefs = np.cumsum(weights)
+        coef_18 = coefs[-1]
+        
+        
+        cse = np.zeros(self.N,dtype=np.float64)
+        self.cse = np.zeros((self.N,self.T),dtype=np.float64)
+        
+        xi  = self.setup.pars['util_xi']
+        lam = self.setup.pars['util_lam']
+        kap = self.setup.pars['util_kap']  
+        
+        
+        self.q = -1*np.ones((self.N,self.T),dtype=np.float64)
+        ip = (self.x>0)
+        self.q[ip] = (self.x[ip]**lam + kap*(1-self.labor_supply[ip])**lam)**(1/lam)
+        uq = np.zeros_like(self.q)
+        uq[~ip] = None
+        uq[ip] = self.q[ip]**(1-xi)/(1-xi)
+        
+        
+        for t in range(self.T-1):
+            
+            periods_ahead = (self.T-2) - t
+            coef = coef_18 if periods_ahead >= 17 else coefs[periods_ahead]
+            
+            ind_ahead = min(18,periods_ahead+1)
+            
+            if t == 0:
+                i_born = (self.x[:,t] > 0)
+            else:
+                i_born = (self.x[:,t] > 0) & (self.x[:,t-1] == 0)
+            
+            if not np.any(i_born):
+                continue
+            else:
+                print((t,periods_ahead))
+        
+            assert np.all(cse[i_born] == 0)
+            
+            uqpick = uq[i_born,t:(t+ind_ahead)]
+            
+            wpick = weights[:ind_ahead][None,:]
+            
+            assert np.all(~np.isnan(uqpick))
+            
+            
+            cse[i_born] = ((np.sum(uqpick*wpick,axis=1)*(1-xi)/coef)**(1/(1-xi)))
+            
+            self.cse[i_born,t:] = cse[i_born][:,None]
+        
+            
+            
+            
+            
+        
+        
         
         
             

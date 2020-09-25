@@ -89,3 +89,5 @@ if __name__ == '__main__':
         print('Done. Residual in point x0 is {}'.format(out))
         
         
+        
+        
