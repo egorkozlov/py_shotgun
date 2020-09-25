@@ -104,5 +104,5 @@ def main(read_wisdom=False,erase=False):
     return locals()
 
 if __name__ == '__main__':
-    allthings = main()
+    allthings = main(read_wisdom=True)
     globals().update(**allthings)

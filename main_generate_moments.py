@@ -30,7 +30,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     
     assert (high_e or low_e), 'wrong specifier for education'
     
-    x, targ_mode = get_point(high_e,read_wisdom=True)
+    x, targ_mode = get_point(high_e,read_wisdom=False)
 
     tar = target_values(targ_mode)
 
@@ -106,6 +106,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 def adj_list(return_dict=False):
     # this is a list of possible countefactual scenarios with names on them
     
+    '''
     adjustments = [('baseline',{}),
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
@@ -141,6 +142,18 @@ def adj_list(return_dict=False):
                     #                'pmeet_28': 0.0,
                     #                'pmeet_35': 0.0}),
                    ('no home production',{'util_kap':0.001})]
+    '''
+    
+    
+    adjustments = [('half divorce costs',{'multiply':{'u_lost_divorce':0.5}}),
+                   ('no unplanned pregnancy unanticipated',{'ppreg_sim_mult':0.0}),
+                   ('no taxes to couples',{'tax_childless_couples':False,
+                                           'tax_couples_woth_children':False}),
+                   ('no taxes to couples with children',{'tax_couples_woth_children':False}),
+                   ('no taxes to single mothers',{'tax_single_mothers':False}),
+                   ('no taxes to ones with children',{'tax_single_mothers':False,
+                                                      'tax_couples_woth_children':False})
+                   ]
     
     if return_dict: adjustments = dict(adjustments)
     return adjustments
@@ -161,7 +174,7 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['col']: #,'hs']:
+    for educ_name in ['hs','col']:
         for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
