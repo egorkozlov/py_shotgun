@@ -113,9 +113,11 @@ def compute_moments(self):
     moments['ever kids by years after marriage, b2'] = pol[0]
 
 
-    for t in range(1,11):
-        moments['ever kids by years after marriage, {}'.format(t)] = ever_kid[pick & (self.yaftmar==t)].mean()
-
+    for t in range(1,21):
+        try:
+            moments['ever kids by years after marriage, {}'.format(t)] = ever_kid[pick & (self.yaftmar==t)].mean()
+        except:
+            break
 
 
     pick = yaftmar_pick & age_pick & one_mar
@@ -130,14 +132,23 @@ def compute_moments(self):
     moments['divorced by years after marriage, b1'] = pol[1]
     moments['divorced by years after marriage, b2'] = pol[0]
 
-    for t in range(1,11):
-        moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean() if np.any(pick & (self.yaftmar==t)) else 0.0
-
-    for t in range(1,11):
-        moments['divorced by years after marriage if kids first, {}'.format(t)]      = div_now[pick & (self.yaftmar==t) & obs_k_m==1].mean() if np.any(pick & (self.yaftmar==t) & obs_k_m==1) else 0.0
-
-    for t in range(1,11):
-        moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean() if np.any(pick & (self.yaftmar==t) & obs_m_k==1) else 0.0
+    for t in range(1,21):
+        try:
+            moments['divorced by years after marriage, {}'.format(t)]  = div_now[pick & (self.yaftmar==t)].mean() if np.any(pick & (self.yaftmar==t)) else 0.0
+        except:
+            break
+        
+        
+    for t in range(1,21):
+        try:
+            moments['divorced by years after marriage if kids first, {}'.format(t)]      = div_now[pick & (self.yaftmar==t) & obs_k_m==1].mean() if np.any(pick & (self.yaftmar==t) & obs_k_m==1) else 0.0
+        except:
+            break
+    for t in range(1,21):
+        try:
+            moments['divorced by years after marriage if marriage first, {}'.format(t)]  = div_now[pick & (self.yaftmar==t) & obs_m_k==1].mean() if np.any(pick & (self.yaftmar==t) & obs_m_k==1) else 0.0
+        except:
+            break
         
     # divorce hazards
     # simulating by years after marriage
@@ -239,39 +250,39 @@ def compute_moments(self):
     in_sample = obs_k_m | obs_m_k
 
 
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['k then m in sample at {}'.format(21+i)] = obs_k_m[in_sample[:,i],i].mean()
 
 
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['k then m in population at {}'.format(21+i)] = obs_k_m[:,i].mean()
 
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['m then k in population at {}'.format(21+i)] = obs_m_k[:,i].mean()
 
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         pick = (div_now & ever_kid)[:,i]
         moments['divorced and kids in population at {}'.format(21+i)] = pick.mean()
         moments['above median among divorced mothers at {}'.format(21+i)] = (self.female_z >= 0)[pick,i].mean() if np.any(pick) else 0.5
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['divorced and no kids in population at {}'.format(21+i)] = (div_now & ~ever_kid)[:,i].mean()
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         pick = (~ever_mar & ever_kid)[:,i]
         moments['never married and kids in population at {}'.format(21+i)] = pick.mean()
         moments['above median among never married mothers at {}'.format(21+i)] = (self.female_z >= 0)[pick,i].mean() if np.any(pick) else 0.5
 
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['never married and no kids in population at {}'.format(21+i)] = (~ever_mar & ~ever_kid)[:,i].mean()
     
     
     
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         moments['single mothers in total at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean()
         moments['single mothers among mothers at {}'.format(21+i)] = (have_kid & ~is_mar)[:,i].mean() / np.maximum((have_kid)[:,i].mean(),0.01)
         moments['aborted unplanned pregnancies at {}'.format(21+i)] = self.share_aborted[i]
     
     
-    for i in range(1,15):
+    for i in range(1,self.T-2):
         i_above = self.female_z > 0
         i_below = self.female_z < 0
         try:
@@ -483,15 +494,15 @@ def compute_moments(self):
     haz_mk = (m['Single, pregnant'])/c['Single']
     haz_nk = n_newkids / n_childless
 
-    for t in range(1,15):
+    for t in range(1,self.T-2):
         moments['ever married at {}'.format(21+t)] = ever_mar[:,t].mean()
 
-    for t in range(1,15):
+    for t in range(1,self.T-2):
         moments['hazard of marriage at {}'.format(21+t)] = haz_m[t] if not np.isnan(haz_m[t]) else 0.0
-    for t in range(1,15):
+    for t in range(1,self.T-2):
         moments['hazard of marriage & having a child at {}'.format(21+t)] = haz_mk[t] if not np.isnan(haz_mk[t]) else 0.0
 
-    for t in range(1,15):
+    for t in range(1,self.T-2):
         moments['hazard of new child at {}'.format(21+t)] = haz_nk[t] if not np.isnan(haz_nk[t]) else 0.0
 
     try:
@@ -571,7 +582,7 @@ def aux_moments(self):
     is_mar = (self.state == n_mark) | (self.state == n_marnk)
     have_kid = (self.state == n_mark) | (self.state == n_singlek)
 
-    for it in range(3,15):
+    for it in range(3,self.T-2):
         pick_up = is_mar[:,it] & ~is_mar[:,it-1]
         pick_down = ~is_mar[:,it]
         mom['men, relative income just married / single at {}'.format(21+it)] = np.mean(self.male_earnings[pick_up,9])/np.mean(self.male_earnings[pick_down,9]) if (np.any(pick_up) and np.any(pick_down)) else 0.0
