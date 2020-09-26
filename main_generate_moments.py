@@ -76,7 +76,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
         else:
             print("file {} already exists".format(fname))
 
-
+        
         print('done, doing fit plots')
 
         try:                 
