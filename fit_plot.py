@@ -55,10 +55,11 @@ class FitPlots(object):
         else:
             self.targets = all_targets(targ_mode)
         
-        try:
-            self.print_things()
-        except:
-            print('failed to print')
+        if not noplot:
+            try:
+                self.print_things()
+            except:
+                print('failed to print')
             
         self.moments_aux = moments_aux
         
@@ -662,7 +663,7 @@ class FitPlots(object):
         
         
     
-    def plot_welfare(self,a_mult=1):
+    def plot_welfare(self,a_mult=1,noplot=False):
         # singles
         z_fem = self.setup.exogrid.zf_t[0]
         w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
@@ -687,31 +688,35 @@ class FitPlots(object):
                   moments['value function: male, single, all assets'],
                   targets['value function: male, single, all assets'][0],
                   a_mult=a_mult)
-                  
-        print(a_male)
-        print(a_female)
         
-        fig, ax = plt.subplots()
-        plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
-        ax.grid(True)
-        xticks = z_fem
-        ax.set_xticks(xticks)
-        plt.legend()
-        plt.title('Welfare differences: female, 21, no kids, no assets') 
-        plt.xlabel('female productivity')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        plt.savefig('welfare_female.pdf')
+        if not noplot:
+            print(a_male)
+            print(a_female)
+
+            fig, ax = plt.subplots()
+            plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = z_fem
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare differences: female, 21, no kids, no assets') 
+            plt.xlabel('female productivity')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            plt.savefig('welfare_female.pdf')
+
+            fig, ax = plt.subplots()        
+            plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = z_mal
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare differences: male, 23, no kids, no assets') 
+            plt.xlabel('male productivity')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            plt.savefig('welfare_male.pdf')
         
-        fig, ax = plt.subplots()        
-        plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
-        ax.grid(True)
-        xticks = z_mal
-        ax.set_xticks(xticks)
-        plt.legend()
-        plt.title('Welfare differences: male, 23, no kids, no assets') 
-        plt.xlabel('male productivity')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        plt.savefig('welfare_male.pdf')
+        
+        
         
         # couples 
         # transofrm the state
@@ -729,21 +734,23 @@ class FitPlots(object):
                             a_mult=a_mult)
         
         
-        
-        psi = self.setup.exogrid.psi_t[0]
-        
-        
-        fig, ax = plt.subplots()
-        #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
-        #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
-        plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
-        ax.grid(True)
-        xticks = np.linspace(psi.min(),psi.max(),7)
-        ax.set_xticks(xticks)
-        plt.legend()
-        plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
-        plt.xlabel('love shock')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+        if not noplot:
+            psi = self.setup.exogrid.psi_t[0]
+
+
+            fig, ax = plt.subplots()
+            #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
+            #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
+            plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = np.linspace(psi.min(),psi.max(),7)
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
+            plt.xlabel('love shock')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            
+        if noplot: return a_female, a_male, a_couple
         
         
     def plot_child_welfare(self):
