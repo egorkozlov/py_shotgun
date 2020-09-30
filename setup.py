@@ -260,7 +260,7 @@ class ModelSetup(object):
         
         p['n_psi_t'] = [p['n_psi']]*T
         
-        p['psi_clip'] = 2.5*p['sigma_psi_init']
+        p['psi_clip'] = 8.5*p['sigma_psi_init']
         
         
         
@@ -388,8 +388,8 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
-            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
+            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+            #exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
             #assert False
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])

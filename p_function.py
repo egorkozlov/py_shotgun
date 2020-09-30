@@ -77,9 +77,10 @@ def fun(x):
         
         def q(pt):
             try:
-                ans = mdl_resid(translator(pt),return_format=['scaled residuals'])
-            except:
+                ans = mdl_resid(translator(pt),moments_repeat=3,return_format=['scaled residuals'])
+            except BaseException as a:
                 print('During optimization function evaluation failed at {}'.format(pt))
+                print(a)
                 ans = np.array([1e6])
             finally:
                 gc.collect()
@@ -87,7 +88,7 @@ def fun(x):
             
             
             
-        res=dfols.solve(q, xc, rhobeg = 0.05, rhoend=1e-6, maxfun=npt, bounds=(xl,xu),
+        res=dfols.solve(q, xc, rhobeg = 0.15, rhoend=1e-6, maxfun=npt, bounds=(xl,xu),
                         #npt=len(xc)+5,
                         scaling_within_bounds=True, 
                         #user_params={'tr_radius.gamma_dec':0.75,'tr_radius.gamma_inc':1.5,

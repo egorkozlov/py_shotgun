@@ -57,7 +57,7 @@ def main(read_wisdom=False,erase=False):
     this_name = 'col bl'
     out, mdl, agents, res, mom = mdl_resid(x=x,targets=tar,
                                       return_format=['distance','models','agents','scaled residuals','moments'],
-                                      load_from='mdl.pkl',
+                                      #load_from='mdl.pkl',
                                       verbose=True,draw=True,cs_moments=False,
                                       moments_save_name = this_name,
                                       moments_repeat=1)
@@ -65,22 +65,10 @@ def main(read_wisdom=False,erase=False):
 
     #agents.sim_graphs()
 
-    '''
+    
     mdl[0].time_statistics()
 
-
-    
-
-
     print('Done. Residual in point x0 is {}'.format(out))
-
-    from targets import all_targets
-    tar_fk = all_targets('low education')
-    mom_fk = {key: tar_fk[key][0] for key in tar_fk}
-
-
-    #from simulations import Agents
-    #moments_aux = Agents( mdl, N=10000, T=18, female=False, verbose=False).aux_moments()
 
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
@@ -90,7 +78,7 @@ def main(read_wisdom=False,erase=False):
                    base_name='college baseline',
                    moments_aux=None) #,moments_aux=moments_aux)
     
-    
+    '''
     from fit_plot import FitPlots
     fp = FitPlots(targ_mode=targ_mode,
                    compare='col baseline.pkl',
@@ -99,8 +87,9 @@ def main(read_wisdom=False,erase=False):
                    base_name='double stigma',
                    moments_aux=None) #,moments_aux=moments_aux)
     
-    mdl[0].mar_graphs(t = 4)
     '''
+    mdl[0].mar_graphs(t = 4)
+    
     return locals()
 
 if __name__ == '__main__':

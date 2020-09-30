@@ -30,7 +30,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     
     assert (high_e or low_e), 'wrong specifier for education'
     
-    x, targ_mode = get_point(high_e,read_wisdom=False)
+    x, targ_mode = get_point(high_e,read_wisdom=True)
 
     tar = target_values(targ_mode)
 
@@ -180,7 +180,7 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['hs','col']:
+    for educ_name in ['col']: #'hs',
         for adj_name, fix in adjustments:    
           run(adj_name,fix,educ_name,resume=resume)
     
