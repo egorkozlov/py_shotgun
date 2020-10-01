@@ -20,7 +20,7 @@ from calibration_params import calibration_params
 try:
     from numba import cuda
     g = cuda.device_array((2,5))
-    npt = 140 
+    npt = 160 
 except:
     npt = 90
 
