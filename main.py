@@ -43,7 +43,7 @@ if __name__ == '__main__':
     #config.NUMBA_NUM_THREADS = 2
 
     
-    fix_values = True
+    fix_values = False
     if fix_values:
         
         keys_fix = ['sigma_psi','sigma_psi_init','mu_psi_init',
