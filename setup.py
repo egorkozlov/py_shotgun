@@ -91,7 +91,7 @@ class ModelSetup(object):
         
         
         p['no kids at meeting'] = True
-        p['high education'] = True # what trend to pick
+        p['high education'] = False # what trend to pick
         p['any kids'] = True
         
         p['z_drift'] = -0.09 if p['high education'] else -0.06
