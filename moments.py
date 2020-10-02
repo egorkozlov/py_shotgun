@@ -522,6 +522,8 @@ def compute_moments(self):
     pick_above = (self.female_z[:,9] > 0) & (is_mar[:,9])
     moments['sorting at 30'] = (self.male_z[pick_above,9] > 0).mean()
 
+    pick_above = (self.female_z[:,:19] > 0) & (is_mar[:,:19])
+    moments['sorting overall'] = (self.male_z[:,:19][pick_above] > 0).mean()
 
     
 
