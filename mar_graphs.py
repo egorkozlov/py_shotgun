@@ -215,12 +215,12 @@ def mar_graphs(self,t=2):
         Vfm0, Vmm0 = [mdl.x_reshape(x,t) for x in [Vfm,Vmm]]
         Vfs0,Vms0 = [mdl.x_reshape(x[...,None],t) for x in [Vfs,Vms]]
         surplus = np.minimum(Vfm0-Vfs0,Vmm0-Vms0).max(axis=4)
-        ind_last_neg = np.sum((surplus < 0),axis=3,keepdims=True)-1
+        ind_last_neg = np.clip(np.sum((surplus < 0),axis=3,keepdims=True)-1, 0, psig.size-2)
         last_neg_v = np.take_along_axis(surplus,ind_last_neg,3)
         first_pos_v = np.take_along_axis(surplus,ind_last_neg+1,3)
         w_pos = (-last_neg_v) / (first_pos_v - last_neg_v)
-        assert np.all(w_pos<=1)
-        assert np.all(w_pos>=0)
+        #assert np.all(w_pos<=1)
+        #assert np.all(w_pos>=0)
         
         tholds = psig[ind_last_neg+1]*w_pos + psig[ind_last_neg]*(1-w_pos)
         # this is an array of thresholds, dimensionality is (a,zf,zm), but 
