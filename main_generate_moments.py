@@ -30,7 +30,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
     
     assert (high_e or low_e), 'wrong specifier for education'
     
-    x, targ_mode = get_point(high_e,read_wisdom=True)
+    x, targ_mode = get_point(high_e,read_wisdom=False)
 
     tar = target_values(targ_mode)
 
@@ -113,7 +113,7 @@ def adj_list(return_dict=False):
     
     adjustments = [('baseline',{}),
                    ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),
-                   ('plus ten percent social stigma',{'multiply':{'disutil_shotgun':1.1}}),
+                   #('plus ten percent social stigma',{'multiply':{'disutil_shotgun':1.1}}),
                    ('infinite social stigma',{'disutil_shotgun':400.0}),
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
@@ -180,9 +180,9 @@ def generate_counterfactuals(resume=True):
     run(*adjustments[0],'hs')
     '''
     
-    for educ_name in ['col']: #'hs',
-        for adj_name, fix in adjustments:    
-          run(adj_name,fix,educ_name,resume=resume)
+    for adj_name, fix in adjustments:    
+        for educ_name in ['col','hs']:
+            run(adj_name,fix,educ_name,resume=resume)
     
     
 if __name__ == '__main__':

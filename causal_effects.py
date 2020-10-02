@@ -7,6 +7,7 @@ Created on Wed Sep 16 20:38:35 2020
 """
 
 from simulations import Agents
+import numpy as np
 
 class Agents_FixedSim(Agents):
     # this are simulations where shocks are altered such that everyone 
