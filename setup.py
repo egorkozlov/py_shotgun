@@ -91,7 +91,7 @@ class ModelSetup(object):
         
         
         p['no kids at meeting'] = True
-        p['high education'] = True # what trend to pick
+        p['high education'] = False # what trend to pick
         p['any kids'] = True
         
         p['z_drift'] = -0.09 if p['high education'] else -0.06
@@ -257,12 +257,13 @@ class ModelSetup(object):
         if p['pmeet_exo'] is None:
             p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(20)] + \
                         [p['pmeet_40']]*(Tmeet - 20) + [0.0]*(T-Tmeet)
-                        
+            
+            p['pmeet_t'] = np.array(p['pmeet_t'])
                         
             if p['pmeet_pre25'] is not None: p['pmeet_t'][:4] = p['pmeet_pre25']
         else:
             p['pmeet_t'] = [p['pmeet_exo'][min(t,p['pmeet_exo'].size-1)] for t in range(Tmeet)] + [0.0]*(T-Tmeet)
-        
+            p['pmeet_t'] = np.array(p['pmeet_t'])
         
         
         p['n_psi_t'] = [p['n_psi']]*T
