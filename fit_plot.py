@@ -55,10 +55,11 @@ class FitPlots(object):
         else:
             self.targets = all_targets(targ_mode)
         
-        try:
-            self.print_things()
-        except:
-            print('failed to print')
+        if not noplot:
+            try:
+                self.print_things()
+            except:
+                print('failed to print')
             
         self.moments_aux = moments_aux
         
@@ -122,6 +123,11 @@ class FitPlots(object):
             self.plot_kfmf_ref()
         except:
             print('failed to plot ref')
+            
+        try:    
+            self.plot_child_welfare()
+        except:
+            print('failed to plot child welfare')
             
         plt.show()
         
@@ -356,8 +362,8 @@ class FitPlots(object):
             i_model = ~np.isnan(prob_model)
             plt.plot(yval[i_model],prob_model[i_model]*100,'o-b',label=self.base_name)
             plt.plot(yval[i_data],prob_data[i_data]*100,'d-k',label=self.compare_name)
-            #if name == 'ever kids by years after marriage' and self.compare_name == 'data':
-            #    plt.plot(yval[i_data][3:],prob_data[i_data][3:]*100,'+',label='targeted',linewidth=6,markersize=14)
+            if name == 'ever kids by years after marriage' and self.base_name == 'college baseline':
+                plt.plot(yval[i_data][3:],prob_data[i_data][3:]*100,'+',label='targeted',linewidth=6,markersize=14)
             #if name_aux is not None: plt.plot(tval,aux,label=name_aux)
             plt.legend()
             plt.title(cap) 
@@ -657,7 +663,7 @@ class FitPlots(object):
         
         
     
-    def plot_welfare(self,a_mult=1):
+    def plot_welfare(self,a_mult=1,noplot=False):
         # singles
         z_fem = self.setup.exogrid.zf_t[0]
         w_fem = np.exp(z_fem + self.setup.pars['f_wage_trend'][0])
@@ -682,31 +688,35 @@ class FitPlots(object):
                   moments['value function: male, single, all assets'],
                   targets['value function: male, single, all assets'][0],
                   a_mult=a_mult)
-                  
-        print(a_male)
-        print(a_female)
         
-        fig, ax = plt.subplots()
-        plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
-        ax.grid(True)
-        xticks = z_fem
-        ax.set_xticks(xticks)
-        plt.legend()
-        plt.title('Welfare differences: female, 21, no kids, no assets') 
-        plt.xlabel('female productivity')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        plt.savefig('welfare_female.pdf')
+        if not noplot:
+            print(a_male)
+            print(a_female)
+
+            fig, ax = plt.subplots()
+            plt.plot(z_fem,a_female,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = z_fem
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare differences: female, 21, no kids, no assets') 
+            plt.xlabel('female productivity')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            plt.savefig('welfare_female.pdf')
+
+            fig, ax = plt.subplots()        
+            plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = z_mal
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare differences: male, 23, no kids, no assets') 
+            plt.xlabel('male productivity')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            plt.savefig('welfare_male.pdf')
         
-        fig, ax = plt.subplots()        
-        plt.plot(z_mal,a_male,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
-        ax.grid(True)
-        xticks = z_mal
-        ax.set_xticks(xticks)
-        plt.legend()
-        plt.title('Welfare differences: male, 23, no kids, no assets') 
-        plt.xlabel('male productivity')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
-        plt.savefig('welfare_male.pdf')
+        
+        
         
         # couples 
         # transofrm the state
@@ -724,21 +734,48 @@ class FitPlots(object):
                             a_mult=a_mult)
         
         
+        if not noplot:
+            psi = self.setup.exogrid.psi_t[0]
+
+
+            fig, ax = plt.subplots()
+            #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
+            #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
+            plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+            ax.grid(True)
+            xticks = np.linspace(psi.min(),psi.max(),7)
+            ax.set_xticks(xticks)
+            plt.legend()
+            plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
+            plt.xlabel('love shock')
+            plt.ylabel('asset equivalent variation (2016 USD, 1000s)') 
+            
+        if noplot: return a_female, a_male, a_couple
         
-        psi = self.setup.exogrid.psi_t[0]
+        
+    def plot_child_welfare(self):
+        # singles
+        
+        aval = np.arange(25,36)
+        
+        
+        base_val = np.array([self.moments['child welfare if born at {}, median'.format(a)] for a in aval])
+        compare_val = np.array([self.targets['child welfare if born at {}, median'.format(a)][0] for a in aval])
+        
+        change_mean = 100*(self.moments['welfare of all children born, mean'] - self.targets['welfare of all children born, mean'][0])/self.moments['welfare of all children born, mean']
+        change_median = 100*(self.moments['welfare of all children born, median'] - self.targets['welfare of all children born, median'][0])/self.moments['welfare of all children born, median']
         
         
         fig, ax = plt.subplots()
-        #plt.plot(psi,v_couple_base_val[iexo],'o-b',label=self.base_name)
-        #if v_couple_compare_val is not None: plt.plot(psi,v_couple_compare_val[iexo],'o-k',label=self.compare_name)
-        plt.plot(psi,a_couple,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
+        plt.plot(aval,base_val - compare_val,'o-b',label='{} - {}'.format(self.base_name,self.compare_name))
         ax.grid(True)
-        xticks = np.linspace(psi.min(),psi.max(),7)
+        xticks = aval
         ax.set_xticks(xticks)
         plt.legend()
-        plt.title('Welfare comparison: couple, 21/23, no kids, no assets') 
-        plt.xlabel('love shock')
-        plt.ylabel('asset equivalent variation (2016 USD, 1000s)')  
+        plt.title("Child consumption equivalent differences, by mother's are\n changes mean = {:02.1f}%, median = {:02.1f}%".format(change_mean,change_median)) 
+        plt.xlabel('age the child is born')
+        plt.ylabel('child consumption equivalent') 
+        
         
     
         

@@ -79,6 +79,10 @@ class ModelSetup(object):
         p['pmeet_30'] = 0.2
         p['pmeet_40'] = 0.1
         
+        p['pmeet_pre25'] = None
+        p['ppreg_pre25'] = None
+        
+        
         p['pmeet_exo'] = None
         p['ppreg_exo'] = None
         
@@ -136,7 +140,12 @@ class ModelSetup(object):
         
         p['util_out_lf'] = 0.0
         
+        p['ppreg_sim_mult'] = 1.0
         
+        
+        p['tax_childless_couples'] = True        
+        p['tax_couples_woth_children'] = True
+        p['tax_single_mothers'] = True
         
         p['preg_21'] = 0.01
         p['preg_28'] = 0.5
@@ -248,14 +257,18 @@ class ModelSetup(object):
         if p['pmeet_exo'] is None:
             p['pmeet_t'] = [np.clip(p['pmeet_0'] + t*p['pmeet_t'] + (t**2)*p['pmeet_t2'],0.0,1.0) for t in range(20)] + \
                         [p['pmeet_40']]*(Tmeet - 20) + [0.0]*(T-Tmeet)
+            
+            p['pmeet_t'] = np.array(p['pmeet_t'])
+                        
+            if p['pmeet_pre25'] is not None: p['pmeet_t'][:4] = p['pmeet_pre25']
         else:
             p['pmeet_t'] = [p['pmeet_exo'][min(t,p['pmeet_exo'].size-1)] for t in range(Tmeet)] + [0.0]*(T-Tmeet)
-        
+            p['pmeet_t'] = np.array(p['pmeet_t'])
         
         
         p['n_psi_t'] = [p['n_psi']]*T
         
-        p['psi_clip'] = 2.5*p['sigma_psi_init']
+        p['psi_clip'] = 8.5*p['sigma_psi_init']
         
         
         
@@ -383,8 +396,8 @@ class ModelSetup(object):
             exogrid['zf_t_mat'][Tret-1] = np.ones((p['n_zf_t'][Tret-1],1))
             exogrid['zm_t_mat'][Tret-1] = np.ones((p['n_zm_t'][Tret-1],1))
             
-            #exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
-            exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
+            exogrid['psi_t'], exogrid['psi_t_mat'] = rouw_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0])
+            #exogrid['psi_t'], exogrid['psi_t_mat'] = tauchen_nonst(p['T'],p['sigma_psi'],p['sigma_psi_init'],p['n_psi_t'][0],nsd=2.5,fix_0=False)
             #assert False
             zfzm, zfzmmat = combine_matrices_two_lists(exogrid['zf_t'], exogrid['zm_t'], exogrid['zf_t_mat'], exogrid['zm_t_mat'])
             all_t, all_t_mat = combine_matrices_two_lists(zfzm,exogrid['psi_t'],zfzmmat,exogrid['psi_t_mat'])
@@ -956,6 +969,8 @@ class ModelSetup(object):
             p = self.pars['preg_a0'] + self.pars['preg_at']*t + \
                 self.pars['preg_at2']*(t**2) + \
                 self.pars['preg_az']*z + self.pars['preg_azt']*t*z
+            
+            if t <= 4 and (self.pars['ppreg_pre25'] is not None): p = self.pars['ppreg_pre25'] + 0.0*z
         else: # handles exogenous probabilities too
             try:
                 p = self.pars['ppreg_exo'][t] + 0.0*z
@@ -978,12 +993,21 @@ class ModelSetup(object):
             self.upp_precomputed_mal.append(pm)    
             
             
-    def _tax_fun(self,lam,tau,avg_inc):
-        def tax(income):
-            return 1 - lam*((income/avg_inc)**(-tau))
+    def _tax_fun(self,lam,tau,avg_inc,do_taxation=True):
+        if do_taxation:
+            def tax(income):
+                return 1 - lam*((income/avg_inc)**(-tau))
+        else:
+            def tax(income):
+                return np.minimum(1 - lam*((income/avg_inc)**(-tau)),0.0)
         return tax
     
+    
+    
     def compute_taxes(self):
+        
+        
+        
         self.taxes = dict()
         
         
@@ -992,9 +1016,9 @@ class ModelSetup(object):
         ai_c = ai_fem + ai_mal
         self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,ai_fem)
         self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,ai_mal)
-        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem) # use one child
-        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c)
-        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c)
+        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem,self.pars['tax_single_mothers'])
+        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c,self.pars['tax_childless_couples'])
+        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c,self.pars['tax_couples_woth_children'])
         
     def compute_child_support_transitions(self,*,child_support_share):
         from interp_np import interp

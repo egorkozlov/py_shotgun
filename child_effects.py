@@ -7,6 +7,7 @@ Created on Wed Sep 16 20:38:35 2020
 """
 
 from simulations import Agents
+import numpy as np
 
 class Agents_FixedSim(Agents):
     # this are simulations where shocks are altered such that everyone 
@@ -28,14 +29,8 @@ class Agents_FixedSim(Agents):
         self.run_sim()
         
         
-if __name__ == '__main__':
-    import numpy as np
-    try:
-        print(len(mdl.V))
-    except:
-        from dill import load
-        mdl = load(open('mdl.pkl','rb+'))
         
+def get_child_effects_graphs(mdl):
         
     tmeet = 4
     np.random.seed(12)
@@ -92,6 +87,18 @@ if __name__ == '__main__':
     plt.ylabel('% divorced by 40')
     plt.grid(True)
     plt.savefig('conception_divorce.pdf')
+        
+        
+        
+if __name__ == '__main__':
+    try:
+        print(len(mdl.V))
+    except:
+        from dill import load
+        mdl = load(open('mdl.pkl','rb+'))
+    
+    get_child_effects_graphs(mdl)
+    
     
     
 
