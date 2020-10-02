@@ -60,7 +60,7 @@ class ModelSetup(object):
         p['mu_psi_init'] = 0.0
         p['sigma_psi']   = 0.11
         p['R_t'] = [1/0.96]*T
-        p['n_psi'] = 17
+        p['n_psi'] = 15
         p['beta_t'] = [0.96]*T
         p['A'] = 1.0 # consumption in couple: c = (1/A)*[c_f^(1+rho) + c_m^(1+rho)]^(1/(1+rho))
         p['crra_power'] = 1.5
