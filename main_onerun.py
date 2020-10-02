@@ -32,7 +32,7 @@ from estimates import get_point
  
 def main(read_wisdom=False,erase=False):
     
-    high_e = False
+    high_e = True
     
     if erase:
         try:
