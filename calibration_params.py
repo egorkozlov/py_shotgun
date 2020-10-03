@@ -21,7 +21,7 @@ def calibration_params(xin=None,xfix=None):
     params = OrderedDict(
               sigma_psi=(0.0001,0.1,0.1),
               sigma_psi_init=(0.001,0.2,0.1),
-              pmeet_21=(0.0,1.2,0.09),
+              pmeet_21=(0.0,1.5,0.09),
               pmeet_30=(0.0,1.2,0.37),
               pmeet_40=(0.0,1.2,0.47),
               preg_21=(-0.2,1.0,0.02),
@@ -32,7 +32,7 @@ def calibration_params(xin=None,xfix=None):
               util_kap=(4.0,12.0,0.834),
               util_qbar=(0.0,40.0,0.5),
               disutil_marry_sm_mal = (0.0,6.0,15.5),
-              disutil_shotgun=(0.0,6.0,0.63),
+              disutil_shotgun=(0.0,9.0,0.63),
               abortion_costs=(0.0,2.0,5.0),
               p_abortion_access=(0.0,1.0,0.5),
               u_lost_divorce=(0.0,4.0,2.0)
