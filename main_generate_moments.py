@@ -110,7 +110,7 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
 def adj_list(return_dict=False):
     # this is a list of possible countefactual scenarios with names on them
     
-    
+    '''
     adjustments = [('baseline',{}),
                    ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),
                    #('plus ten percent social stigma',{'multiply':{'disutil_shotgun':1.1}}),
@@ -156,7 +156,12 @@ def adj_list(return_dict=False):
                     #                'pmeet_35': 0.0}),
                    ('no home production',{'util_kap':0.001})]
     
+    '''
     
+    adjustments = [('{} social stigma'.format(u),{'multiply':{'disutil_shotgun':u},
+                                                  'n_psi':17}) for u in
+                   [0.0,0.1,0.25,0.5,0.75,0.9,1.0,1.1,1.25,1.5,2.0,2.5,3.0,4.0,5.0,7.5,10.0]]
+                   
     
     
     
