@@ -27,7 +27,7 @@ def calibration_params(xin=None,xfix=None):
               preg_21=(-0.2,1.0,0.02),
               preg_28=(0.0,1.0,0.04),
               preg_35=(-0.1,1.0,0.03),
-              u_shift_mar=(0.0,0.7,1.83),
+              u_shift_kid=(0.0,0.7,1.83),
               util_alp=(0.1,1.0,0.627),
               util_kap=(4.0,12.0,0.834),
               util_qbar=(0.0,40.0,0.5),
@@ -36,7 +36,7 @@ def calibration_params(xin=None,xfix=None):
               abortion_costs=(0.0,2.0,5.0),
               p_abortion_access=(0.0,1.0,0.5),
               u_lost_divorce=(0.0,4.0,2.0),
-              couple_rts=(0.0,0.6,0.23)
+              u_shift_couple=(-0.5,0.5,0.0)
                         )
     
     
