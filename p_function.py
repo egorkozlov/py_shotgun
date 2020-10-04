@@ -59,6 +59,8 @@ def fun(x):
             
         #Open File with best solution so far
         param=filer('wisdom.pkl',0,False)
+        
+        iw = len(param)-1
              
         param.sort(key = sortFirst)
         print('f best so far is {} and x is {}'.format(param[0][0],param[0][1]))
@@ -68,7 +70,7 @@ def fun(x):
         xt=filer('sobol.pkl',None,False)
         
         #Determine the initial position
-        dump=min(max(0.1,((i+1)/N_st)**(0.5)),0.995)
+        dump=min(max(0.0,((iw)/N_st)**(0.5)),0.995)
         
         xc=dump*xm+(1-dump)*xt[:,i]
         xc=xc.squeeze()
