@@ -996,10 +996,10 @@ class ModelSetup(object):
     def _tax_fun(self,lam,tau,avg_inc,do_taxation=True):
         if do_taxation:
             def tax(income):
-                return 1 - lam*((income/avg_inc)**(-tau))
+                return (1 - lam*((income/avg_inc)**(-tau)))*income
         else:
             def tax(income):
-                return np.minimum(1 - lam*((income/avg_inc)**(-tau)),0.0)
+                return (np.minimum(1 - lam*((income/avg_inc)**(-tau)),0.0))*income
         return tax
     
     
