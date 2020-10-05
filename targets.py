@@ -44,6 +44,10 @@ def target_values(mode='high education'):
             ('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
+            ('remarriage chance if kids, 26-30',),  
+            ('remarriage chance if kids, 31-35',),
+            ('remarriage chance if no kids, 26-30',),  
+            ('remarriage chance if no kids, 31-35',),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',),
             ('sorting overall',)            
@@ -554,6 +558,13 @@ def all_targets(pick=None):
     targets['never married and no kids in population at 33'] = (.1632083, .0016353)
     targets['never married and no kids in population at 34'] = (.1516136, .0015821)
     targets['never married and no kids in population at 35'] = (.1424985, .0015173)
+    
+    
+    targets['remarriage chance if no kids, 26-30'] = (.056675, .0027803)
+    targets['remarriage chance if no kids, 31-35'] = (.0521429,.0023292)
+    targets['remarriage chance if kids, 26-30']    = (.1068772,.0040101)
+    targets['remarriage chance if kids, 31-35']    = (.0971051,.0030155 )
+    
     
     
     targets['divorced ratio above over below at 23'] = (.801952, .0531031)

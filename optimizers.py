@@ -102,6 +102,7 @@ def v_optimize_couple(money_in,sgrid,EV,mgrid,utilint,xint,ls,beta,ushift,taxfun
         tax_paid = (taxfun(wf*lval + wm).reshape((1,nexo))).astype(dtype,copy=False)
         money_left_bt = (money - (1-lval)*wf.reshape((1,nexo))).astype(dtype,copy=False)
         mmin = money_left_bt.min()
+        #print(np.mean(tax_paid/money_left_bt))
         money_left = np.maximum(money_left_bt - tax_paid,mmin).astype(dtype,copy=False)
         
         
