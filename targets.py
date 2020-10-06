@@ -278,10 +278,10 @@ def all_targets(pick=None):
     targets['never married and no kids in population at 35'] = (.1789942, .0015138)
     
     
-    targets['remarriage chance if no kids, 26-30'] = (.1068772,.0040101)
-    targets['remarriage chance if no kids, 31-35'] = (.0971051,.0030155 )
-    targets['remarriage chance if kids, 26-30']    = (.1357563,.0059429)
-    targets['remarriage chance if kids, 31-35']    = (.10925,  .0030496)
+    targets['remarriage chance if no kids, 26-30'] = (.1068772,.0040101*(1/4))
+    targets['remarriage chance if no kids, 31-35'] = (.0971051,.0030155*(1/4))
+    targets['remarriage chance if kids, 26-30']    = (.1357563,.0059429*(1/4))
+    targets['remarriage chance if kids, 31-35']    = (.10925,  .0030496*(1/4))
     
     
     targets['divorced ratio above over below at 23'] = (.8509691, .1271747)
@@ -560,10 +560,10 @@ def all_targets(pick=None):
     targets['never married and no kids in population at 35'] = (.1424985, .0015173)
     
     
-    targets['remarriage chance if no kids, 26-30'] = (.056675, .0027803)
-    targets['remarriage chance if no kids, 31-35'] = (.0521429,.0023292)
-    targets['remarriage chance if kids, 26-30']    = (.1068772,.0040101)
-    targets['remarriage chance if kids, 31-35']    = (.0971051,.0030155 )
+    targets['remarriage chance if no kids, 26-30'] = (.056675, .0027803*(1/4))
+    targets['remarriage chance if no kids, 31-35'] = (.0521429,.0023292*(1/4))
+    targets['remarriage chance if kids, 26-30']    = (.1068772,.0040101*(1/4))
+    targets['remarriage chance if kids, 31-35']    = (.0971051,.0030155*(1/4))
     
     
     
