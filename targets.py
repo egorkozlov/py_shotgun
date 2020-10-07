@@ -41,7 +41,7 @@ def target_values(mode='low education'):
             ('mean x share',),
             ('more than one mar at 40',),
             ('in labor force at 30 if kids',),
-            ('ever married and at ',(23,35),1),
+            ('ever married at ',(23,35),1),
             #('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
             #('remarriage chance if kids, 26-30',),  
