@@ -35,19 +35,19 @@ def target_values(mode='low education'):
             ('ever kids by years after marriage, ',(4,8),1),
             ('k then m in population at ',(23,35),1),
             ('m then k in population at ',(23,35),1),
-            ('divorced by years after marriage if kids first, ',(1,10),1/4),
-            ('divorced by years after marriage if marriage first, ',(1,10),1/4),
+            ('k then m in sample at ',(23,35),1),
+            ('divorced by years after marriage if kids first, ',(1,10),1),
+            ('divorced by years after marriage if marriage first, ',(1,10),1),
             ('mean x share',),
             ('more than one mar at 40',),
             ('in labor force at 30 if kids',),
-            ('never married and no kids in population at ',(23,35),1),
-            ('divorced and kids in population at ',(28,35),1),
+            ('ever married and at ',(23,35),1),
+            #('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
-            ('never married and kids in population at ',(28,35),1),
-            ('remarriage chance if kids, 26-30',),  
-            ('remarriage chance if kids, 31-35',),
-            ('remarriage chance if no kids, 26-30',),  
-            ('remarriage chance if no kids, 31-35',),
+            #('remarriage chance if kids, 26-30',),  
+            #('remarriage chance if kids, 31-35',),
+            #('remarriage chance if no kids, 26-30',),  
+            #('remarriage chance if no kids, 31-35',),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',),
             ('sorting overall',)            
@@ -216,7 +216,7 @@ def all_targets(pick=None):
     targets['mean x share'] = (0.4,0.001)
     targets['divorced if k then m and one marriage'] = (.1480121,.0024232*(1/4))
     targets['divorced if m then k and one marriage'] = (.0536316,.0004861*(1/4))
-    targets['more than one mar at 40']       = (.1190139,.0012735)
+    targets['more than one mar at 40']       = (.1190139,.0012735*(1/4))
     targets['in labor force at 30 if kids'] = (.739675,.0028066*(1/4))
     
     
@@ -496,7 +496,7 @@ def all_targets(pick=None):
     targets['mean x share'] = (0.4,0.001)
     targets['divorced if k then m and one marriage'] = (.1727448,.0014886*(1/4))
     targets['divorced if m then k and one marriage'] = (.1394705,.000983*(1/4))
-    targets['more than one mar at 40']       = (.1714891,.0015326)
+    targets['more than one mar at 40']       = (.1714891,.0015326*(1/4))
     targets['in labor force at 30 if kids'] = (.5466037,.0033879*(1/4))
     
     
