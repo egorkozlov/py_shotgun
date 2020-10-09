@@ -147,3 +147,5 @@ histo.csv
 *.prof
 *.swp
 counterfactuals.ipynb
+
+*.ipynb
