@@ -69,9 +69,9 @@ def run(adj_name,fix,educ_name,resume=False,noplot=False):
             out,  mom = mdl_resid(x=x_new,targets=tar,
                                           return_format=['distance','moments'],
                                           verbose=False,draw=False,cs_moments=False,
-                                          save_to ='mdl for {}'.format(fname),
+                                          #save_to ='mdl for {}'.format(fname),
                                           moments_save_name = name,
-                                          moments_repeat=5,Tsim=42)
+                                          moments_repeat=3,Tsim=35)
             print("file {} saved".format(fname))
         else:
             print("file {} already exists".format(fname))
@@ -112,13 +112,15 @@ def adj_list(return_dict=False):
     
     
     adjustments = [('baseline',{}),
-                   ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),
-                   #('plus ten percent social stigma',{'multiply':{'disutil_shotgun':1.1}}),
-                   ('infinite social stigma',{'disutil_shotgun':400.0}),
                    ('abortions and no stigma',{'disutil_shotgun':0.0,
                                               'p_abortion_access':1.0,
                                               'abortion_costs':0.0}),
                    ('no social stigma',{'disutil_shotgun':0.0}),
+                   ('costless abortion',{'p_abortion_access':1.0,
+                                         'abortion_costs':0.0}),
+                   ('double social stigma',{'multiply':{'disutil_shotgun':2.0}}),                   
+                   ('half social stigma',{'multiply':{'disutil_shotgun':0.5}}),
+                   ('infinite social stigma',{'disutil_shotgun':400.0}),                   
                    ('no child support',{'child_support_awarded_nm':0.0,
                                         'child_support_awarded_div':0.0}),
                    ('full child support',{'child_support_awarded_nm':1.0,
@@ -126,28 +128,26 @@ def adj_list(return_dict=False):
                    ('in mar child support',{'child_support_awarded_nm':0.0,
                                         'child_support_awarded_div':1.0}),                   
                    ('double divorce costs',{'multiply':{'u_lost_divorce':2.0}}),
-                   ('half divorce costs',{'multiply':{'u_lost_divorce':0.5}}),
-                   ('no unplanned pregnancy unanticipated',{'ppreg_sim_mult':0.0}),
-                   #('no taxes to couples',{'tax_childless_couples':False,
-                   #                        'tax_couples_woth_children':False}),
-                   #('no taxes to couples with children',{'tax_couples_woth_children':False}),
-                   #('no taxes to single mothers',{'tax_single_mothers':False}),
-                   #('no taxes to ones with children',{'tax_single_mothers':False,
-                   #                                   'tax_couples_woth_children':False}),
-                   #('out mar child support',{'child_support_awarded_nm':1.0,
-                   #                     'child_support_awarded_div':0.0}),
-                   ('infinite divorce costs',{'u_lost_divorce':200.0}),
+                   ('half divorce costs',{'multiply':{'u_lost_divorce':0.5}}),                   
                    ('no divorce costs',{'u_lost_divorce':0.0}),
-                   #('full access to abortion',{'p_abortion_access':1.0}),
-                   ('no abortions',{'p_abortion_access':0.0}),
-                   ('costless abortion',{'p_abortion_access':1.0,
-                                         'abortion_costs':0.0}),
-                   ('no remar penalty',{'disutil_marry_sm_mal':0.0}),
-                   ('infinite remar penalty',{'disutil_marry_sm_mal':500.0}),
-                   ('no subsistence constraint',{'util_qbar':0.0}),
+                   ('infinite divorce costs',{'u_lost_divorce':200.0}),
+                   ('no unplanned pregnancy unanticipated',{'ppreg_sim_mult':0.0}),
                    ('no unplanned pregnancy',{'preg_21': 0.0,
                                               'preg_28': 0.0,
                                               'preg_35': 0.0}),
+                   ('no taxes to couples',{'tax_childless_couples':False,
+                                           'tax_couples_woth_children':False}),
+                   ('no taxes to couples with children',{'tax_couples_woth_children':False}),
+                   ('no taxes to single mothers',{'tax_single_mothers':False}),
+                   ('no taxes to ones with children',{'tax_single_mothers':False,
+                                                      'tax_couples_woth_children':False}),
+                   #('out mar child support',{'child_support_awarded_nm':1.0,
+                   #                     'child_support_awarded_div':0.0}),
+                   #('full access to abortion',{'p_abortion_access':1.0}),
+                   ('no abortions',{'p_abortion_access':0.0}),
+                   ('no remar penalty',{'disutil_marry_sm_mal':0.0}),
+                   ('infinite remar penalty',{'disutil_marry_sm_mal':500.0}),
+                   ('no subsistence constraint',{'util_qbar':0.0}),                   
                    ('no skills depreciation',{'z_drift':0.0}),
                    ('no pay gap',{'pay_gap':False}),
                    ('no kids',{'any kids':False}),
@@ -157,6 +157,12 @@ def adj_list(return_dict=False):
                    ('no home production',{'util_kap':0.001})]
     
     
+    '''
+    
+    adjustments = [('{} social stigma'.format(u),{'multiply':{'disutil_shotgun':u},
+                                                  'n_psi':17}) for u in
+                   [0.0,0.1,0.25,0.5,0.75,0.9,1.0,1.1,1.25,1.5,2.0,2.5,3.0,4.0,5.0,7.5,10.0]]
+    '''               
     
     
     
