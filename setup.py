@@ -106,8 +106,8 @@ class ModelSetup(object):
         
         p['preg_mult'] = 1.0
         
-        p['u_shift_mar'] = 0.0
-        p['u_shift_coh'] = 0.0
+        p['u_shift_kid'] = 0.0
+        p['u_shift_couple'] = 0.0
         p['sm_shift'] = 0.0
         
         p['disutil_marry_sm_fem'] = 0.0
@@ -545,9 +545,9 @@ class ModelSetup(object):
         
         self.utility_shifters = {'Female, single':0.0,
                                  'Male, single':0.0,
-                                 'Female and child':p['u_shift_mar'] + p['sm_shift'],
-                                 'Couple and child':p['u_shift_mar'],
-                                 'Couple, no children':p['u_shift_coh']}
+                                 'Female and child':p['u_shift_kid'] + p['sm_shift'],
+                                 'Couple and child':p['u_shift_kid'] + p['u_shift_couple'],
+                                 'Couple, no children':p['u_shift_couple']}
         
         
         # this pre-computes transition matrices for meeting a partner
