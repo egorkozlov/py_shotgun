@@ -130,6 +130,7 @@ class Agents:
         self.k_m = np.zeros((N,T),dtype=np.bool)
         self.k_m_true = np.zeros((N,T),dtype=np.bool)
         self.m_k = np.zeros((N,T),dtype=np.bool)
+        self.has_step = np.zeros((N,T),dtype=np.bool)
         
         self.nmar = np.zeros((N,T),dtype=np.int8)
         self.n_kept = np.zeros((T,),dtype=np.int16)
@@ -659,7 +660,8 @@ class Agents:
                         self.k_m[ind[i_agree_mar],(t+1):] = True
                         self.k_m_true[ind[i_agree_mar],(t+1):] = (i_preg[i_agree_mar][:,None] & (sname!='Female and child'))
                         
-                        
+                        if sname=='Female and child':
+                            self.has_step[ind[i_agree_mar],(t+1):] = True
                         
                         fls_policy = self.Mlist[ipol].V[t+1]['Couple and child']['fls']
                         

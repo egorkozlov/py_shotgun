@@ -41,13 +41,13 @@ def target_values(mode='high education'):
             ('mean x share',),
             ('more than one mar at 40',),
             ('in labor force at 30 if kids',),
-            ('never married and no kids in population at ',(23,35),1),
+            ('ever married at ',(23,35),1),
             ('divorced and kids in population at ',(28,35),1),
             ('divorced and no kids in population at ',(28,35),1),
-            ('never married and kids in population at ',(28,35),1),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',),
-            ('sorting overall',)            
+            ('sorting overall',),
+            ('step share',)            
            ]
     
     
@@ -332,6 +332,8 @@ def all_targets(pick=None):
     targets['sorting at 30'] = (0.6,0.0005)
     targets['sorting overall'] = (0.6140971,0.0014194) 
     
+    targets['step share'] = (3*0.041,3*0.0004)
+    
     all_targets['high education'] = targets.copy()
     
     
@@ -606,6 +608,10 @@ def all_targets(pick=None):
     targets['abortion 30s over 20s'] = (25/65,0.001)
     targets['sorting at 30'] = (0.6,0.0005) #(0.630436,0.0022637)
     targets['sorting overall'] = (0.630436,0.0022637)
+    
+    targets['step share'] = (3*0.105,3*0.0006)
+
+
     
     targets['unplanned pregnancies aborted'] = (0.4,0.001)
     all_targets['low education'] = targets.copy()

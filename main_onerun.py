@@ -30,9 +30,8 @@ os.environ['MKL_CBWR']='AUTO'
 
 from estimates import get_point
  
-def main(read_wisdom=False,erase=False):
+def main(read_wisdom=False,erase=False,high_e=True):
     
-    high_e = True
     
     if erase:
         try:

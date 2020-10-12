@@ -25,7 +25,8 @@ def compute_moments(self):
     ever_kid = ( np.cumsum( (self.state == n_mark) | (self.state == n_singlek),axis=1) > 0)
     ever_upp = (np.cumsum(self.unplanned_preg,axis=1)>0)
     ever_km  = (np.cumsum(self.k_m,axis=1)>0)
-
+    
+    has_step = self.has_step
 
 
     nmar_cum = np.zeros_like(self.agreed,dtype=np.uint8)
@@ -524,6 +525,8 @@ def compute_moments(self):
 
     pick_above = (self.female_z[:,:19] > 0) & (is_mar[:,:19])
     moments['sorting overall'] = (self.male_z[:,:19][pick_above] > 0).mean()
+
+    moments['step share'] = ((self.has_step[:,:19]) & (is_mar[:,:19])).mean()
 
     
 
