@@ -526,7 +526,7 @@ def compute_moments(self):
     pick_above = (self.female_z[:,:19] > 0) & (is_mar[:,:19])
     moments['sorting overall'] = (self.male_z[:,:19][pick_above] > 0).mean()
 
-    moments['step share'] = ((self.has_step[:,:19]) & (is_mar[:,:19])).mean()
+    moments['step share'] = (self.has_step[:,:19][is_mark[:,:19]]).mean()
 
     
 
