@@ -43,9 +43,13 @@ def target_values(mode='high education'):
             ('mean x share',),
             ('more than one mar at 40',),
             ('in labor force at 30 if kids',),
+            ('never married and no kids in population at ',(23,35),1),
+            ('divorced and kids in population at ',(28,35),1),
+            ('divorced and no kids in population at ',(28,35),1),
+            ('never married and kids in population at ',(28,35),1),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',),
-            ('sorting overall',),
+            ('sorting overall',),            
             ('step share',)            
            ]
     
