@@ -649,11 +649,14 @@ class ModelSetup(object):
         pz_all = pz_precomputed['prob_z']
         
         
+        
         pick = t if t < len(pz_all) else -1
         
         pz = pz_precomputed['prob_z'][pick]         
         pa = pz_precomputed['prob_a_by_z'][pick] 
         va = pz_precomputed['val_a_by_z'][pick] 
+        
+        #print('for female = {}, probabilities are {} and mean is {}'.format(female,pz,np.sum(pz*z_partner)))
         
         
         na_matches = pa.shape[-1]

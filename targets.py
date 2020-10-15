@@ -49,8 +49,9 @@ def target_values(mode='high education'):
             ('never married and kids in population at ',(28,35),1),
             ('unplanned pregnancies aborted',),
             ('abortion 30s over 20s',),
-            ('sorting overall',),            
-            ('step share',)            
+            ('sorting husband above if above',),
+            ('sorting husband above if below',)#,
+            #('step share',)            
            ]
     
     
@@ -333,7 +334,8 @@ def all_targets(pick=None):
         
     targets['unplanned pregnancies aborted'] = (0.4,0.001)
     targets['sorting at 30'] = (0.6,0.0005)
-    targets['sorting overall'] = (0.6140971,0.0014194) 
+    targets['sorting husband above if above'] = (0.6140971,0.0014194) 
+    targets['sorting husband above if below'] = (0.37912,0.00171)
     
     targets['step share'] = (0.041,0.0004)
     
@@ -610,7 +612,9 @@ def all_targets(pick=None):
     targets['abortion ratio'] = (0.41*0.85*186,0.2)
     targets['abortion 30s over 20s'] = (25/65,0.001)
     targets['sorting at 30'] = (0.6,0.0005) #(0.630436,0.0022637)
-    targets['sorting overall'] = (0.630436,0.0022637)
+    targets['sorting husband above if above'] = (0.630436,0.0022637)
+    targets['sorting husband above if below'] = (0.4015,0.0024)
+    
     
     targets['step share'] = (0.105,0.0006)
 
