@@ -30,7 +30,7 @@ def get_point(high_e,read_wisdom=False):
         targ_mode = 'high education'
         
     else:
-        x = {'sigma_psi': 0.04119975516565719, 'sigma_psi_init': 0.07184509981781, 'pmeet_21': 0.7300641341551373, 'pmeet_30': 0.38552526708748397, 'pmeet_40': 1.4132304041226518, 'preg_21': 0.1029100967053943, 'preg_28': 0.11241132276639117, 'preg_35': 0.11203564468462099, 'u_shift_mar': 0.338428482678413, 'util_alp': 0.5195282434982275, 'util_kap': 7.152398760885778, 'util_qbar': 0.0, 'disutil_marry_sm_mal': 3.18966037249299, 'disutil_shotgun': 0.3647670950676456, 'abortion_costs': 0.2962878054482049, 'p_abortion_access': 0.6662167114665236, 'u_lost_divorce': 0.5275074834332285, 'mu_psi_init': -0.24342175587968384,
+        x = {'sigma_psi': 0.1, 'sigma_psi_init': 0.06116524742294942, 'pmeet_21': 0.8113766193192298, 'pmeet_30': 0.5810854411953447, 'pmeet_40': 1.2888197016633065, 'preg_21': 0.10931640666793829, 'preg_28': 0.05149518424513294, 'preg_35': 0.10182921767475042, 'u_shift_kid': 0.4031345423311973, 'util_alp': 0.6494460777054719, 'util_kap': 6.043394416570878, 'util_qbar': 0.0, 'disutil_marry_sm_mal': 5.768217858740022, 'disutil_shotgun': 1.3338166895953723, 'abortion_costs': 0.0, 'p_abortion_access': 0.7538834914491163, 'u_lost_divorce': 2.008607758320293, 'u_shift_couple': -0.3431072199441293,
              'high education': False}
         
         targ_mode = 'low education'
@@ -38,7 +38,7 @@ def get_point(high_e,read_wisdom=False):
         if read_wisdom:
             try:
                 print('read wisdom from file!')
-                o = filer('wisdom.pkl',0,0,repeat=False)[0]
+                o = filer('/projects/p31069/py_shotgun/wisdom.pkl',0,0,repeat=False)[0]
                 x = calibration_params()[-1](o[1])
                 print(x)
                 print('saved distance is {}'.format(o[0]))

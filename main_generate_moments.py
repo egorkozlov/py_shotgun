@@ -187,7 +187,7 @@ def generate_counterfactuals(resume=True):
     '''
     
     for adj_name, fix in adjustments:    
-        for educ_name in ['col','hs']:
+        for educ_name in ['hs']: # 'col']:
             run(adj_name,fix,educ_name,resume=resume)
     
     
