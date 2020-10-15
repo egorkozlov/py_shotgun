@@ -13,7 +13,7 @@ def get_point(high_e,read_wisdom=False):
 
     if high_e:
         
-        x = {'sigma_psi': 0.02297391391828134, 'sigma_psi_init': 0.061389470944663196, 'pmeet_21': 0.35427476693487037, 'pmeet_30': 1.101469983799187, 'pmeet_40': 0.0, 'preg_21': 0.0021972818487067947, 'preg_28': 0.03194765436380882, 'preg_35': 0.02558129855186625, 'u_shift_kid': 0.34592995681350347, 'util_alp': 0.8554745878335215, 'util_kap': 6.749928240029728, 'util_qbar': 16.614101270795228, 'disutil_marry_sm_mal': 3.262093358061867, 'disutil_shotgun': 0.5084201219022069, 'abortion_costs': 2.251099749734383, 'p_abortion_access': 0.8949286724553163, 'u_lost_divorce': 1.0648120485130006, 'u_shift_couple': -0.16004255555405467,
+        x = {'sigma_psi': 0.02271227468311225, 'sigma_psi_init': 0.058638977435951305, 'pmeet_21': 0.3775858999749023, 'pmeet_30': 1.1114312962137847, 'pmeet_40': 0.31014313380175096, 'preg_21': 0.007431431021009238, 'preg_28': 0.02892174895848225, 'preg_35': 0.024209123328699594, 'u_shift_kid': 0.31771592374588375, 'util_alp': 0.771834843542828, 'util_kap': 6.902234564557551, 'util_qbar': 9.473335136133066, 'disutil_marry_sm_mal': 3.2472913078044545, 'disutil_shotgun': 0.4890157219311151, 'abortion_costs': 1.5886358570521772, 'p_abortion_access': 0.8174304666969183, 'u_lost_divorce': 0.9539818957506494, 'u_shift_couple': -0.15110699130997146,
              'high education': True}
         
         if read_wisdom:

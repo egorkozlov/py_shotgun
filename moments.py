@@ -524,9 +524,15 @@ def compute_moments(self):
     moments['sorting at 30'] = (self.male_z[pick_above,9] > 0).mean()
 
     pick_above = (self.female_z[:,:19] > 0) & (is_mar[:,:19])
-    moments['sorting overall'] = (self.male_z[:,:19][pick_above] > 0).mean()
+    moments['sorting husband above if above'] = (self.male_z[:,:19][pick_above] > 0).mean()
 
     moments['step share'] = (self.has_step[:,:19][is_mark[:,:19]]).mean()
+    
+    pick_below = (self.female_z[:,:19] < 0) & (is_mar[:,:19])
+    moments['sorting husband above if below'] = (self.male_z[:,:19][pick_below] > 0).mean()
+
+
+    
 
     
 
