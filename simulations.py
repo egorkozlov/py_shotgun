@@ -986,6 +986,7 @@ class Agents:
         self.couple_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.total_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.total_resources = -np.ones((self.N,self.T),dtype=np.float32)
+        self.disposable_income = -np.ones((self.N,self.T),dtype=np.float32)
         self.taxes_paid = -1000*np.ones((self.N,self.T),dtype=np.float32)
         self.tax_rate = -1*np.ones((self.N,self.T),dtype=np.float32)
         
@@ -1073,6 +1074,7 @@ class Agents:
                 
                 self.taxes_paid[pick,t] = self.total_resources[pick,t] - self.total_expenditures[pick,t]
                 self.tax_rate[pick,t] = self.taxes_paid[pick,t] / self.total_earnings[pick,t]
+                self.disposable_income[pick,t] = self.total_earnings[pick,t] - self.taxes_paid[pick,t]
                 
         
         for state, i_state in self.state_codes.items():

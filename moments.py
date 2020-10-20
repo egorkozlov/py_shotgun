@@ -559,6 +559,11 @@ def compute_moments(self):
     
     moments['taxes paid mean, 21-40'] = self.taxes_paid[:,:19].mean()
     if self.verbose: print('mean taxes are: {}'.format(moments['taxes paid mean, 21-40']))
+        
+    moments['mean resources, 21-40'] = (self.disposable_income[:,:19][is_mar[:,:19]]).mean()
+    moments['median resources, 21-40'] = np.median((self.disposable_income[:,:19][is_mar[:,:19]]))
+    moments['median resources, 30'] = np.median((self.disposable_income[:,9][is_mar[:,9]]))
+    
 
     moments['value function: female, single, no assets'] = self.Mlist[0].V[0]['Female, single']['V'][0,:]
     moments['value function: male, single, no assets'] = self.Mlist[0].V[0]['Male, single']['V'][0,:]

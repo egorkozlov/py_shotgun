@@ -49,7 +49,7 @@ def v_iter_single_mom(setup,t,EV,ushift):
     ls = setup.ls_levels['Female and child']
     
     
-    taxfun = setup.taxes['Female and child']
+    taxfun = setup.taxes['Female and child'][t]
     dtype = setup.dtype
         
     

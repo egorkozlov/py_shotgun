@@ -168,7 +168,7 @@ def v_iter_couple(model,t,EV_tuple,ushift,haschild,nbatch=500,verbose=False):
     key = 'Couple and child' if haschild else 'Couple, no children'
     
     
-    taxfun = setup.taxes[key] if t < setup.pars['Tret'] else lambda x : 0.0*x
+    taxfun = setup.taxes[key][t] if t < setup.pars['Tret'] else lambda x : 0.0*x
     
     ls = setup.ls_levels[key]
     if nogpu:

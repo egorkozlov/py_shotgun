@@ -70,7 +70,7 @@ def v_iter_single(setup,t,EV,female,ushift):
     
     sname = 'Female, single' if female else 'Male, single'
     
-    taxfun = setup.taxes[sname] if t < setup.pars['Tret'] else lambda x : 0.0*x
+    taxfun = setup.taxes[sname][t] if t < setup.pars['Tret'] else lambda x : 0.0*x
     
     uu = setup.u_precomputed[sname]['u'] if nogpu else setup.cupy.u_precomputed[sname]['u']
     ux = setup.u_precomputed[sname]['x'] if nogpu else setup.cupy.u_precomputed[sname]['x']
