@@ -556,6 +556,9 @@ def compute_moments(self):
     num_div_nk_3135   = (div_now[:,10:15] & ~have_kid[:,10:15]).sum()
     moments['remarriage chance if no kids, 31-35'] = num_remar_nk_3135 / (num_remar_nk_3135 + num_div_nk_3135) if num_div_nk_3135 > 0 else 0.0
 
+    
+    moments['taxes paid mean, 21-40'] = self.taxes_paid[:,:19].mean()
+    if self.verbose: print('mean taxes are: {}'.format(moments['taxes paid mean, 21-40']))
 
     moments['value function: female, single, no assets'] = self.Mlist[0].V[0]['Female, single']['V'][0,:]
     moments['value function: male, single, no assets'] = self.Mlist[0].V[0]['Male, single']['V'][0,:]

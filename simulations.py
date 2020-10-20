@@ -984,6 +984,11 @@ class Agents:
         self.female_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.male_earnings = -np.ones((self.N,self.T),dtype=np.float32)
         self.couple_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        self.total_earnings = -np.ones((self.N,self.T),dtype=np.float32)
+        self.total_resources = -np.ones((self.N,self.T),dtype=np.float32)
+        self.taxes_paid = -1000*np.ones((self.N,self.T),dtype=np.float32)
+        self.tax_rate = -1*np.ones((self.N,self.T),dtype=np.float32)
+        
         
         self.total_expenditures = self.c + self.x + self.s
         
@@ -1006,6 +1011,9 @@ class Agents:
         for t in range(self.T):
             tm = self.setup.pars['m_wage_trend'][t]
             tf = self.setup.pars['f_wage_trend'][t]
+            R = self.setup.pars['R_t'][t]
+            agrid_s = self.setup.agrid_s
+            agrid_c = self.setup.agrid_c
             
             
             
@@ -1027,6 +1035,8 @@ class Agents:
                     self.female_z[pick,t] = self.setup.exogrid.zf_t[t][iexo]
                     self.female_earnings[pick,t] = wage*self.labor_supply[pick,t]
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.female_earnings[pick,t]
+                    self.total_earnings[pick,t] = self.female_earnings[pick,t]
+                    self.total_resources[pick,t] = self.total_earnings[pick,t] + R*agrid_s[self.iassets[pick,t]]
                     assert np.all(wage>0)
                 elif state == 'Male, single':                    
                     wage = np.exp(self.setup.exogrid.zm_t[t][iexo] + tm)
@@ -1034,6 +1044,8 @@ class Agents:
                     self.male_z[pick,t] = self.setup.exogrid.zm_t[t][iexo]
                     self.male_earnings[pick,t] = wage # !!!
                     self.savings_to_earnings[pick,t] = self.s[pick,t] / self.male_earnings[pick,t]
+                    self.total_earnings[pick,t] = self.male_earnings[pick,t]
+                    self.total_resources[pick,t] = self.total_earnings[pick,t] + R*agrid_s[self.iassets[pick,t]]
                     assert np.all(wage>0)
                 elif state == 'Couple and child' or state == 'Couple, no children':
                     iall, izf, izm, ipsi = self.setup.all_indices(t,iexo)
@@ -1050,11 +1062,18 @@ class Agents:
                     self.theta_couple[pick,t] = self.setup.thetagrid_fine[self.itheta[pick,t]]
                     self.psi_couple[pick,t] = self.setup.exogrid.psi_t[t][ipsi]
                     
+                    self.total_earnings[pick,t] = self.female_earnings[pick,t] + self.male_earnings[pick,t]
+                    self.total_resources[pick,t] = self.total_earnings[pick,t] + R*agrid_c[self.iassets[pick,t]]
+                    
                     
                     assert np.all(wage_f>0)
                     assert np.all(wage_m>0)
                 else:
                     raise Exception('unsupported state code?')
+                
+                self.taxes_paid[pick,t] = self.total_resources[pick,t] - self.total_expenditures[pick,t]
+                self.tax_rate[pick,t] = self.taxes_paid[pick,t] / self.total_earnings[pick,t]
+                
         
         for state, i_state in self.state_codes.items():
             if max_savings[i_state] < 0: continue

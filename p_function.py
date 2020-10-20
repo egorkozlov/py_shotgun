@@ -20,7 +20,7 @@ from calibration_params import calibration_params
 try:
     from numba import cuda
     g = cuda.device_array((2,5))
-    npt = 160 
+    npt = 120 
 except:
     npt = 90
 
@@ -114,7 +114,7 @@ def fun(x):
         
         param_new = filer('wisdom.pkl',None,False)
         
-        param_write = param_new+[(fbest,res.x)]
+        param_write = param_new+[(res.f,res.x)]
         
         #Save Updated File
         param_write.sort(key=sortFirst)

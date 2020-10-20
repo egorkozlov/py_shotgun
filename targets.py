@@ -48,9 +48,9 @@ def target_values(mode='high education'):
             ('divorced and no kids in population at ',(28,35),1),
             ('never married and kids in population at ',(28,35),1),
             ('unplanned pregnancies aborted',),
-            ('abortion 30s over 20s',),
-            ('sorting husband above if above',),
-            ('sorting husband above if below',)#,
+            ('abortion 30s over 20s',)
+            # ('sorting husband above if above',),
+            #('sorting husband above if below',)#,
             #('step share',)            
            ]
     

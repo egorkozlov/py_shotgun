@@ -147,6 +147,12 @@ class ModelSetup(object):
         p['tax_couples_woth_children'] = True
         p['tax_single_mothers'] = True
         
+        p['lst_female_single'] = 0.0
+        p['lst_male_single'] = 0.0
+        p['lst_single_mother'] = 0.0
+        p['lst_couple_and_child'] = 0.0
+        p['lst_couple_no_children'] = 0.0
+        
         p['preg_21'] = 0.01
         p['preg_28'] = 0.5
         p['preg_35'] = 0.3
@@ -996,13 +1002,13 @@ class ModelSetup(object):
             self.upp_precomputed_mal.append(pm)    
             
             
-    def _tax_fun(self,lam,tau,avg_inc,do_taxation=True):
+    def _tax_fun(self,lam,tau,avg_inc,*,do_taxation=True,lump_sum=0.0):
         if do_taxation:
             def tax(income):
-                return (1 - lam*((income/avg_inc)**(-tau)))*income
+                return (1 - lam*((income/avg_inc)**(-tau)))*income + lump_sum
         else:
             def tax(income):
-                return (np.minimum(1 - lam*((income/avg_inc)**(-tau)),0.0))*income
+                return (np.minimum( (1 - lam*((income/avg_inc)**(-tau)))*income + lump_sum, 0.0)) 
         return tax
     
     
@@ -1013,15 +1019,22 @@ class ModelSetup(object):
         
         self.taxes = dict()
         
+        p = self.pars
+        
         
         ai_fem = np.mean(np.exp(self.pars['f_wage_trend'][:20]))
         ai_mal = np.mean(np.exp(self.pars['f_wage_trend'][:20]))
         ai_c = ai_fem + ai_mal
-        self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,ai_fem)
-        self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,ai_mal)
-        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem,self.pars['tax_single_mothers'])
-        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c,self.pars['tax_childless_couples'])
-        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c,self.pars['tax_couples_woth_children'])
+        self.taxes['Female, single'] =      self._tax_fun(0.882,0.036,ai_fem,do_taxation=True,\
+                                                          lump_sum=p['lst_female_single'])
+        self.taxes['Male, single'] =        self._tax_fun(0.882,0.036,ai_mal,do_taxation=True,\
+                                                          lump_sum=p['lst_male_single'])
+        self.taxes['Female and child'] =    self._tax_fun(0.926,0.042,ai_fem,do_taxation=self.pars['tax_single_mothers'],\
+                                                          lump_sum=p['lst_single_mother'])
+        self.taxes['Couple, no children'] = self._tax_fun(0.903,0.058,ai_c,do_taxation=self.pars['tax_childless_couples'],\
+                                                          lump_sum=p['lst_couple_no_children'])
+        self.taxes['Couple and child'] =    self._tax_fun(0.925,0.070,ai_c,do_taxation=self.pars['tax_couples_woth_children'],\
+                                                          lump_sum=p['lst_couple_and_child'])
         
     def compute_child_support_transitions(self,*,child_support_share):
         from interp_np import interp

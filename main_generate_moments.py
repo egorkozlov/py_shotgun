@@ -164,8 +164,11 @@ def adj_list(return_dict=False):
                    [0.0,0.1,0.25,0.5,0.75,0.9,1.0,1.1,1.25,1.5,2.0,2.5,3.0,4.0,5.0,7.5,10.0]]
     '''               
     
+    '''
+    adjustments = [('rn subsidize couples',{'lst_female_single': 5.92470160965083, 'lst_male_single': 5.92470160965083, 'lst_single_mother': 5.92470160965083, 'lst_couple_and_child': -6.0, 'lst_couple_no_children': -6.0})]
+    '''
     
-    
+    adjustments = [('rn subsidize couples',{'lst_female_single': 5.92470160965083, 'lst_male_single': 5.92470160965083, 'lst_single_mother': 5.92470160965083, 'lst_couple_and_child': -6.0, 'lst_couple_no_children': -6.0})]
     
     if return_dict: adjustments = dict(adjustments)
     return adjustments
@@ -187,7 +190,7 @@ def generate_counterfactuals(resume=True):
     '''
     
     for adj_name, fix in adjustments:    
-        for educ_name in ['hs']: # 'col']:
+        for educ_name in ['col']:
             run(adj_name,fix,educ_name,resume=resume)
     
     
