@@ -14,7 +14,7 @@ try:
 except:
     pass
 
-def mar_graphs(self,t=2):
+def mar_graphs(self,t=4):
     mdl = self
     setup = mdl.setup
     V = mdl.V
@@ -100,7 +100,7 @@ def mar_graphs(self,t=2):
     
     izf = 3
     izm = 2
-    ipsi = 7
+    ipsi = 10
     
     fig, axs = plt.subplots(1,2)
     

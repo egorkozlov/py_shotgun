@@ -89,9 +89,14 @@ def mdl_resid(x=None,targets=None,weights=w,
         mdl = Model(verbose=verbose,**kwords)
         mdl_list = [mdl]
         
-    else:       
-        mdl_list = [dill.load(open(l,'rb+')) for l in load_from]
-        mdl = mdl_list[0]
+    else:     
+        try:
+            mdl_list = [dill.load(open(l,'rb+')) for l in load_from]
+            mdl = mdl_list[0]
+        except:
+            print('failed to load...')
+            mdl = Model(verbose=verbose,**kwords)
+            mdl_list = [mdl]
         
         
     if save_to is not None:
