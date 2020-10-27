@@ -107,6 +107,18 @@ def v_mar(setup,V,t,iassets_couple,iexo_couple,*,match_type,female,
     else:
         v_f, v_m, agree, nbs, itheta = v_mar_gpu(V_f_yes,V_m_yes,V_f_no,V_m_no,it,wnt)
     
+    
+    # adjust utility
+    
+    # we subtracted this at the moment of bargaining, now add this back
+    disagreement_add =  setup.pars['stigma_extra_coef']*setup.pars['disutil_shotgun'] if (match_type == 'Unplanned pregnancy') else 0.0
+    
+    if disagreement_add:
+        v_f = v_f*(agree) + (V_f_no+disagreement_add)*(1.0-agree)
+        v_m = v_m*(agree) + (V_m_no+disagreement_add)*(1.0-agree)
+        
+    
+    
     out = {'V_fem':v_f,'V_mal':v_m,'Agree':agree,'NBS':nbs,'itheta':itheta,'Abortion':do_abortion}
     
     if return_insides: out.update({'V_f_yes':V_f_yes,'V_m_yes':V_m_yes,                           
@@ -219,12 +231,12 @@ def pick_values(setup,V,*,match_type):
         i_abortion = (V['Female, single']['V'] - u_costs) >= V['Female and child']['V']
         
           
-        V_fem = (V['Female and child']['V'] - setup.pars['disutil_shotgun'],
-                 V['Female, single']['V'] - u_costs- setup.pars['disutil_shotgun'],
+        V_fem = (V['Female and child']['V'] - setup.pars['disutil_shotgun'] - setup.pars['stigma_extra_coef']*setup.pars['disutil_shotgun'],
+                 V['Female, single']['V'] - u_costs - setup.pars['disutil_shotgun'] - setup.pars['stigma_extra_coef']*setup.pars['disutil_shotgun'],
                  i_abortion, p_access)
                    
         V_mal = V['Male, single']['V'] \
-                - setup.pars['disutil_shotgun']
+                - setup.pars['disutil_shotgun']  - setup.pars['stigma_extra_coef']*setup.pars['disutil_shotgun']
                 
         V_fem_mar = V['Couple and child']['VF']
         V_mal_mar = V['Couple and child']['VM']
@@ -239,7 +251,7 @@ def pick_values(setup,V,*,match_type):
         V_mal = V['Male, single']['V'] 
         
         
-        V_fem_mar = V['Couple and child']['VF'] - setup.pars['disutil_marry_sm_fem']
+        V_fem_mar = V['Couple and child']['VF'] - setup.pars['disutil_marry_sm_fem'] 
         V_mal_mar = V['Couple and child']['VM'] - setup.pars['disutil_marry_sm_mal']
         
         return {'V_fem':V_fem,'V_mal':V_mal,

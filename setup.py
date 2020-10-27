@@ -113,6 +113,7 @@ class ModelSetup(object):
         p['disutil_marry_sm_fem'] = 0.0
         p['disutil_marry_sm_mal'] = 10.0
         p['disutil_shotgun'] = 2.0
+        p['stigma_extra_coef'] = 0.0
         p['pmeet_multiplier_fem'] = 1.0
         p['p_to_meet_sm_if_mal'] = 0.1
         
